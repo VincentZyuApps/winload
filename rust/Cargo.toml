@@ -1,0 +1,22 @@
+[package]
+name = "winload"
+version = "0.1.0"
+edition = "2021"
+description = "Network Load Monitor — nload-like TUI tool for Windows/Linux/macOS"
+license = "MIT"
+readme = "../README.md"
+
+[[bin]]
+name = "winload"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = "0.29"
+crossterm = "0.28"
+sysinfo = "0.32"
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

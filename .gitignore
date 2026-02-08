@@ -101,10 +101,9 @@ py/uv.lock
 rust/target/
 rust/**/target/
 
-# Cargo.lock (保留 libraries 的，忽略 binaries 的)
-# 通常 binary 项目忽略 Cargo.lock，library 项目保留
-# 这里默认忽略，如果是 library 可以取消注释
-rust/Cargo.lock
+# Cargo.lock — 二进制项目应提交 Cargo.lock 以保证可复现构建
+# 如果是 library 项目，取消下面的注释来忽略
+# rust/Cargo.lock
 
 # Cargo build artifacts
 rust/**/*.rs.bk

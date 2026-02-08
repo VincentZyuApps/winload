@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""
+Cross-compile winload for Windows x64 and Linux x64 from WSL.
+Usage: python3 build.py [--clean]
+"""
+
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+# 路径配置
+RUST_DIR = Path(__file__).parent.absolute()
+PROJECT_ROOT = RUST_DIR.parent
+OUTPUT_DIR = RUST_DIR / "dist"
+
+TARGETS = [
+    ("x86_64-unknown-linux-gnu", "winload", "winload-linux-x86_64"),
+    ("x86_64-pc-windows-gnu", "winload.exe", "winload-windows-x86_64.exe"),
+]
+
+
+def run_command(cmd, cwd=None, check=True):
+    """运行命令并打印输出"""
+    print(f"\n▶ {' '.join(cmd)}")
+    result = subprocess.run(
+        cmd,
+        cwd=cwd,
+        capture_output=False,
+        text=True,
+        check=check,
+    )
+    return result.returncode == 0
+
+
+def ensure_target_installed(target):
+    """确保 Rust target 已安装"""
+    print(f"\n📦 Checking target: {target}")
+    result = subprocess.run(
+        ["rustup", "target", "list", "--installed"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    if target not in result.stdout:
+        print(f"   → Installing {target}...")
+        run_command(["rustup", "target", "add", target])
+    else:
+        print(f"   ✓ {target} already installed")
+
+
+def build_target(target, binary_name, output_name):
+    """编译指定 target"""
+    print(f"\n🔨 Building {target}...")
+    
+    # 先清理该 target 的编译产物
+    target_dir = RUST_DIR / "target" / target
+    if target_dir.exists():
+        print(f"   → Cleaning {target} artifacts...")
+        try:
+            shutil.rmtree(target_dir)
+        except Exception as e:
+            print(f"   ⚠️  Warning: Could not clean {target_dir}: {e}")
+    
+    # 编译
+    success = run_command(
+        ["cargo", "build", "--release", "--target", target],
+        cwd=RUST_DIR,
+    )
+    
+    if not success:
+        print(f"❌ Build failed for {target}")
+        return False
+    
+    # 复制产物到 dist 目录
+    source = RUST_DIR / "target" / target / "release" / binary_name
+    dest = OUTPUT_DIR / output_name
+    
+    if not source.exists():
+        print(f"❌ Binary not found: {source}")
+        return False
+    
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, dest)
+    
+    # 显示文件信息
+    size_mb = dest.stat().st_size / 1024 / 1024
+    print(f"✓ {output_name} ({size_mb:.2f} MB)")
+    
+    return True
+
+
+def main():
+    """主构建流程"""
+    # 参数解析
+    parser = argparse.ArgumentParser(
+        description="Cross-compile winload for multiple platforms"
+    )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Run 'cargo clean' before building",
+    )
+    args = parser.parse_args()
+    
+    print("=" * 60)
+    print("🚀 Building winload for multiple platforms")
+    print("=" * 60)
+    
+    # 检查是否在 WSL 中
+    if not Path("/proc/version").exists():
+        print("❌ This script must be run in WSL")
+        sys.exit(1)
+    
+    with open("/proc/version") as f:
+        if "microsoft" not in f.read().lower():
+            print("⚠️  Warning: This doesn't look like WSL")
+    
+    # 如果指定了 --clean，先执行 cargo clean
+    if args.clean:
+        print("\n🧹 Running cargo clean...")
+        if run_command(["cargo", "clean"], cwd=RUST_DIR, check=False):
+            print("   ✓ Cleaned successfully")
+        else:
+            print("   ⚠️  cargo clean failed, continuing anyway...")
+    
+    # 检查工具链
+    for target, _, _ in TARGETS:
+        ensure_target_installed(target)
+    
+    # 清理旧的 dist 目录
+    if OUTPUT_DIR.exists():
+        print(f"\n🧹 Cleaning {OUTPUT_DIR}...")
+        shutil.rmtree(OUTPUT_DIR)
+    
+    # 编译所有 target
+    success_count = 0
+    for target, binary, output in TARGETS:
+        if build_target(target, binary, output):
+            success_count += 1
+    
+    # 总结
+    print("\n" + "=" * 60)
+    print(f"📊 Build Summary: {success_count}/{len(TARGETS)} succeeded")
+    print("=" * 60)
+    
+    if OUTPUT_DIR.exists():
+        print(f"\n📦 Output directory: {OUTPUT_DIR}")
+        for item in sorted(OUTPUT_DIR.iterdir()):
+            size_mb = item.stat().st_size / 1024 / 1024
+            print(f"   • {item.name} ({size_mb:.2f} MB)")
+    
+    sys.exit(0 if success_count == len(TARGETS) else 1)
+
+
+if __name__ == "__main__":
+    main()
