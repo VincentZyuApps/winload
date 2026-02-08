@@ -1,0 +1,198 @@
+# ============================================================
+# winload - 网络流量监控工具
+# Python + Rust 混合项目的统一 .gitignore
+# ============================================================
+
+# ============================================================
+# Python (py/ 目录)
+# ============================================================
+
+# Virtual environments
+py/.venv/
+py/venv/
+py/ENV/
+py/env/
+py/.env
+
+# Python 缓存
+py/__pycache__/
+py/**/__pycache__/
+py/*.py[cod]
+py/**/*.py[cod]
+py/*$py.class
+
+# Distribution / packaging
+py/.Python
+py/build/
+py/develop-eggs/
+py/dist/
+py/downloads/
+py/eggs/
+py/.eggs/
+py/lib/
+py/lib64/
+py/parts/
+py/sdist/
+py/var/
+py/wheels/
+py/share/python-wheels/
+py/*.egg-info/
+py/.installed.cfg
+py/*.egg
+py/MANIFEST
+
+# PyInstaller
+py/*.manifest
+py/*.spec
+
+# Installer logs
+py/pip-log.txt
+py/pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+py/htmlcov/
+py/.tox/
+py/.nox/
+py/.coverage
+py/.coverage.*
+py/.cache
+py/nosetests.xml
+py/coverage.xml
+py/*.cover
+py/*.py,cover
+py/.hypothesis/
+py/.pytest_cache/
+py/cover/
+
+# Jupyter Notebook
+py/.ipynb_checkpoints
+
+# IPython
+py/profile_default/
+py/ipython_config.py
+
+# pyenv
+py/.python-version
+
+# mypy
+py/.mypy_cache/
+py/.dmypy.json
+py/dmypy.json
+
+# Pyre type checker
+py/.pyre/
+
+# pytype static type analyzer
+py/.pytype/
+
+# Cython debug symbols
+py/cython_debug/
+
+# uv
+py/.uv/
+py/uv.lock
+
+
+# ============================================================
+# Rust (rust/ 目录)
+# ============================================================
+
+# Compiled output
+rust/target/
+rust/**/target/
+
+# Cargo.lock (保留 libraries 的，忽略 binaries 的)
+# 通常 binary 项目忽略 Cargo.lock，library 项目保留
+# 这里默认忽略，如果是 library 可以取消注释
+rust/Cargo.lock
+
+# Cargo build artifacts
+rust/**/*.rs.bk
+rust/**/*.pdb
+
+# Debug files
+rust/**/*.dSYM/
+
+# IDE / editor generated
+rust/**/*.swp
+rust/**/*.swo
+rust/**/*~
+
+# Profiling data
+rust/perf.data
+rust/perf.data.old
+rust/flamegraph.svg
+
+
+# ============================================================
+# 编辑器 / IDE
+# ============================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs (PyCharm, IntelliJ IDEA, CLion, RustRover)
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+
+# ============================================================
+# 操作系统
+# ============================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.Trash-*
+.nfs*
+
+
+# ============================================================
+# 项目相关
+# ============================================================
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# 测试输出
+test_output/
+
+# 本地配置（如果有）
+local_config.*
+.env.local
