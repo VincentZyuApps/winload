@@ -3,3 +3,5 @@
 
 #### preview of python impl
 ![docs/preview-py.png](docs/preview-py.png)
+
+![docs/preview-rust.png](docs/preview-rust.png)
