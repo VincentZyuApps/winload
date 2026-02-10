@@ -20,7 +20,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();
 
     if area.height < 10 || area.width < 40 {
-        draw_too_small(frame, area);
+        draw_too_small(frame, area, app.emoji);
         return;
     }
 
@@ -50,7 +50,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     draw_header(frame, chunks[0], app, show_loopback_warning);
     draw_panels(frame, chunks[1], app);
-    draw_help(frame, chunks[2]);
+    draw_help(frame, chunks[2], app.emoji);
 }
 
 // ─── Header ────────────────────────────────────────────────
@@ -63,14 +63,26 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
             String::new()
         };
 
-        let header = Line::from(Span::styled(
+        let header_text = if app.emoji {
+            format!(
+                "🖧 Device {}{} ({}/{}) 📡:",
+                view.info.name,
+                addr_str,
+                app.current_idx + 1,
+                app.views.len(),
+            )
+        } else {
             format!(
                 "Device {}{} ({}/{}):",
                 view.info.name,
                 addr_str,
                 app.current_idx + 1,
                 app.views.len(),
-            ),
+            )
+        };
+
+        let header = Line::from(Span::styled(
+            header_text,
             Style::default()
                 .fg(Color::White)
                 .add_modifier(Modifier::BOLD),
@@ -119,19 +131,26 @@ fn draw_panels(frame: &mut Frame, area: Rect, app: &App) {
         .split(area);
 
     if let Some(view) = app.current_view() {
+        let (in_label, out_label) = if app.emoji {
+            ("⬇️📥 Incoming", "⬆️📤 Outgoing")
+        } else {
+            ("Incoming", "Outgoing")
+        };
         draw_traffic_panel(
             frame,
             panels[0],
-            "Incoming",
+            in_label,
             &view.engine.incoming,
             &view.engine.incoming_history,
+            app.emoji,
         );
         draw_traffic_panel(
             frame,
             panels[1],
-            "Outgoing",
+            out_label,
             &view.engine.outgoing,
             &view.engine.outgoing_history,
+            app.emoji,
         );
     }
 }
@@ -142,6 +161,7 @@ fn draw_traffic_panel(
     label: &str,
     stats: &TrafficStats,
     history: &VecDeque<f64>,
+    emoji: bool,
 ) {
     if area.height < 2 || area.width < 20 {
         return;
@@ -166,14 +186,14 @@ fn draw_traffic_panel(
     frame.render_widget(Paragraph::new(vec![label_line]), panel_chunks[0]);
 
     // ── 内容区: 左侧图形 + 右侧统计 ──
-    let stat_width: u16 = 24;
+    let stat_width: u16 = if emoji { 28 } else { 24 };
     let content_chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Min(10), Constraint::Length(stat_width)])
         .split(panel_chunks[1]);
 
     draw_graph(frame, content_chunks[0], history, scale_max);
-    draw_stats(frame, content_chunks[1], stats);
+    draw_stats(frame, content_chunks[1], stats, emoji);
 }
 
 // ─── Graph ─────────────────────────────────────────────────
@@ -205,8 +225,8 @@ fn draw_graph(frame: &mut Frame, area: Rect, history: &VecDeque<f64>, max_value:
 
 // ─── Stats ─────────────────────────────────────────────────
 
-fn draw_stats(frame: &mut Frame, area: Rect, stats: &TrafficStats) {
-    let stat_lines = format_stats_lines(stats);
+fn draw_stats(frame: &mut Frame, area: Rect, stats: &TrafficStats, emoji: bool) {
+    let stat_lines = format_stats_lines(stats, emoji);
     let stat_count = stat_lines.len() as u16;
 
     // 底部对齐
@@ -221,48 +241,82 @@ fn draw_stats(frame: &mut Frame, area: Rect, stats: &TrafficStats) {
     }
 }
 
-fn format_stats_lines(st: &TrafficStats) -> Vec<Line<'static>> {
+fn format_stats_lines(st: &TrafficStats, emoji: bool) -> Vec<Line<'static>> {
     let label_style = Style::default()
         .fg(Color::Cyan)
         .add_modifier(Modifier::BOLD);
     let value_style = Style::default().fg(Color::White);
 
-    vec![
-        Line::from(vec![
-            Span::styled("Curr: ", label_style),
-            Span::styled(stats::format_speed(st.current), value_style),
-        ]),
-        Line::from(vec![
-            Span::styled(" Avg: ", label_style),
-            Span::styled(stats::format_speed(st.average), value_style),
-        ]),
-        Line::from(vec![
-            Span::styled(" Min: ", label_style),
-            Span::styled(stats::format_speed(st.minimum), value_style),
-        ]),
-        Line::from(vec![
-            Span::styled(" Max: ", label_style),
-            Span::styled(stats::format_speed(st.maximum), value_style),
-        ]),
-        Line::from(vec![
-            Span::styled(" Ttl: ", label_style),
-            Span::styled(stats::format_bytes(st.total), value_style),
-        ]),
-    ]
+    if emoji {
+        vec![
+            Line::from(vec![
+                Span::styled("⚡ Curr: ", label_style),
+                Span::styled(stats::format_speed(st.current), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled("📊  Avg: ", label_style),
+                Span::styled(stats::format_speed(st.average), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled("📏  Min: ", label_style),
+                Span::styled(stats::format_speed(st.minimum), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled("🚀  Max: ", label_style),
+                Span::styled(stats::format_speed(st.maximum), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled("📦  Ttl: ", label_style),
+                Span::styled(stats::format_bytes(st.total), value_style),
+            ]),
+        ]
+    } else {
+        vec![
+            Line::from(vec![
+                Span::styled("Curr: ", label_style),
+                Span::styled(stats::format_speed(st.current), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled(" Avg: ", label_style),
+                Span::styled(stats::format_speed(st.average), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled(" Min: ", label_style),
+                Span::styled(stats::format_speed(st.minimum), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled(" Max: ", label_style),
+                Span::styled(stats::format_speed(st.maximum), value_style),
+            ]),
+            Line::from(vec![
+                Span::styled(" Ttl: ", label_style),
+                Span::styled(stats::format_bytes(st.total), value_style),
+            ]),
+        ]
+    }
 }
 
 // ─── Help / Error ──────────────────────────────────────────
 
-fn draw_help(frame: &mut Frame, area: Rect) {
+fn draw_help(frame: &mut Frame, area: Rect, emoji: bool) {
+    let help_text = if emoji {
+        " ⬅️/➡️ Switch Device | 🚪 q Quit"
+    } else {
+        " \u{2190}/\u{2192} Switch Device | q Quit"
+    };
     let help = Line::from(Span::styled(
-        " \u{2190}/\u{2192} Switch Device | q Quit",
+        help_text,
         Style::default().fg(Color::Yellow),
     ));
     frame.render_widget(Paragraph::new(vec![help]), area);
 }
 
-fn draw_too_small(frame: &mut Frame, area: Rect) {
-    let msg = "Terminal too small!";
+fn draw_too_small(frame: &mut Frame, area: Rect, emoji: bool) {
+    let msg = if emoji {
+        "😭 Terminal too small! 📌"
+    } else {
+        "Terminal too small!"
+    };
     let x = area.width.saturating_sub(msg.len() as u16) / 2;
     let y = area.height / 2;
     let line = Line::from(Span::styled(

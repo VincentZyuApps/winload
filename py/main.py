@@ -47,13 +47,19 @@ def parse_args() -> argparse.Namespace:
         metavar="NAME",
         help="启动时默认显示的设备名",
     )
+    parser.add_argument(
+        "-e", "--emoji",
+        action="store_true",
+        default=False,
+        help="启用 emoji 装饰模式 🎉",
+    )
     return parser.parse_args()
 
 
 def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
     """curses 主循环"""
     collector = Collector()
-    ui = UI(stdscr, collector)
+    ui = UI(stdscr, collector, emoji=args.emoji)
 
     # 如果指定了默认设备，切换到对应索引
     if args.device:

@@ -38,6 +38,7 @@ winload -d "Wi-Fi"   # Start with a specific device
 | `-t`, `--interval <MS>` | Refresh interval in milliseconds | `500` |
 | `-a`, `--average <SEC>` | Average calculation window in seconds | `300` |
 | `-d`, `--device <NAME>` | Default device name (partial match) | — |
+| `-e`, `--emoji` | Enable emoji decorations in TUI 🎉 | off |
 | `--debug-info` | Print network interface debug info and exit *(Rust only)* | — |
 | `-h`, `--help` | Print help | — |
 | `-V`, `--version` | Print version *(Rust only)* | — |

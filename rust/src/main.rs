@@ -45,6 +45,10 @@ struct Args {
     /// Print debug info about network interfaces and exit
     #[arg(long = "debug-info")]
     debug_info: bool,
+
+    /// Enable emoji decorations in TUI and output
+    #[arg(short = 'e', long = "emoji")]
+    emoji: bool,
 }
 
 // ─── App 状态 ──────────────────────────────────────────────
@@ -59,6 +63,7 @@ pub struct DeviceView {
 pub struct App {
     pub views: Vec<DeviceView>,
     pub current_idx: usize,
+    pub emoji: bool,
     collector: Collector,
 }
 
@@ -90,6 +95,7 @@ impl App {
         Self {
             views,
             current_idx,
+            emoji: args.emoji,
             collector,
         }
     }
@@ -177,7 +183,13 @@ fn main() -> io::Result<()> {
     // 如果传入 --debug-info，打印接口信息后退出
     if args.debug_info {
         let collector = Collector::new();
+        if args.emoji {
+            println!("\n🔍🌐 Network Interfaces Debug Info 🖧✨");
+        }
         collector.print_debug_info();
+        if args.emoji {
+            println!("🏁 Done! Happy debugging! 🎉🐛");
+        }
         return Ok(());
     }
     let mut terminal = ratatui::init();

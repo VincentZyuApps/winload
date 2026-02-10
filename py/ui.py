@@ -41,11 +41,12 @@ class UI:
     COLOR_HELP = 9
     COLOR_ERROR = 10
 
-    def __init__(self, stdscr: "curses.window", collector: Collector):
+    def __init__(self, stdscr: "curses.window", collector: Collector, emoji: bool = False):
         self.stdscr = stdscr
         self.collector = collector
         self.current_device_idx = 0
         self.views: List[DeviceView] = []
+        self.emoji = emoji
 
         # 初始化颜色
         curses.start_color()
@@ -125,10 +126,16 @@ class UI:
         # ── 头部: Device name [ip] (n/m): ──
         addr = view.get_addr_str()
         addr_str = f" [{addr}]" if addr else ""
-        header = (
-            f"Device {view.name}{addr_str} "
-            f"({device_idx + 1}/{len(self.views)}):"
-        )
+        if self.emoji:
+            header = (
+                f"🖧 Device {view.name}{addr_str} "
+                f"({device_idx + 1}/{len(self.views)}) 📡:"
+            )
+        else:
+            header = (
+                f"Device {view.name}{addr_str} "
+                f"({device_idx + 1}/{len(self.views)}):"
+            )
         self._safe_addstr(row, 0, header, curses.color_pair(self.COLOR_HEADER) | curses.A_BOLD)
         row += 1
 
@@ -153,29 +160,34 @@ class UI:
             return
 
         # ── Incoming 面板 ──
+        in_label = "⬇️📥 Incoming" if self.emoji else "Incoming"
         self._draw_panel(
             start_row=row,
             max_x=max_x,
             panel_height=panel_height,
-            label="Incoming",
+            label=in_label,
             stats=view.engine.incoming,
             history=view.engine.incoming_history,
         )
         row += panel_height
 
         # ── Outgoing 面板 ──
+        out_label = "⬆️📤 Outgoing" if self.emoji else "Outgoing"
         self._draw_panel(
             start_row=row,
             max_x=max_x,
             panel_height=panel_height,
-            label="Outgoing",
+            label=out_label,
             stats=view.engine.outgoing,
             history=view.engine.outgoing_history,
         )
         row += panel_height
 
         # ── 底部帮助行 ──
-        help_text = " ←/→ Switch Device | q Quit"
+        if self.emoji:
+            help_text = " ⬅️/➡️ Switch Device | 🚪 q Quit"
+        else:
+            help_text = " ←/→ Switch Device | q Quit"
         self._safe_addstr(
             max_y - 1, 0,
             help_text[:max_x - 1],
@@ -263,6 +275,14 @@ class UI:
 
     def _format_stats(self, stats: TrafficStats) -> List[str]:
         """格式化 5 行统计文本"""
+        if self.emoji:
+            return [
+                f"⚡ Curr: {format_speed(stats.current)}",
+                f"📊  Avg: {format_speed(stats.average)}",
+                f"📏  Min: {format_speed(stats.minimum)}",
+                f"🚀  Max: {format_speed(stats.maximum)}",
+                f"📦  Ttl: {format_bytes(stats.total)}",
+            ]
         return [
             f"Curr: {format_speed(stats.current)}",
             f" Avg: {format_speed(stats.average)}",
@@ -272,7 +292,7 @@ class UI:
         ]
 
     def _draw_too_small(self, max_y: int, max_x: int) -> None:
-        msg = "Terminal too small!"
+        msg = "😭 Terminal too small! 📌" if self.emoji else "Terminal too small!"
         y = max_y // 2
         x = max(0, (max_x - len(msg)) // 2)
         self._safe_addstr(
