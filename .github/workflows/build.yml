@@ -86,6 +86,22 @@ jobs:
             binary: winload
             asset: winload-linux-x86_64
 
+          # ── Windows ARM64 (cross-compile on x64 runner) ──
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+            name: windows-aarch64
+            binary: winload.exe
+            asset: winload-windows-aarch64.exe
+
+          # ── Linux ARM64 (cross-compile on x64 runner) ──
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            name: linux-aarch64
+            binary: winload
+            asset: winload-linux-aarch64
+            cross_linker: aarch64-linux-gnu-gcc
+            cross_packages: gcc-aarch64-linux-gnu
+
           # ── macOS x64 (build on Apple Silicon runner) ──
           - target: x86_64-apple-darwin
             os: macos-latest
@@ -115,8 +131,16 @@ jobs:
           workspaces: rust -> target
           cache-on-failure: true
 
+      - name: Install cross-compilation toolchain (Linux ARM64)
+        if: matrix.cross_packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.cross_packages }}
+
       - name: Build release binary
         working-directory: rust
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.cross_linker || '' }}
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Prepare artifact
