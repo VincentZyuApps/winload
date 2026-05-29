@@ -208,7 +208,7 @@ winload --npcap      # Capture 127.0.0.1 loopback traffic (Windows, requires Npc
 | `-t`, `--interval <MS>` | Refresh interval in milliseconds | `500` |
 | `-a`, `--average <SEC>` | Average calculation window in seconds | `300` |
 | `-d`, `--device <NAME>` | Default device name (partial match) | — |
-| `--title [TITLE]` | Override header title: no value shows `winload <version>`; empty string keeps the default device header | — |
+| `--title [TITLE]` | Add a title line above device header: no value shows `winload <version>`; empty string (or omitted) shows only the default device header | — |
 | `-e`, `--emoji` | Enable emoji decorations in TUI 🎉 | off |
 | `-U`, `--unicode` | Use Unicode block characters for graph (█▓░·) | off |
 | `-u`, `--unit <UNIT>` | Display unit: `bit` or `byte` | `bit` |

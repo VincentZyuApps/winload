@@ -208,7 +208,7 @@ winload --npcap      # 捕获 127.0.0.1 回环流量 (Windows，需安装 Npcap)
 | `-t`, `--interval <MS>` | 刷新间隔（毫秒） | `500` |
 | `-a`, `--average <SEC>` | 平均值计算窗口（秒） | `300` |
 | `-d`, `--device <NAME>` | 默认设备名（模糊匹配） | — |
-| `--title [TITLE]` | 覆盖顶部标题：不带值时显示 `winload <版本号>`；空字符串保持默认设备标题 | — |
+| `--title [TITLE]` | 在设备标题上方添加标题行：不带值时显示 `winload <版本号>`；空字符串（或省略）时仅显示默认设备标题 | — |
 | `-e`, `--emoji` | 启用 emoji 装饰 🎉 | 关闭 |
 | `-U`, `--unicode` | 使用 Unicode 方块字符绘图（█▓░·） | 关闭 |
 | `-u`, `--unit <UNIT>` | 显示单位：`bit` 或 `byte` | `bit` |

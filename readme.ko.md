@@ -208,7 +208,7 @@ winload --npcap      # 127.0.0.1 루프백 트래픽 캡처 (Windows, Npcap 필�
 | `-t`, `--interval <MS>` | 새로고침 간격 (밀리초 단위) | `500` |
 | `-a`, `--average <SEC>` | 평균 계산을 위한 윈도우 시간 (초 단위) | `300` |
 | `-d`, `--device <NAME>` | 기본 장치 이름 (부분 일치 가능) | — |
-| `--title [TITLE]` | 헤더 제목 덮어쓰기. 값이 없으면 `winload <version>`을 표시하고, 빈 문자열이면 기본 장치 헤더를 유지 | — |
+| `--title [TITLE]` | 장치 헤더 위에 제목 줄 추가. 값이 없으면 `winload <version>`을 표시하고, 빈 문자열(또는 생략)이면 기본 장치 헤더만 표시 | — |
 | `-e`, `--emoji` | TUI에서 이모지 장식 활성화 🎉 | 비활성 |
 | `-U`, `--unicode` | 그래프에 Unicode 블록 문자 사용 (█▓░·) | 비활성 |
 | `-u`, `--unit <UNIT>` | 표시 단위: `bit` 또는 `byte` | `bit` |

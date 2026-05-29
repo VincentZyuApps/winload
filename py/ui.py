@@ -182,25 +182,32 @@ class UI:
         row = 0
 
         # ── 头部: Device name [ip] (n/m): ──
-        if self.title is not None:
-            header = self.title
-        else:
-            addr = view.get_addr_str()
-            addr_str = f" [{addr}]" if addr else ""
-            if self.emoji:
-                header = (
-                    f"{t('device_emoji')} {view.name}{addr_str} "
-                    f"({device_idx + 1}/{len(self.views)}) 📡:"
-                )
-            else:
-                header = (
-                    f"{t('device')} {view.name}{addr_str} "
-                    f"({device_idx + 1}/{len(self.views)}):"
-                )
         header_attr = self._color(self._get_bar_attr(self.COLOR_HEADER, bold=True))
+
+        # Add title line if present
+        if self.title is not None:
+            title_line = self.title
+            if self.bar_style == "fill":
+                title_line = title_line.ljust(max_x - 1)
+            self._safe_addstr(row, 0, title_line, header_attr)
+            row += 1
+
+        # Always show device header
+        addr = view.get_addr_str()
+        addr_str = f" [{addr}]" if addr else ""
+        if self.emoji:
+            device_header = (
+                f"{t('device_emoji')} {view.name}{addr_str} "
+                f"({device_idx + 1}/{len(self.views)}) 📡:"
+            )
+        else:
+            device_header = (
+                f"{t('device')} {view.name}{addr_str} "
+                f"({device_idx + 1}/{len(self.views)}):"
+            )
         if self.bar_style == "fill":
-            header = header.ljust(max_x - 1)
-        self._safe_addstr(row, 0, header, header_attr)
+            device_header = device_header.ljust(max_x - 1)
+        self._safe_addstr(row, 0, device_header, header_attr)
         row += 1
 
         # ── Loopback 警告（仅 Windows）──

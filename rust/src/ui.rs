@@ -116,32 +116,30 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
             ""
         };
 
-        let header_text = if let Some(title) = &app.title {
-            title.clone()
+        // Build device header
+        let addr_str = if !view.info.addrs.is_empty() {
+            format!(" [{}]", view.info.addrs[0])
         } else {
-            let addr_str = if !view.info.addrs.is_empty() {
-                format!(" [{}]", view.info.addrs[0])
-            } else {
-                String::new()
-            };
-            if app.emoji {
-                format!(
-                    "{} {}{} ({}/{}){} 📡:",
-                    t("device_emoji"),
-                    view.info.name,
-                    addr_str,
-                    app.current_idx + 1,
-                    app.views.len(),
-                    mode_tag,
-                )
-            } else {
-                format!(
-                    "{} {}{} ({}/{}){}:",
-                    t("device"),
-                    view.info.name,
-                    addr_str,
-                    app.current_idx + 1,
-                    app.views.len(),
+            String::new()
+        };
+        let device_header = if app.emoji {
+            format!(
+                "{} {} ({}/{}){} 📡:",
+                t("device_emoji"),
+                view.info.name,
+                addr_str,
+                app.current_idx + 1,
+                app.views.len(),
+                mode_tag,
+            )
+        } else {
+            format!(
+                "{} {}{} ({}/{}){}:",
+                t("device"),
+                view.info.name,
+                addr_str,
+                app.current_idx + 1,
+                app.views.len(),
                     mode_tag,
                 )
             }
@@ -163,15 +161,25 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
                 .add_modifier(Modifier::BOLD),
         }, app.no_color);
 
-        let header_display = if app.bar_style == BarStyle::Fill {
-            pad_to_width(&header_text, width)
+        let mut lines = vec![];
+
+        // Add title line if present
+        if let Some(title) = &app.title {
+            let title_display = if app.bar_style == BarStyle::Fill {
+                pad_to_width(title, width)
+            } else {
+                title.clone()
+            };
+            lines.push(Line::from(Span::styled(title_display, header_style)));
+        }
+
+        // Add device header line
+        let device_display = if app.bar_style == BarStyle::Fill {
+            pad_to_width(&device_header, width)
         } else {
-            header_text
+            device_header
         };
-
-        let header = Line::from(Span::styled(header_display, header_style));
-
-        let mut lines = vec![header];
+        lines.push(Line::from(Span::styled(device_display, header_style)));
         
         if show_loopback_warning {
             let warn_text = t("loopback_warning");
