@@ -163,9 +163,8 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
                 addr_str,
                 app.current_idx + 1,
                 app.views.len(),
-                    mode_tag,
-                )
-            }
+                mode_tag,
+            )
         };
 
         let width = area.width as usize;
