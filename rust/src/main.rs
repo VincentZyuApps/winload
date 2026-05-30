@@ -49,6 +49,16 @@ pub enum BarStyle {
     Plain,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+pub enum TitleAlign {
+    /// Align title to the left
+    Left,
+    /// Center title (default)
+    Center,
+    /// Align title to the right
+    Right,
+}
+
 /// 解析人类可读的流量值，如 "100M" → 100*1024*1024 bytes/s
 pub fn parse_max_value(s: &str) -> Result<f64, String> {
     let s = s.trim();
@@ -101,6 +111,10 @@ struct Args {
     /// Override header title
     #[arg(long = "title", num_args = 0..=1, default_missing_value = "__WINLOAD_TITLE_FLAG_ONLY__", value_name = "TITLE")]
     title: Option<Option<String>>,
+
+    /// Title alignment: left, center, right
+    #[arg(long = "title-align", value_enum, default_value = "center")]
+    title_align: TitleAlign,
 
     /// Print debug info about network interfaces and exit
     #[arg(long = "debug-info")]
@@ -172,6 +186,7 @@ pub struct App {
     pub views: Vec<DeviceView>,
     pub current_idx: usize,
     pub title: Option<String>,
+    pub title_align: TitleAlign,
     pub emoji: bool,
     pub unicode: bool,
     pub unit: Unit,
@@ -227,6 +242,7 @@ impl App {
             views,
             current_idx,
             title: resolve_title(args),
+            title_align: args.title_align,
             emoji: args.emoji,
             unicode: args.unicode,
             unit: args.unit,

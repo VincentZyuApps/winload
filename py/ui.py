@@ -45,6 +45,7 @@ class UI:
 
     def __init__(self, stdscr: "curses.window", collector: Collector,
                  title: Optional[str] = None,
+                 title_align: str = "center",
                  emoji: bool = False, unit: str = "bit",
                  fixed_max: Optional[float] = None, no_graph: bool = False,
                  unicode: bool = False, bar_style: str = "fill",
@@ -57,6 +58,7 @@ class UI:
         self.current_device_idx = 0
         self.views: List[DeviceView] = []
         self.title = title
+        self.title_align = title_align
         self.emoji = emoji
         self.unit = unit
         self.fixed_max = fixed_max
@@ -186,9 +188,18 @@ class UI:
 
         # Add title line if present
         if self.title is not None:
-            title_line = self.title
+            title_len = len(self.title)
+            pad_total = max(0, max_x - 1 - title_len)
+            if self.title_align == "center":
+                pad_l = pad_total // 2
+            elif self.title_align == "right":
+                pad_l = pad_total
+            else:
+                pad_l = 0
             if self.bar_style == "fill":
-                title_line = title_line.ljust(max_x - 1)
+                title_line = (" " * pad_l + self.title).ljust(max_x - 1)
+            else:
+                title_line = " " * pad_l + self.title
             self._safe_addstr(row, 0, title_line, header_attr)
             row += 1
 

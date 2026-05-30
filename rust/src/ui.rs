@@ -60,9 +60,13 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
     // Calculate base header height:
     // - 1 line for device always
+    // - +1 if title is present
     // - +1 if there are warnings/info
     // - +1 if separator is not hidden
     let mut header_height = 1; // device line
+    if app.title.is_some() {
+        header_height += 1; // title line
+    }
     if show_loopback_warning || show_loopback_info {
         header_height += 1; // warning/info line
     }
@@ -94,6 +98,25 @@ fn pad_to_width(text: &str, width: usize) -> String {
         text.to_string()
     } else {
         format!("{}{}", text, " ".repeat(width - text_len))
+    }
+}
+
+/// 根据对齐方式对齐文本
+fn align_text(text: &str, width: usize, align: &crate::TitleAlign, fill: bool) -> String {
+    let text_w = str_display_width(text);
+    let pad_total = width.saturating_sub(text_w);
+    let (pad_l, pad_r) = match align {
+        crate::TitleAlign::Left => (0, pad_total),
+        crate::TitleAlign::Right => (pad_total, 0),
+        crate::TitleAlign::Center => {
+            let l = pad_total / 2;
+            (l, pad_total - l)
+        }
+    };
+    if fill {
+        format!("{}{}{}", " ".repeat(pad_l), text, " ".repeat(pad_r))
+    } else {
+        format!("{}{}", " ".repeat(pad_l), text)
     }
 }
 
@@ -165,11 +188,7 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
 
         // Add title line if present
         if let Some(title) = &app.title {
-            let title_display = if app.bar_style == BarStyle::Fill {
-                pad_to_width(title, width)
-            } else {
-                title.clone()
-            };
+            let title_display = align_text(title, width, &app.title_align, app.bar_style == BarStyle::Fill);
             lines.push(Line::from(Span::styled(title_display, header_style)));
         }
 

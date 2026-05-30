@@ -200,6 +200,14 @@ def parse_args() -> argparse.Namespace:
         help=t("help_title"),
     )
     parser.add_argument(
+        "--title-align",
+        type=str,
+        choices=["left", "center", "right"],
+        default="center",
+        metavar="ALIGN",
+        help="Title alignment: left, center, right\n\n[default: center]",
+    )
+    parser.add_argument(
         "-e",
         "--emoji",
         action="store_true",
@@ -328,6 +336,7 @@ def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
         stdscr,
         collector,
         title=resolve_title(args.title),
+        title_align=args.title_align,
         emoji=args.emoji,
         unit=args.unit,
         fixed_max=fixed_max,
