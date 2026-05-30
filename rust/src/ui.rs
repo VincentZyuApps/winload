@@ -147,7 +147,7 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
         };
         let device_header = if app.emoji {
             format!(
-                "{} {} ({}/{}){} 📡:",
+                "{} {}{} ({}/{}) 📡:",
                 t("device_emoji"),
                 view.info.name,
                 addr_str,
@@ -157,7 +157,7 @@ fn draw_header(frame: &mut Frame, area: Rect, app: &App, show_loopback_warning: 
             )
         } else {
             format!(
-                "{} {}{} ({}/{}){}:",
+                "{} {}{} ({}/{}){} :",
                 t("device"),
                 view.info.name,
                 addr_str,
