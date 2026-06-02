@@ -10,6 +10,7 @@
 > **[📖 繁體中文(台灣)](readme.zh-tw.md)**
 > **[📖 日本語](readme.jp.md)**
 > **[📖 한국어](readme.ko.md)**
+> **[📖 文言文](readme.lzh.md)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/VincentZyuApps/winload)
 [![Gitee](https://img.shields.io/badge/Gitee-C71D23?style=for-the-badge&logo=gitee&logoColor=white)](https://gitee.com/vincent-zyu/winload)
