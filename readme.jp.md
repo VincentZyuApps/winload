@@ -299,3 +299,6 @@ LinuxおよびmacOSでは、ループバックトラフィックは追加のフ�
 | [![sysinfo](https://img.shields.io/badge/sysinfo-0.32-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/GuillaumeGomez/sysinfo) | 0.32 | システム情報ライブラリ |
 | [![clap](https://img.shields.io/badge/clap-4-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/clap-rs/clap) | 4 | コマンドライン引数パーサー |
 | [![pcap](https://img.shields.io/badge/pcap-2-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/pcap-parser/pcap) | 2 | パケットキャプチャ（オプション、Windows） |
+## 🧭 結語
+
+ネットの流れは形なく、Winload はそれに姿を与える。パケットは端末を行き交い、音もなく、気配もない。しかし、その一つひとつの行き来を、余すところなく目の当たりにすることができる。一つのマシンのネットワークの鼓動を知りたいとき、この道具は机の上の小さな灯火となり、夜を渡る船の星となるのである。

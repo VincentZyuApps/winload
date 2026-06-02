@@ -11,4 +11,6 @@ python3 build.py
 
 python3 build.py --clean
 
+cargo run --release -- --help
+
 ```

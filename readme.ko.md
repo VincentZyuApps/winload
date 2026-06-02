@@ -299,3 +299,6 @@ Linux 및 macOS에서는 별도의 설정 없이 루프백 트래픽 모니터�
 | [![sysinfo](https://img.shields.io/badge/sysinfo-0.32-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/GuillaumeGomez/sysinfo) | 0.32 | 시스템 정보 라이브러리 |
 | [![clap](https://img.shields.io/badge/clap-4-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/clap-rs/clap) | 4 | 명령줄 인자 파서 |
 | [![pcap](https://img.shields.io/badge/pcap-2-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/pcap-parser/pcap) | 2 | 패킷 캡처 (선택 사항, Windows) |
+## 🧭 맺음말
+
+네트워크 트래픽은 무형으로 흐르고, 소리 없이 스쳐갑니다. 그러나 Winload는 그것에 형체를 부여하여, 터미널 위에서 수많은 패킷의 춤을 생생히 펼쳐 보입니다. 한 대의 기계가 숨 쉬는 그물의 맥박을 알고자 할 때, 이 도구는 책상 위의 작은 등불이 되어 주고, 밤바다를 항해하는 이에게 별이 되어 줍니다.

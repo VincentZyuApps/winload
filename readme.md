@@ -299,3 +299,6 @@ On Linux and macOS, loopback traffic works out of the box — no extra flags nee
 | [![sysinfo](https://img.shields.io/badge/sysinfo-0.32-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/GuillaumeGomez/sysinfo) | 0.32 | System information library |
 | [![clap](https://img.shields.io/badge/clap-4-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/clap-rs/clap) | 4 | Command-line argument parser |
 | [![pcap](https://img.shields.io/badge/pcap-2-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/pcap-parser/pcap) | 2 | Packet capture (optional, Windows) |
+## 🧭 Epilogue
+
+Network traffic flows formless through the void — yet Winload gives it shape. Packets traverse the terminal, silent and unseen, but through this window, every thread of throughput takes form before your eyes. If you seek to know the pulse of a machine's connection to the world, this tool is at once a humble lamp upon your desk and a guiding star for the journey ahead.

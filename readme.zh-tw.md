@@ -299,3 +299,6 @@ winload --npcap
 | [![sysinfo](https://img.shields.io/badge/sysinfo-0.32-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/GuillaumeGomez/sysinfo) | 0.32 | 系統信息庫 |
 | [![clap](https://img.shields.io/badge/clap-4-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/clap-rs/clap) | 4 | 命令行參數解析器 |
 | [![pcap](https://img.shields.io/badge/pcap-2-000000?style=flat-square&logo=rust&logoColor=white)](https://github.com/pcap-parser/pcap) | 2 | 數據包捕獲（可選，Windows） |
+## 🧭 結語
+
+網路流量本是無形無影之物，而 Winload 卻能讓它具象於眼前。資料包在終端中穿行，無聲無息，卻能將千絲萬縷的吞吐之狀盡數呈現。若你想讀懂一台機器的網路脈搏，此工具既可作案頭的一盞小燈，也可作夜航時的一顆星。
