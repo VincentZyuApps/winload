@@ -1152,14 +1152,13 @@ jobs:
 
           echo "✅ winload-rust-bin updated!"
 
-  # ── 发布到 npm（@vincentzyuapps/winload: 预编译二进制）────────────
+  # ── 发布到 npm（scoped: @vincentzyuapps/winload）─────────────────
   # 原理同 esbuild / @biomejs/biome / turbo:
   #   1. 为每个平台发布一个只含二进制的包 (os/cpu 字段让 npm 自动筛选)
   #   2. 主包 @vincentzyuapps/winload 通过 optionalDependencies 引用它们
   #   3. 用户 npm install 时只下载匹配当前平台的那一个
-  #   4. 同时发布到 GitHub Packages (npm.pkg.github.com)
-  publish-npm:
-    name: Publish to npm
+  publish-npm-scope:
+    name: Publish to npm (scoped)
     needs: [check, release]
     if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
@@ -1207,7 +1206,6 @@ jobs:
           NPM_TAG="latest"
           echo "📦 npm version: ${NPM_VERSION} (tag: ${NPM_TAG})"
 
-          # 平台定义: npm包名|os|cpu|源文件|二进制名
           PLATFORMS=(
             "@vincentzyuapps/winload-win32-x64|win32|x64|artifacts/winload-windows-x86_64.exe|winload.exe"
             "@vincentzyuapps/winload-win32-arm64|win32|arm64|artifacts/winload-windows-aarch64.exe|winload.exe"
@@ -1257,12 +1255,10 @@ jobs:
           NPM_VERSION="${VERSION#v}"
           NPM_TAG="latest"
 
-          # 复制项目根目录的 readme.md 作为 npm 页面展示
           cp readme.md npm/winload-rust-bin/readme.md
 
           cd npm/winload-rust-bin
 
-          # 动态更新 package.json 中的版本号（版本以 Cargo.toml 为唯一真实源）
           node -e "
             const fs = require('fs');
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -1277,25 +1273,76 @@ jobs:
           cat package.json
           npm publish --provenance --access public --tag "${NPM_TAG}"
 
-          echo "✅ npm packages published!"
+          echo "✅ Scoped package published!"
 
-      # ── 同步发布到 GitHub Packages ──
-      # 直接在每个包目录写入 .npmrc，确保 npm 能找到 npm.pkg.github.com 的认证。
-      # (actions/setup-node 生成的 .npmrc 只包含 registry.npmjs.org 的认证)
+      - name: Upload npm packages for downstream jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: |
+            npm-platforms/
+            npm/winload-rust-bin/
+          if-no-files-found: error
+
+  # ── 发布到 npm（unscoped: winload-rust-bin）─────────────────
+  publish-npm-unscope:
+    name: Publish to npm (unscoped)
+    needs: [check, release, publish-npm-scope]
+    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish winload-rust-bin (unscoped) to npm
+        run: |
+          cd npm/winload-rust-bin
+          node -e "
+            const p = require('./package.json');
+            p.name = 'winload-rust-bin';
+            require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2) + '\n');
+          "
+          npm publish --provenance --access public --tag latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ── 同步发布到 GitHub Packages (npm.pkg.github.com) ────────
+  publish-npm-github-packages:
+    name: Publish to GitHub Packages for npm
+    needs: [check, release, publish-npm-scope]
+    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Publish platform packages to GitHub Packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ needs.check.outputs.version }}"
-          NPM_VERSION="${VERSION#v}"
-          NPM_TAG="latest"
-
           for dir in npm-platforms/@vincentzyuapps/*/; do
             [ -d "$dir" ] || continue
             echo "📦 Publishing $(basename $dir) to GitHub Packages..."
             cd "$dir"
             echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-            npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}" 2>&1 || echo "⚠️ Failed to publish $(basename $dir) to GitHub Packages (may already exist)"
+            npm publish --registry https://npm.pkg.github.com 2>&1 || echo "⚠️ Failed to publish $(basename $dir) to GitHub Packages (may already exist)"
             cd "$GITHUB_WORKSPACE"
           done
 
@@ -1305,7 +1352,7 @@ jobs:
         run: |
           cd npm/winload-rust-bin
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          npm publish --registry https://npm.pkg.github.com --tag "latest"
+          npm publish --registry https://npm.pkg.github.com
 
           echo "✅ GitHub Packages published!"
 
