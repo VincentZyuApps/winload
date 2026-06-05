@@ -24,6 +24,7 @@
 [![Crates.io](https://img.shields.io/badge/Crates.io-000000?style=for-the-badge&logo=rust&logoColor=white)](https://crates.io/crates/winload)
 
 [![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/@vincentzyuapps/winload)
+
 [![Scoop.sh](https://img.shields.io/badge/Scoop.sh-7B4AE2?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSI1IiBmaWxsPSIjRUM3MEExIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiNFQkYzQTEiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiM4RTZFQzgiLz48cGF0aCBkPSJNMTYuNSA0bC0xLjUtMS41TDExLjUgNmwxLjUgMS41eiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik0zIDEzaDE4YzAgNC40LTMuNiA4LTggOGgtNGMtNC40IDAtOC0zLjYtOC04eiIgZmlsbD0iIzRGNEI1MyIvPjwvc3ZnPg==)](https://scoop.sh/#/apps?q=%22https%3A%2F%2Fgithub.com%2FVincentZyuApps%2Fscoop-bucket%22&o=false)
 [![AUR](https://img.shields.io/badge/AUR-1793D1?style=for-the-badge&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/winload-rust-bin)
 [![APT](https://img.shields.io/badge/APT-E95420?style=for-the-badge&logo=debian&logoColor=white)](https://github.com/VincentZyuApps/winload/releases)
@@ -94,20 +95,17 @@ uv run python -c "import shutil; print(shutil.which('winload'))"
 ```bash
 # Recommended (scoped)
 npm install -g @vincentzyuapps/winload
-
 # Alternative (unscoped)
 npm install -g winload-rust-bin
-
 # Alternative (GitHub Packages)
 npm install -g @vincentzyuapps/winload --registry https://npm.pkg.github.com
-
 # on Windows, use win-nload to avoid conflict with System32\winload.exe
 # on Linux/macOS, both winload and win-nload work
 # or use npx directly
 npx @vincentzyuapps/winload
 ```
 
-> Includes 6 precompiled binaries for x86_64 & ARM64 across Windows, Linux, and macOS.
+> Includes 4 precompiled binaries for x86_64 & ARM64 across Windows, Linux, and macOS.
 
 ### Cargo (Build from source)
 ```bash
@@ -134,7 +132,7 @@ where win-nload # CMD
 > scoop install windows-terminal-preview
 > wtp
 > ```
-> 💡 **All builds require Windows 10+** (Rust 1.77+ dropped Windows 7/8 support). Scoop and npm provide **MSVC + Npcap** for **x86_64** and **ARM64** by default. These builds now delay-load `wpcap.dll`, reducing startup failures before `--npcap` is used, but loopback capture still requires Npcap installed on the system. For other variants (MinGW, non-Npcap, i686), download from [GitHub Releases](https://github.com/VincentZyuApps/winload/releases).
+> 💡 **All builds require Windows 10+** (Rust 1.77+ dropped Windows 7/8 support). Scoop and npm provide **MSVC + Npcap** for **x86_64** and **ARM64** by default. These builds now delay-load `wpcap.dll`, reducing startup failures before `--npcap` is used, but loopback capture still requires Npcap installed on the system.
 
 ### Arch Linux (AUR):
 ```bash
@@ -308,3 +306,4 @@ On Linux and macOS, loopback traffic works out of the box — no extra flags nee
 ## 🧭 Epilogue
 
 Network traffic flows formless through the void — yet Winload gives it shape. Packets traverse the terminal, silent and unseen, but through this window, every thread of throughput takes form before your eyes. If you seek to know the pulse of a machine's connection to the world, this tool is at once a humble lamp upon your desk and a guiding star for the journey ahead.
+

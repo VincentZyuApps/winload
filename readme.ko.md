@@ -24,6 +24,7 @@
 [![Crates.io](https://img.shields.io/badge/Crates.io-000000?style=for-the-badge&logo=rust&logoColor=white)](https://crates.io/crates/winload)
 
 [![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/@vincentzyuapps/winload)
+
 [![Scoop.sh](https://img.shields.io/badge/Scoop.sh-7B4AE2?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSI1IiBmaWxsPSIjRUM3MEExIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiNFQkYzQTEiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiM4RTZFQzgiLz48cGF0aCBkPSJNMTYuNSA0bC0xLjUtMS41TDExLjUgNmwxLjUgMS41eiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik0zIDEzaDE4YzAgNC40LTMuNiA4LTggOGgtNGMtNC40IDAtOC0zLjYtOC04eiIgZmlsbD0iIzRGNEI1MyIvPjwvc3ZnPg==)](https://scoop.sh/#/apps?q=%22https%3A%2F%2Fgithub.com%2FVincentZyuApps%2Fscoop-bucket%22&o=false)
 [![AUR](https://img.shields.io/badge/AUR-1793D1?style=for-the-badge&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/winload-rust-bin)
 [![APT](https://img.shields.io/badge/APT-E95420?style=for-the-badge&logo=debian&logoColor=white)](https://github.com/VincentZyuApps/winload/releases)
@@ -94,20 +95,17 @@ uv run python -c "import shutil; print(shutil.which('winload'))"
 ```bash
 # 권장（scoped）
 npm install -g @vincentzyuapps/winload
-
 # 대체（unscoped）
 npm install -g winload-rust-bin
-
 # 대체（GitHub Packages）
 npm install -g @vincentzyuapps/winload --registry https://npm.pkg.github.com
-
 # Windows에서는 System32\winload.exe와의 충돌을 피하기 위해 win-nload 사용
 # Linux/macOS에서는 winload 또는 win-nload 모두 사용 가능
 # 또는 npx 를 직접 사용
 npx @vincentzyuapps/winload
 ```
 
-> 6가지 사전 컴파일된 바이너리 포함: x86_64 & ARM64, Windows·Linux·macOS 대응.
+> 4가지 사전 컴파일된 바이너리 포함: x86_64 & ARM64, Windows·Linux·macOS 대응.
 
 ### Cargo (소스 코드 빌드)
 ```bash
@@ -134,7 +132,7 @@ where win-nload # CMD
 > scoop install windows-terminal-preview
 > wtp
 > ```
-> 💡 **모든 빌드는 Windows 10+가 필요합니다**（Rust 1.77+에서 Windows 7/8 지원이 중단되었습니다）。Scoop은 **x86_64** 및 **ARM64**용 **MSVC + Npcap** 빌드만 제공합니다. 다른 변형(MinGW, Npcap 미포함, i686)은 [GitHub Releases](https://github.com/VincentZyuApps/winload/releases)에서 다운로드하세요.
+> 💡 **모든 빌드는 Windows 10+가 필요합니다**（Rust 1.77+에서 Windows 7/8 지원이 중단되었습니다）。Scoop은 **x86_64** 및 **ARM64**용 **MSVC + Npcap** 빌드만 제공합니다.
 
 ### Arch Linux (AUR):
 ```bash
@@ -308,3 +306,4 @@ Linux 및 macOS에서는 별도의 설정 없이 루프백 트래픽 모니터�
 ## 🧭 맺음말
 
 네트워크 트래픽은 무형으로 흐르고, 소리 없이 스쳐갑니다. 그러나 Winload는 그것에 형체를 부여하여, 터미널 위에서 수많은 패킷의 춤을 생생히 펼쳐 보입니다. 한 대의 기계가 숨 쉬는 그물의 맥박을 알고자 할 때, 이 도구는 책상 위의 작은 등불이 되어 주고, 밤바다를 항해하는 이에게 별이 되어 줍니다.
+

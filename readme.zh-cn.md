@@ -24,6 +24,7 @@
 [![Crates.io](https://img.shields.io/badge/Crates.io-000000?style=for-the-badge&logo=rust&logoColor=white)](https://crates.io/crates/winload)
 
 [![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/@vincentzyuapps/winload)
+
 [![Scoop.sh](https://img.shields.io/badge/Scoop.sh-7B4AE2?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSI1IiBmaWxsPSIjRUM3MEExIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiNFQkYzQTEiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiM4RTZFQzgiLz48cGF0aCBkPSJNMTYuNSA0bC0xLjUtMS41TDExLjUgNmwxLjUgMS41eiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik0zIDEzaDE4YzAgNC40LTMuNiA4LTggOGgtNGMtNC40IDAtOC0zLjYtOC04eiIgZmlsbD0iIzRGNEI1MyIvPjwvc3ZnPg==)](https://scoop.sh/#/apps?q=%22https%3A%2F%2Fgithub.com%2FVincentZyuApps%2Fscoop-bucket%22&o=false)
 [![AUR](https://img.shields.io/badge/AUR-1793D1?style=for-the-badge&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/winload-rust-bin)
 [![APT](https://img.shields.io/badge/APT-E95420?style=for-the-badge&logo=debian&logoColor=white)](https://github.com/VincentZyuApps/winload/releases)
@@ -94,20 +95,17 @@ uv run python -c "import shutil; print(shutil.which('winload'))"
 ```bash
 # 推荐（scoped）
 npm install -g @vincentzyuapps/winload
-
 # 备选（unscoped）
 npm install -g winload-rust-bin
-
 # 备选（GitHub Packages）
 npm install -g @vincentzyuapps/winload --registry https://npm.pkg.github.com
-
 # 在 Windows 上使用 win-nload 以避免与 System32\winload.exe 冲突
 # 在 Linux/macOS 上，winload 和 win-nload 均可使用
 # 或直接使用 npx
 npx @vincentzyuapps/winload
 ```
 
-> 包含 6 个预编译二进制文件：x86_64 & ARM64 版本，支持 Windows、Linux 和 macOS。
+> 包含 4 个预编译二进制文件：x86_64 & ARM64 版本，支持 Windows、Linux 和 macOS。
 
 ### Cargo (源码编译)
 ```bash
@@ -134,7 +132,7 @@ where win-nload # CMD
 > scoop install windows-terminal-preview
 > wtp
 > ```
-> 💡 **所有构建均需 Windows 10+**（Rust 1.77+ 已放弃支持 Windows 7/8）。Scoop 和 npm 默认提供 **x86_64** 和 **ARM64** 的 **MSVC + Npcap** 构建。这些构建现在会延迟加载 `wpcap.dll`，可降低未使用 `--npcap` 前的启动失败风险，但回环抓包仍然需要系统已安装 Npcap。其他变体（MinGW、无 Npcap、i686）请从 [GitHub Releases](https://github.com/VincentZyuApps/winload/releases) 下载。
+> 💡 **所有构建均需 Windows 10+**（Rust 1.77+ 已放弃支持 Windows 7/8）。Scoop 和 npm 默认提供 **x86_64** 和 **ARM64** 的 **MSVC + Npcap** 构建。这些构建现在会延迟加载 `wpcap.dll`，可降低未使用 `--npcap` 前的启动失败风险，但回环抓包仍然需要系统已安装 Npcap。
 
 ### Arch Linux (AUR):
 ```bash
@@ -308,3 +306,4 @@ winload --npcap
 ## 🧭 结语
 
 网络流量本是无形无影之物，而 Winload 却能让它具象于眼前。数据包在终端中穿行，无声无息，却能将千丝万缕的吞吐之状尽数呈现。若你想读懂一台机器的网络脉搏，此工具既可作案头的一盏小灯，也可作夜航时的一颗星。
+

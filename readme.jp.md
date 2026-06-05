@@ -24,6 +24,7 @@
 [![Crates.io](https://img.shields.io/badge/Crates.io-000000?style=for-the-badge&logo=rust&logoColor=white)](https://crates.io/crates/winload)
 
 [![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)](https://www.npmjs.com/package/@vincentzyuapps/winload)
+
 [![Scoop.sh](https://img.shields.io/badge/Scoop.sh-7B4AE2?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSI4IiByPSI1IiBmaWxsPSIjRUM3MEExIi8+PGNpcmNsZSBjeD0iOCIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiNFQkYzQTEiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjEyIiByPSI0LjUiIGZpbGw9IiM4RTZFQzgiLz48cGF0aCBkPSJNMTYuNSA0bC0xLjUtMS41TDExLjUgNmwxLjUgMS41eiIgZmlsbD0iI2ZmZmZmZiIvPjxwYXRoIGQ9Ik0zIDEzaDE4YzAgNC40LTMuNiA4LTggOGgtNGMtNC40IDAtOC0zLjYtOC04eiIgZmlsbD0iIzRGNEI1MyIvPjwvc3ZnPg==)](https://scoop.sh/#/apps?q=%22https%3A%2F%2Fgithub.com%2FVincentZyuApps%2Fscoop-bucket%22&o=false)
 [![AUR](https://img.shields.io/badge/AUR-1793D1?style=for-the-badge&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/winload-rust-bin)
 [![APT](https://img.shields.io/badge/APT-E95420?style=for-the-badge&logo=debian&logoColor=white)](https://github.com/VincentZyuApps/winload/releases)
@@ -94,20 +95,17 @@ uv run python -c "import shutil; print(shutil.which('winload'))"
 ```bash
 # 推奨（scoped）
 npm install -g @vincentzyuapps/winload
-
 # 代替（unscoped）
 npm install -g winload-rust-bin
-
 # 代替（GitHub Packages）
 npm install -g @vincentzyuapps/winload --registry https://npm.pkg.github.com
-
 # Windows では System32\winload.exe との競合を避けるため win-nload を使用
 # Linux/macOS では winload と win-nload のどちらも使用可能
 # または npx を直接使用
 npx @vincentzyuapps/winload
 ```
 
-> 6つのプリコンパイル済みバイナリを含む：x86_64 & ARM64 対応、Windows・Linux・macOS に対応。
+> 4つのプリコンパイル済みバイナリを含む：x86_64 & ARM64 対応、Windows・Linux・macOS に対応。
 
 ### Cargo (ソースからビルド)
 ```bash
@@ -134,7 +132,7 @@ where win-nload # CMD
 > scoop install windows-terminal-preview
 > wtp
 > ```
-> 💡 **すべてのビルドに Windows 10+ が必要です**（Rust 1.77+ は Windows 7/8 をサポートしなくなりました）。Scoop と npm は既定で **x86_64** および **ARM64** 向けの **MSVC + Npcap** ビルドを提供します。これらのビルドは `wpcap.dll` を遅延読み込みするようになったため、`--npcap` を使う前の起動失敗リスクは下がりましたが、ループバック取得には引き続きシステムに Npcap が必要です。その他のバリアント（MinGW、Npcap なし、i686）は [GitHub Releases](https://github.com/VincentZyuApps/winload/releases) からダウンロードしてください。
+> 💡 **すべてのビルドに Windows 10+ が必要です**（Rust 1.77+ は Windows 7/8 をサポートしなくなりました）。Scoop と npm は既定で **x86_64** および **ARM64** 向けの **MSVC + Npcap** ビルドを提供します。これらのビルドは `wpcap.dll` を遅延読み込みするようになったため、`--npcap` を使う前の起動失敗リスクは下がりましたが、ループバック取得には引き続きシステムに Npcap が必要です。
 
 ### Arch Linux (AUR):
 ```bash
@@ -308,3 +306,4 @@ LinuxおよびmacOSでは、ループバックトラフィックは追加のフ�
 ## 🧭 結語
 
 ネットの流れは形なく、Winload はそれに姿を与える。パケットは端末を行き交い、音もなく、気配もない。しかし、その一つひとつの行き来を、余すところなく目の当たりにすることができる。一つのマシンのネットワークの鼓動を知りたいとき、この道具は机の上の小さな灯火となり、夜を渡る船の星となるのである。
+

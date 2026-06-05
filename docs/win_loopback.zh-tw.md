@@ -131,11 +131,8 @@ winload 使用 **Npcap** 作為 Windows loopback 擷取後端：
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `winload-windows-x86_64-msvc-npcap.exe` | Windows / x86_64 | Yes | Yes, when Npcap is installed and loopback capture is enabled | Yes | No | ✅ | ✅ | MSVC build with delay-loaded `wpcap.dll` |
 | `winload-windows-x86_64-msvc-no-npcap.exe` | Windows / x86_64 | No | No | No | No | ❌ | ❌ | No Npcap support; normal NIC traffic still works |
-| `winload-windows-x86_64-mingw-no-npcap.exe` | Windows / x86_64 | No | No | No | No | ❌ | ❌ | MinGW variant without Npcap support |
 | `winload-windows-aarch64-msvc-npcap.exe` | Windows / ARM64 | Yes | Yes, when Npcap is installed and loopback capture is enabled | Yes | No | ✅ | ✅ | ARM64 MSVC build with delay-loaded `wpcap.dll` |
 | `winload-windows-aarch64-msvc-no-npcap.exe` | Windows / ARM64 | No | No | No | No | ❌ | ❌ | ARM64 build without Npcap support |
-| `winload-windows-i686-msvc-no-npcap.exe` | Windows / i686 (32-bit) | No | No | No | No | ❌ | ❌ | 32-bit MSVC build without Npcap support |
-| `winload-windows-i686-mingw-no-npcap.exe` | Windows / i686 (32-bit) | No | No | No | No | ❌ | ❌ | 32-bit MinGW build without Npcap support |
 
 ### 補充說明
 

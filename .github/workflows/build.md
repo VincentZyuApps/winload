@@ -93,11 +93,8 @@ git commit -m "feat: add dark mode support"
 |----------|:---:|--------|-------|
 | Windows | x64 (MSVC, npcap) | `x86_64-pc-windows-msvc` | With Npcap capture support, built natively with MSVC, Windows 7+ |
 | Windows | x64 (MSVC, no-npcap) | `x86_64-pc-windows-msvc` | Standalone without Npcap (`--no-default-features`), MSVC, Windows 7+ |
-| Windows | x64 (MinGW, no-npcap) | `x86_64-pc-windows-gnu` | MinGW-w64 standalone, no Npcap, for legacy Windows XP/Vista/7+ |
 | Windows | ARM64 (MSVC, npcap) | `aarch64-pc-windows-msvc` | With Npcap capture, cross-compiled with MSVC, Windows 7+ (Snapdragon X/ Surface Pro X) |
 | Windows | ARM64 (MSVC, no-npcap) | `aarch64-pc-windows-msvc` | Standalone without Npcap (`--no-default-features`), MSVC, Windows 7+ |
-| Windows | x86 (MSVC, no-npcap) | `i686-pc-windows-msvc` | 32-bit standalone MSVC, no Npcap, Windows 7+ |
-| Windows | x86 (i686 MinGW, no-npcap) | `i686-pc-windows-gnu` | 32-bit MinGW-w64 standalone, no Npcap, for legacy Windows XP/Vista/7+ |
 | Linux | x64 | `x86_64-unknown-linux-musl` | Built on Ubuntu runner with musl static linking, mainly for all x64 Linux distros (most cloud servers) |
 | Linux | ARM64 | `aarch64-unknown-linux-gnu` | Cross-compiled on ubuntu-22.04 with gcc-aarch64, mainly for ARM64 servers / SBCs (RPi etc.) |
 | macOS | x64 | `x86_64-apple-darwin` | Built on Apple Silicon runner via Rosetta, mainly for Intel Macs (2020 and earlier) |

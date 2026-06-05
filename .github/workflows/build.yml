@@ -171,32 +171,6 @@ jobs:
             asset: winload-windows-x86_64-msvc-no-npcap.exe
             no_default_features: true
 
-          # ── Windows x86_64 (MinGW, no Npcap) ──
-          - target: x86_64-pc-windows-gnu
-            os: windows-latest
-            name: windows-x86_64-mingw-no-npcap
-            binary: winload.exe
-            asset: winload-windows-x86_64-mingw-no-npcap.exe
-            mingw: true
-            no_default_features: true
-
-          # ── Windows i686 (MSVC, without Npcap) ──
-          - target: i686-pc-windows-msvc
-            os: windows-latest
-            name: windows-i686-msvc-no-npcap
-            binary: winload.exe
-            asset: winload-windows-i686-msvc-no-npcap.exe
-            no_default_features: true
-
-          # ── Windows i686 (MinGW, no Npcap) ──
-          - target: i686-pc-windows-gnu
-            os: windows-latest
-            name: windows-i686-mingw-no-npcap
-            binary: winload.exe
-            asset: winload-windows-i686-mingw-no-npcap.exe
-            mingw: true
-            no_default_features: true
-
           # ── Linux x64 (musl 静态链接, 兼容所有 Linux) ──
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
@@ -273,36 +247,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-
-      - name: Install MinGW-w64
-        if: matrix.mingw
-        shell: pwsh
-        run: |
-          $arch = if ("${{ matrix.target }}" -like "*i686*") { "i686" } else { "x86_64" }
-          $eh = if ($arch -eq "i686") { "dwarf" } else { "seh" }
-          $url = "https://github.com/niXman/mingw-builds-binaries/releases/download/15.2.0-rt_v13-rev0/${arch}-15.2.0-release-posix-${eh}-ucrt-rt_v13-rev0.7z"
-          $out = "$env:RUNNER_TEMP\mingw.7z"
-          $extractDir = "$env:RUNNER_TEMP\mingw"
-
-          Write-Host "Downloading MinGW ${arch}..."
-          Invoke-WebRequest -Uri $url -OutFile $out
-
-          Write-Host "Extracting..."
-          7z x $out -o"$extractDir" -y | Out-Null
-
-          $mingwDir = (Get-ChildItem -Path $extractDir -Directory | Select-Object -First 1).FullName
-          $binPath = Join-Path $mingwDir "bin"
-          Write-Host "Adding to PATH: $binPath"
-          echo "$binPath" | Out-File -Append $env:GITHUB_PATH
-
-      - name: Configure MinGW linker
-        if: matrix.mingw
-        shell: pwsh
-        run: |
-          $arch = if ("${{ matrix.target }}" -like "*i686*") { "i686" } else { "x86_64" }
-          $upper = $arch.ToUpper()
-          echo "CARGO_TARGET_${upper}_PC_WINDOWS_GNU_LINKER=${arch}-w64-mingw32-gcc" >> $env:GITHUB_ENV
-          echo "CC_${arch}_pc_windows_gnu=${arch}-w64-mingw32-gcc" >> $env:GITHUB_ENV
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
@@ -404,16 +348,6 @@ jobs:
         if: runner.os == 'Linux' && !contains(matrix.target, 'android')
         run: |
           cargo install cargo-deb cargo-generate-rpm
-
-      - name: Set MinGW subsystem version
-        if: matrix.mingw
-        shell: bash
-        run: |
-          if [[ "${{ matrix.target }}" == *i686* ]]; then
-            echo "RUSTFLAGS=-C link-args=-Wl,--major-subsystem-version,5,--minor-subsystem-version,1" >> $GITHUB_ENV
-          else
-            echo "RUSTFLAGS=-C link-args=-Wl,--major-subsystem-version,5,--minor-subsystem-version,2" >> $GITHUB_ENV
-          fi
 
       - name: Build release binary
         if: matrix.target != 'i686-unknown-linux-musl' || !env.I686_MUSL_SKIP
