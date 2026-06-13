@@ -6,7 +6,7 @@ Supported languages: en-us, zh-cn, zh-tw
 _current_lang = "en-us"
 
 _STRINGS: dict[str, dict[str, str]] = {
-    # ── English (en-us) — English ──
+    # ── English (en-us) — English (US) ──
     "en-us": {
         # ── CLI help ──
         "description": "Network Load Monitor — nload-like TUI tool for Windows/Linux/macOS",

@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicU8, Ordering};
 /// Display language
 #[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
 pub enum Lang {
-    /// English (United States) — English
+    /// English (United States) — English (US)
     #[value(name = "en-us")]
     EnUs,
     /// Simplified Chinese (Mainland China) — 简体中文（大陆）
@@ -40,7 +40,7 @@ pub fn t(key: &str) -> &'static str {
     }
 }
 
-// ─── English (en-us) — English ────────────────────────────
+// ─── English (en-us) — English (US) ───────────────────────
 
 fn t_en_us(key: &str) -> &'static str {
     match key {
