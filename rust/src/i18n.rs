@@ -249,6 +249,8 @@ fn t_zh_cn(key: &str) -> &'static str {
 }
 
 // ─── Traditional Chinese (zh-tw) — 繁體中文（台灣）─────────
+
+fn t_zh_tw(key: &str) -> &'static str {
     match key {
         // -- CLI help --
         "description" => "網路負載監控工具 — 仿 Linux nload 的終端網路流量監控工具",
