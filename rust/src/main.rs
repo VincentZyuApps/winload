@@ -14,6 +14,8 @@ mod collector;
 mod graph;
 mod i18n;
 mod loopback;
+#[cfg(target_os = "android")]
+mod netlink;
 mod stats;
 mod ui;
 

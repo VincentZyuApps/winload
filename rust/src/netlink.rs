@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use libc;
 use crate::collector::{DeviceInfo, Snapshot};
 
-pub(super) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
+pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
     const RTM_GETLINK: u16 = 18;
     const RTM_NEWLINK: u16 = 16;
     const NLM_F_REQUEST: u16 = 1;
@@ -93,7 +93,7 @@ pub(super) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
     result
 }
 
-pub(super) fn netlink_devices() -> Vec<DeviceInfo> {
+pub(crate) fn netlink_devices() -> Vec<DeviceInfo> {
     use std::ffi::CStr;
 
     let mut map: HashMap<String, Vec<String>> = HashMap::new();

@@ -6,9 +6,6 @@ use sysinfo::Networks;
 use std::collections::HashMap;
 use std::time::Instant;
 
-#[cfg(target_os = "android")]
-mod netlink;
-
 /// 单次采样快照
 #[derive(Clone, Debug)]
 pub struct Snapshot {
@@ -65,7 +62,7 @@ impl Collector {
             println!("\n=== Network Interfaces Debug Info (netlink fallback) ===");
             println!("Note: /proc/net/dev and /sys/class/net/statistics are not accessible.");
             println!("Using netlink RTNETLINK + getifaddrs instead.\n");
-            let devs = netlink::netlink_devices();
+            let devs = crate::netlink::netlink_devices();
             println!("Total interfaces (via getifaddrs): {}\n", devs.len());
             for dev in &devs {
                 println!("Interface: {}", dev.name);
@@ -119,7 +116,7 @@ impl Collector {
     pub fn devices(&self) -> Vec<DeviceInfo> {
         #[cfg(target_os = "android")]
         if self.use_fallback {
-            return netlink::netlink_devices();
+            return crate::netlink::netlink_devices();
         }
 
         let mut devs: Vec<DeviceInfo> = self
@@ -165,7 +162,7 @@ impl Collector {
 
         #[cfg(target_os = "android")]
         if self.use_fallback {
-            return netlink::netlink_collect(elapsed);
+            return crate::netlink::netlink_collect(elapsed);
         }
 
         // refresh() 只刷新已有接口的数据，不重建列表，计数器不会丢失

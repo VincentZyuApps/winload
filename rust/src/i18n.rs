@@ -244,9 +244,11 @@ fn t_zh_cn(key: &str) -> &'static str {
         "network_label" => "网络",
         "netlink_fallback" => "netlink fallback",
         "sysinfo_default" => "sysinfo 默认",
-        _ => t_en_us(key), ───────────────────────────
+        _ => t_en_us(key),
+    }
+}
 
-fn t_zh_tw(key: &str) -> &'static str {
+// ─── Traditional Chinese (zh-tw)
     match key {
         // -- CLI help --
         "description" => "網路負載監控工具 — 仿 Linux nload 的終端網路流量監控工具",
