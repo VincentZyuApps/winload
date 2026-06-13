@@ -6,13 +6,13 @@ use std::sync::atomic::{AtomicU8, Ordering};
 /// Display language
 #[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
 pub enum Lang {
-    /// English (United States)
+    /// English (United States) — English
     #[value(name = "en-us")]
     EnUs,
-    /// 简体中文
+    /// Simplified Chinese (Mainland China) — 简体中文（大陆）
     #[value(name = "zh-cn")]
     ZhCn,
-    /// 繁體中文
+    /// Traditional Chinese (Taiwan) — 繁體中文（台灣）
     #[value(name = "zh-tw")]
     ZhTw,
 }
@@ -40,7 +40,7 @@ pub fn t(key: &str) -> &'static str {
     }
 }
 
-// ─── English (en-us) ───────────────────────────────────────
+// ─── English (en-us) — English ────────────────────────────
 
 fn t_en_us(key: &str) -> &'static str {
     match key {
@@ -144,7 +144,7 @@ fn t_en_us(key: &str) -> &'static str {
     }
 }
 
-// ─── Simplified Chinese (zh-cn) ────────────────────────────
+// ─── Simplified Chinese (zh-cn) — 简体中文（大陆）──────────
 
 fn t_zh_cn(key: &str) -> &'static str {
     match key {
@@ -248,7 +248,7 @@ fn t_zh_cn(key: &str) -> &'static str {
     }
 }
 
-// ─── Traditional Chinese (zh-tw)
+// ─── Traditional Chinese (zh-tw) — 繁體中文（台灣）─────────
     match key {
         // -- CLI help --
         "description" => "網路負載監控工具 — 仿 Linux nload 的終端網路流量監控工具",

@@ -6,6 +6,7 @@ Supported languages: en-us, zh-cn, zh-tw
 _current_lang = "en-us"
 
 _STRINGS: dict[str, dict[str, str]] = {
+    # ── English (en-us) — English ──
     "en-us": {
         # ── CLI help ──
         "description": "Network Load Monitor — nload-like TUI tool for Windows/Linux/macOS",
@@ -119,6 +120,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "arrow_up": "↑",
         "arrow_down": "↓",
     },
+    # ── Simplified Chinese (zh-cn) — 简体中文（大陆）──
     "zh-cn": {
         # ── CLI help ──
         "description": "网络负载监控工具 — 仿 Linux nload 的终端网络流量监控工具",
@@ -232,6 +234,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "arrow_up": "↑",
         "arrow_down": "↓",
     },
+    # ── Traditional Chinese (zh-tw) — 繁體中文（台灣）──
     "zh-tw": {
         # ── CLI help ──
         "description": "網路負載監控工具 — 仿 Linux nload 的終端網路流量監控工具",
