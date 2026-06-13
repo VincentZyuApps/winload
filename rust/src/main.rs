@@ -301,11 +301,27 @@ impl App {
             self.current_idx = (self.current_idx + self.views.len() - 1) % self.views.len();
         }
     }
+
+    fn exit_info(&self) -> String {
+        let pfx = if self.emoji { t("exit_platform_emoji") } else { t("exit_platform") };
+        #[cfg(target_os = "windows")]
+        {
+            let state = if self.loopback_mode == LoopbackMode::Npcap { t("on") } else { t("off") };
+            return format!("{pfx} Npcap: {state}");
+        }
+        #[cfg(target_os = "android")]
+        {
+            let mode = if self.collector.using_fallback() { t("netlink_fallback") } else { t("sysinfo_default") };
+            return format!("{pfx} {}: {mode}", t("network_label"));
+        }
+        #[allow(unreachable_code)]
+        String::new()
+    }
 }
 
 // ─── 主循环 ────────────────────────────────────────────────
 
-fn run(terminal: &mut ratatui::DefaultTerminal, args: Args) -> io::Result<()> {
+fn run(terminal: &mut ratatui::DefaultTerminal, args: Args) -> io::Result<String> {
     let mut app = App::new(&args);
 
     // 启动回环捕获 (如果指定了 --npcap 或 --etw)
@@ -348,12 +364,12 @@ fn run(terminal: &mut ratatui::DefaultTerminal, args: Args) -> io::Result<()> {
                 if key.kind == KeyEventKind::Press {
                     match key.code {
                         KeyCode::Char('q') | KeyCode::Char('Q') | KeyCode::Esc => {
-                            return Ok(());
+                            return Ok(app.exit_info());
                         }
                         KeyCode::Char('c')
                             if key.modifiers.contains(KeyModifiers::CONTROL) =>
                         {
-                            return Ok(());
+                            return Ok(app.exit_info());
                         }
                         KeyCode::Char('=') => {
                             app.hide_separator = !app.hide_separator;
@@ -385,11 +401,11 @@ fn run(terminal: &mut ratatui::DefaultTerminal, args: Args) -> io::Result<()> {
 
 // ─── 入口 ──────────────────────────────────────────────────
 
-fn print_system_info() {
-    eprintln!("\nSystem: {} | Arch: {} | Target: {}", 
-        std::env::consts::OS, 
-        std::env::consts::ARCH,
-        env!("TARGET"));
+fn print_system_info(extra: &str) {
+    eprint!("\nSystem: {} | Arch: {} | Target: {}",
+        std::env::consts::OS, std::env::consts::ARCH, env!("TARGET"));
+    if !extra.is_empty() { eprint!("\n\t{extra}"); }
+    eprintln!();
 }
 
 fn resolve_title(args: &Args) -> Option<String> {
@@ -495,6 +511,6 @@ fn main() -> io::Result<()> {
     let mut terminal = ratatui::init();
     let result = run(&mut terminal, args);
     ratatui::restore();
-    print_system_info();
-    result
+    print_system_info(result.as_deref().unwrap_or(""));
+    result.map(|_| ())
 }

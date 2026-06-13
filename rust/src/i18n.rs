@@ -134,6 +134,12 @@ fn t_en_us(key: &str) -> &'static str {
         "addr_none" => "(none)",
         "arrow_up" => "↑",
         "arrow_down" => "↓",
+        // -- exit info --
+        "exit_platform" => "[platform-specific]",
+        "exit_platform_emoji" => "[🖥️]",
+        "network_label" => "Network",
+        "netlink_fallback" => "netlink fallback",
+        "sysinfo_default" => "sysinfo default",
         _ => "",
     }
 }
@@ -232,11 +238,13 @@ fn t_zh_cn(key: &str) -> &'static str {
         "addr_none" => "（无）",
         "arrow_up" => "↑",
         "arrow_down" => "↓",
-        _ => t_en_us(key),
-    }
-}
-
-// ─── Traditional Chinese (zh-tw) ───────────────────────────
+        // -- exit info --
+        "exit_platform" => "[平台独有]",
+        "exit_platform_emoji" => "[🖥️]",
+        "network_label" => "网络",
+        "netlink_fallback" => "netlink fallback",
+        "sysinfo_default" => "sysinfo 默认",
+        _ => t_en_us(key), ───────────────────────────
 
 fn t_zh_tw(key: &str) -> &'static str {
     match key {
@@ -330,6 +338,12 @@ fn t_zh_tw(key: &str) -> &'static str {
         "addr_none" => "（無）",
         "arrow_up" => "↑",
         "arrow_down" => "↓",
+        // -- exit info --
+        "exit_platform" => "[平臺獨有]",
+        "exit_platform_emoji" => "[🖥️]",
+        "network_label" => "網路",
+        "netlink_fallback" => "netlink fallback",
+        "sysinfo_default" => "sysinfo 預設",
         _ => t_en_us(key),
     }
 }

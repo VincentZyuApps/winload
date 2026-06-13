@@ -55,6 +55,9 @@ impl Collector {
         self.start.elapsed().as_secs_f64()
     }
 
+    #[cfg(target_os = "android")]
+    pub fn using_fallback(&self) -> bool { self.use_fallback }
+
     /// 打印所有网络接口的调试信息
     pub fn print_debug_info(&self) {
         #[cfg(target_os = "android")]
