@@ -140,10 +140,13 @@ paru -S winload-rust-bin
 which winload
 ```
 
-### Linux (간편 설치 스크립트)
+### Debian & RedHat 계열 배포판 / Termux (간편 설치 스크립트)
 > Debian/Ubuntu 및 파생 버전(Linux Mint, Pop!_OS, Deepin, UOS 등) 지원 (apt)
 
 > Fedora/RHEL 및 파생 버전(Rocky Linux, AlmaLinux, CentOS Stream 등) 지원 (dnf)
+
+> Android의 Termux (aarch64)도 지원
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
 which winload

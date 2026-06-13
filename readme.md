@@ -140,10 +140,13 @@ paru -S winload-rust-bin
 which winload
 ```
 
-### Linux (one-liner)
+### Debian & RedHat Distros / Termux (one-liner)
 > Supports Debian/Ubuntu and derivatives — Linux Mint, Pop!_OS, Deepin, UOS, etc. (apt)
 
 > Supports Fedora/RHEL and derivatives — Rocky Linux, AlmaLinux, CentOS Stream, etc. (dnf)
+
+> Also supports Termux on Android (aarch64)
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
 which winload

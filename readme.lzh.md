@@ -140,10 +140,13 @@ paru -S winload-rust-bin
 which winload
 ```
 
-### Linux（一令而裝）
+### Debian & RedHat 系發行版 / Termux（一令而裝）
 > 支援 Debian/Ubuntu 及其下游 —— Linux Mint、Pop!_OS、Deepin、統信 UOS 等（apt）
 
 > 支援 Fedora/RHEL 及其下游 —— Rocky Linux、AlmaLinux、CentOS Stream 等（dnf）
+
+> 亦支援 Android 之 Termux（aarch64）
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
 which winload
