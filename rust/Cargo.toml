@@ -1,6 +1,6 @@
 [package]
 name = "winload"
-version = "0.1.9-rc.3"
+version = "0.1.9-rc.4"
 edition = "2021"
 description = "Network Load Monitor — nload-like TUI tool for Windows/Linux/macOS"
 license = "MIT"
@@ -16,6 +16,9 @@ crossterm = "0.28"
 sysinfo = "0.32"
 clap = { version = "4", features = ["derive"] }
 unicode-width = "0.2"
+
+[target.'cfg(target_os = "android")'.dependencies]
+libc = "0.2"
 
 [target.'cfg(windows)'.dependencies]
 pcap = { version = "2", optional = true }

@@ -1,9 +1,13 @@
 //! 网络流量数据采集模块
 //! 通过 sysinfo 采集各网卡的累计收发字节数，供上层统计和绘图使用。
+//! 当 sysinfo 返回空（如 Android SELinux 限制）时，回退到 netlink 直接采集。
 
 use sysinfo::Networks;
 use std::collections::HashMap;
 use std::time::Instant;
+
+#[cfg(target_os = "android")]
+mod netlink;
 
 /// 单次采样快照
 #[derive(Clone, Debug)]
@@ -29,13 +33,20 @@ pub struct DeviceInfo {
 pub struct Collector {
     networks: Networks,
     start: Instant,
+    #[cfg(target_os = "android")]
+    use_fallback: bool,
 }
 
 impl Collector {
     pub fn new() -> Self {
+        let networks = Networks::new_with_refreshed_list();
+        #[cfg(target_os = "android")]
+        let use_fallback = networks.is_empty();
         Self {
-            networks: Networks::new_with_refreshed_list(),
+            networks,
             start: Instant::now(),
+            #[cfg(target_os = "android")]
+            use_fallback,
         }
     }
 
@@ -46,6 +57,26 @@ impl Collector {
 
     /// 打印所有网络接口的调试信息
     pub fn print_debug_info(&self) {
+        #[cfg(target_os = "android")]
+        if self.use_fallback {
+            println!("\n=== Network Interfaces Debug Info (netlink fallback) ===");
+            println!("Note: /proc/net/dev and /sys/class/net/statistics are not accessible.");
+            println!("Using netlink RTNETLINK + getifaddrs instead.\n");
+            let devs = netlink::netlink_devices();
+            println!("Total interfaces (via getifaddrs): {}\n", devs.len());
+            for dev in &devs {
+                println!("Interface: {}", dev.name);
+                if !dev.addrs.is_empty() {
+                    println!("  IPv4: {}", dev.addrs.join(", "));
+                }
+            }
+            println!("\nFiltered devices (used in UI): {}", devs.len());
+            for dev in &devs {
+                println!("  - {} [{}]", dev.name, dev.addrs.join(", "));
+            }
+            return;
+        }
+
         println!("\n=== Network Interfaces Debug Info ===");
         println!("Total interfaces detected by sysinfo: {}\n", self.networks.len());
 
@@ -83,6 +114,11 @@ impl Collector {
 
     /// 获取所有可用设备信息（按名称排序）
     pub fn devices(&self) -> Vec<DeviceInfo> {
+        #[cfg(target_os = "android")]
+        if self.use_fallback {
+            return netlink::netlink_devices();
+        }
+
         let mut devs: Vec<DeviceInfo> = self
             .networks
             .iter()
@@ -122,9 +158,15 @@ impl Collector {
 
     /// 采集一次所有网卡的当前累计数据
     pub fn collect(&mut self) -> HashMap<String, Snapshot> {
+        let elapsed = self.start.elapsed().as_secs_f64();
+
+        #[cfg(target_os = "android")]
+        if self.use_fallback {
+            return netlink::netlink_collect(elapsed);
+        }
+
         // refresh() 只刷新已有接口的数据，不重建列表，计数器不会丢失
         self.networks.refresh();
-        let elapsed = self.start.elapsed().as_secs_f64();
 
         #[cfg(target_os = "windows")]
         let mut snapshots: HashMap<String, Snapshot> = self.networks
