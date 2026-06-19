@@ -207,6 +207,7 @@ winload --title "吾監" # 自訂頂標題
 winload --title ""   # 守預設裝置標題
 winload -e           # 啟 emoji 飾 🎉
 winload --npcap      # 捕 127.0.0.1 回環流（Windows，需 Npcap）
+winload --netlink    # 用 RTNETLINK（Linux/Android，Termux proot distro 等受限境）
 ```
 
 ### 參數
@@ -229,6 +230,7 @@ winload --npcap      # 捕 127.0.0.1 回環流（Windows，需 Npcap）
 | `--hide-separator` | 隱分隔線（等號一行） | 關 |
 | `--no-color` | 禁 TUI 色（單色） | 關 |
 | `--npcap` | **[Windows Rust Only]** 以 Npcap 捕回環流 | 關 |
+| `--netlink` | **[Linux/Android Rust Only]** 以 RTNETLINK 代 sysinfo（Termux proot distro 或受限境中用） | 關 |
 | `--debug-info` | 印網口除錯信息後退 | — |
 | `-h`, `--help` | 示助（`--help --emoji` 可得 emoji 版！） | — |
 | `-V`, `--version` | 示版號 | — |
@@ -255,7 +257,7 @@ winload --npcap      # 捕 127.0.0.1 回環流（Windows，需 Npcap）
 
 ## 🪟 Windows 回環流（127.0.0.1）
 
-Windows 不能以標準 API 報回環流——此 [Windows 網棧之缺](docs/win_loopback.zh-cn.md)。
+Windows 不能以標準 API 報回環流——此 [Windows 網棧之缺](docs/win_loopback.zh-tw.md)。
 
 **欲捕回環流於 Windows**，用 `--npcap` 參：
 
@@ -270,6 +272,16 @@ winload --npcap
 > 📖 欲知其詳，請閱 [docs/win_loopback.zh-cn.md](docs/win_loopback.zh-cn.md)
 
 Linux 及 macOS 上，回環流開箱即用，無需他參。
+
+在 **Linux/Android** 上，若 `/proc/net/dev` 不可讀（如 Termux proot distro 或其他受限之境），可以 `--netlink` 參，逕以 RTNETLINK 取網絡之數：
+
+```bash
+winload --netlink
+```
+
+> 註：`--netlink` 惟 **Linux/Android** 可用。macOS 無 netlink — 默以 sysinfo 代之。
+>
+> 📖 欲知其詳，請閱 [docs/linux_android_netlink.zh-tw.md](docs/linux_android_netlink.zh-tw.md)
 
 ## 🖼️ 一覽
 #### Python 本

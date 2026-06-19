@@ -207,6 +207,7 @@ winload --title "My Monitor" # Use a custom header title
 winload --title ""   # Keep the default device header
 winload -e           # Enable emoji decorations 🎉
 winload --npcap      # Capture 127.0.0.1 loopback traffic (Windows, requires Npcap)
+winload --netlink    # Use RTNETLINK on Linux/Android (Termux proot distro, etc.)
 ```
 
 ### Options
@@ -229,6 +230,7 @@ winload --npcap      # Capture 127.0.0.1 loopback traffic (Windows, requires Npc
 | `--hide-separator` | Hide the separator line (row of equals signs) | off |
 | `--no-color` | Disable all TUI colors (monochrome mode) | off |
 | `--npcap` | **[Windows Rust Only]** Capture loopback traffic via Npcap (recommended) | off |
+| `--netlink` | **[Linux/Android Rust Only]** Use RTNETLINK instead of sysinfo (for Termux proot distro or restricted environments) | off |
 | `--debug-info` | Print network interface debug info and exit | — |
 | `-h`, `--help` | Print help (`--help --emoji` for emoji version!) | — |
 | `-V`, `--version` | Print version | — |
@@ -270,6 +272,16 @@ This requires [Npcap](https://npcap.com/#download) installed with "Support loopb
 > 📖 For a deep dive into why Windows loopback is broken, see [docs/win_loopback.md](docs/win_loopback.md)
 
 On Linux and macOS, loopback traffic works out of the box — no extra flags needed.
+
+On **Linux/Android**, if `/proc/net/dev` is not accessible (e.g. inside a Termux proot distro or other restricted environments), use `--netlink` to collect network stats via RTNETLINK directly:
+
+```bash
+winload --netlink
+```
+
+> Note: `--netlink` is **Linux/Android only**. On macOS, netlink is not available — sysinfo is used by default.
+>
+> 📖 For a deep dive into Linux/Android network statistics collection, see [docs/linux_android_netlink.md](docs/linux_android_netlink.md)
 
 ## 🖼️ Previews
 #### Python Edition Preview

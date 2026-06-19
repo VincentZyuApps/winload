@@ -207,6 +207,7 @@ winload --title "My Monitor" # 사용자 지정 헤더 제목 사용
 winload --title ""   # 기본 장치 헤더 유지
 winload -e           # TUI에 이모지 장식 활성화 🎉
 winload --npcap      # 127.0.0.1 루프백 트래픽 캡처 (Windows, Npcap 필요)
+winload --netlink    # RTNETLINK 사용（Linux/Android, Termux proot distro 등 제한된 환경）
 ```
 
 ### 옵션 상세
@@ -229,6 +230,7 @@ winload --npcap      # 127.0.0.1 루프백 트래픽 캡처 (Windows, Npcap 필�
 | `--hide-separator` | 구분선(등호 행) 숨기기 | 비활성 |
 | `--no-color` | 모든 TUI 색상 비활성화 (흑백 모드) | 비활성 |
 | `--npcap` | **[Windows Rust Only]** Npcap을 통해 루프백 트래픽 캡처 | 비활성 |
+| `--netlink` | **[Linux/Android Rust Only]** sysinfo 대신 RTNETLINK 사용 (Termux proot distro 또는 제한된 환경용) | 비활성 |
 | `--debug-info` | 네트워크 인터페이스 디버그 정보 출력 후 종료 | — |
 | `-h`, `--help` | 도움말 출력 (`--help --emoji`로 이모지 버전 확인 가능!) | — |
 | `-V`, `--version` | 버전 정보 출력 | — |
@@ -270,6 +272,16 @@ winload --npcap
 > 📖 Windows 루프백 문제에 대한 기술적인 상세 내용은 [docs/win_loopback.md](docs/win_loopback.md)를 참조하십시오.
 
 Linux 및 macOS에서는 별도의 설정 없이 루프백 트래픽 모니터링이 기본적으로 작동합니다.
+
+**Linux/Android**에서 `/proc/net/dev`에 접근할 수 없는 경우（Termux proot distro 또는 기타 제한된 환경 등），`--netlink`를 사용하여 RTNETLINK를 통해 네트워크 통계를 직접 수집할 수 있습니다：
+
+```bash
+winload --netlink
+```
+
+> 참고：`--netlink`는 **Linux/Android 전용**입니다. macOS에서는 netlink를 사용할 수 없습니다 — 기본적으로 sysinfo가 사용됩니다.
+>
+> 📖 Linux/Android 네트워크 통계 수집 원리에 대한 자세한 내용은 [docs/linux_android_netlink.md](docs/linux_android_netlink.md)를 참조하십시오
 
 ## 🖼️ 미리보기
 #### Python 버전 미리보기

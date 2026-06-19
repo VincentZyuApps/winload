@@ -30,20 +30,25 @@ pub struct DeviceInfo {
 pub struct Collector {
     networks: Networks,
     start: Instant,
-    #[cfg(target_os = "android")]
-    use_fallback: bool,
+    /// 是否使用 netlink 替代 sysinfo（Linux/Android，需 --netlink 显式开启）
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    use_netlink: bool,
 }
 
 impl Collector {
-    pub fn new() -> Self {
+    /// Create a new Collector.
+    ///
+    /// On Linux/Android, if `use_netlink` is true, uses RTNETLINK directly
+    /// instead of sysinfo (useful when /proc/net/dev is inaccessible, e.g.
+    /// in Termux proot distro).
+    #[allow(unused_variables)]
+    pub fn new(use_netlink: bool) -> Self {
         let networks = Networks::new_with_refreshed_list();
-        #[cfg(target_os = "android")]
-        let use_fallback = networks.is_empty();
         Self {
             networks,
             start: Instant::now(),
-            #[cfg(target_os = "android")]
-            use_fallback,
+            #[cfg(any(target_os = "android", target_os = "linux"))]
+            use_netlink,
         }
     }
 
@@ -52,15 +57,15 @@ impl Collector {
         self.start.elapsed().as_secs_f64()
     }
 
-    #[cfg(target_os = "android")]
-    pub fn using_fallback(&self) -> bool { self.use_fallback }
+    #[cfg(any(target_os = "android", target_os = "linux"))]
+    pub fn using_netlink(&self) -> bool { self.use_netlink }
 
     /// 打印所有网络接口的调试信息
     pub fn print_debug_info(&self) {
-        #[cfg(target_os = "android")]
-        if self.use_fallback {
-            println!("\n=== Network Interfaces Debug Info (netlink fallback) ===");
-            println!("Note: /proc/net/dev and /sys/class/net/statistics are not accessible.");
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        if self.use_netlink {
+            println!("\n=== Network Interfaces Debug Info (netlink) ===");
+            println!("Note: /proc/net/dev and /sys/class/net/statistics not used.");
             println!("Using netlink RTNETLINK + getifaddrs instead.\n");
             let devs = crate::netlink::netlink_devices();
             println!("Total interfaces (via getifaddrs): {}\n", devs.len());
@@ -114,8 +119,8 @@ impl Collector {
 
     /// 获取所有可用设备信息（按名称排序）
     pub fn devices(&self) -> Vec<DeviceInfo> {
-        #[cfg(target_os = "android")]
-        if self.use_fallback {
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        if self.use_netlink {
             return crate::netlink::netlink_devices();
         }
 
@@ -160,8 +165,8 @@ impl Collector {
     pub fn collect(&mut self) -> HashMap<String, Snapshot> {
         let elapsed = self.start.elapsed().as_secs_f64();
 
-        #[cfg(target_os = "android")]
-        if self.use_fallback {
+        #[cfg(any(target_os = "android", target_os = "linux"))]
+        if self.use_netlink {
             return crate::netlink::netlink_collect(elapsed);
         }
 

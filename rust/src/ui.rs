@@ -520,12 +520,16 @@ fn draw_help(frame: &mut Frame, area: Rect, emoji: bool, bar_style: BarStyle, no
     let help_text = if emoji {
         #[cfg(target_os = "windows")]
         { t("help_bar_win_emoji") }
-        #[cfg(not(target_os = "windows"))]
+        #[cfg(target_os = "linux")]
+        { t("help_bar_linux_emoji") }
+        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
         { t("help_bar_emoji") }
     } else {
         #[cfg(target_os = "windows")]
         { t("help_bar_win") }
-        #[cfg(not(target_os = "windows"))]
+        #[cfg(target_os = "linux")]
+        { t("help_bar_linux") }
+        #[cfg(not(any(target_os = "windows", target_os = "linux")))]
         { t("help_bar") }
     };
 

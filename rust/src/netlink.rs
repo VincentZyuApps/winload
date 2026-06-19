@@ -1,6 +1,6 @@
-//! Android 网络接口枚举与流量统计模块
+//! Linux/Android 网络接口枚举与流量统计模块
 //!
-#![cfg(target_os = "android")]
+#![cfg(any(target_os = "android", target_os = "linux"))]
 //! 通过 RTNETLINK（RTM_GETLINK + IFLA_STATS64）获取各接口的 rx/tx 字节数，
 //! 通过 getifaddrs() 枚举接口名称和 IPv4 地址。
 //!

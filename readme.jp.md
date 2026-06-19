@@ -207,6 +207,7 @@ winload --title "My Monitor" # カスタムヘッダータイトルを使う
 winload --title ""   # 既定のデバイスヘッダーを使う
 winload -e           # 絵文字装飾を有効にする 🎉
 winload --npcap      # 127.0.0.1 ループバックトラフィックをキャプチャ (Windows, Npcapが必要)
+winload --netlink    # RTNETLINK を使用（Linux/Android、Termux proot distro 等の制限環境）
 ```
 
 ### オプション
@@ -229,6 +230,7 @@ winload --npcap      # 127.0.0.1 ループバックトラフィックをキャ�
 | `--hide-separator` | 区切り線（イコール記号の行）を非表示にする | オフ |
 | `--no-color` | すべてのTUIカラーを無効にする（モノクロモード） | オフ |
 | `--npcap` | **[Windows Rust Only]** Npcap経由でループバックをキャプチャ | オフ |
+| `--netlink` | **[Linux/Android Rust Only]** RTNETLINK を sysinfo の代わりに使用（Termux proot distro や制限された環境向け） | オフ |
 | `--debug-info` | インターフェースのデバッグ情報を表示して終了 | — |
 | `-h`, `--help` | ヘルプを表示 (`--help --emoji` で絵文字版ヘルプ！) | — |
 | `-V`, `--version` | バージョンを表示 | — |
@@ -270,6 +272,16 @@ winload --npcap
 > 📖 なぜWindowsのループバックが制限されているのかについての詳細は、[docs/win_loopback.md](docs/win_loopback.md) を参照してください。
 
 LinuxおよびmacOSでは、ループバックトラフィックは追加のフラグなしで標準で動作します。
+
+**Linux/Android** で `/proc/net/dev` にアクセスできない場合（Termux proot distro やその他の制限された環境など）、`--netlink` を使用して RTNETLINK 経由でネットワーク統計を直接収集できます：
+
+```bash
+winload --netlink
+```
+
+> 注：`--netlink` は **Linux/Android のみ** です。macOS では netlink は利用できません — デフォルトで sysinfo が使用されます。
+>
+> 📖 Linux/Android ネットワーク統計収集の詳細は、[docs/linux_android_netlink.md](docs/linux_android_netlink.md) を参照してください
 
 ## 🖼️ プレビュー
 #### Python版 プレビュー

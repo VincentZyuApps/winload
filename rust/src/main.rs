@@ -14,7 +14,7 @@ mod collector;
 mod graph;
 mod i18n;
 mod loopback;
-#[cfg(target_os = "android")]
+#[cfg(any(target_os = "android", target_os = "linux"))]
 mod netlink;
 mod stats;
 mod ui;
@@ -166,6 +166,12 @@ struct Args {
     #[arg(long = "npcap")]
     npcap: bool,
 
+    /// Use RTNETLINK instead of sysinfo for network stats [Linux/Android]
+    /// Useful in Termux proot distro or restricted environments
+    /// where /proc/net/dev is not accessible.
+    #[arg(long = "netlink")]
+    netlink: bool,
+
     /// Smart adaptive Y-axis max with exponential decay (half-life in seconds)
     #[arg(long = "smart-max", default_missing_value = "10", num_args = 0..=1, value_name = "SECS")]
     smart_max: Option<f64>,
@@ -211,7 +217,7 @@ pub struct App {
 
 impl App {
     fn new(args: &Args) -> Self {
-        let collector = Collector::new();
+        let collector = Collector::new(args.netlink);
         let devices = collector.devices();
 
         let views: Vec<DeviceView> = devices
@@ -311,9 +317,9 @@ impl App {
             let state = if self.loopback_mode == LoopbackMode::Npcap { t("on") } else { t("off") };
             return format!("{pfx} Npcap: {state}");
         }
-        #[cfg(target_os = "android")]
+        #[cfg(any(target_os = "android", target_os = "linux"))]
         {
-            let mode = if self.collector.using_fallback() { t("netlink_fallback") } else { t("sysinfo_default") };
+            let mode = if self.collector.using_netlink() { t("netlink_mode") } else { t("sysinfo_default") };
             return format!("{pfx} {}: {mode}", t("network_label"));
         }
         #[allow(unreachable_code)]
@@ -470,6 +476,7 @@ fn build_translated_command() -> clap::Command {
         .mut_arg("hide_separator", |a| a.help(t("help_hide_separator")))
         .mut_arg("no_color", |a| a.help(t("help_no_color")))
         .mut_arg("npcap", |a| a.help(t("help_npcap")))
+        .mut_arg("netlink", |a| a.help(t("help_netlink")))
         .mut_arg("smart_max", |a| a.help(t("help_smart_max")))
         .mut_arg("lang", |a| a.help(t("help_lang")))
 }
@@ -500,7 +507,7 @@ fn main() -> io::Result<()> {
 
     // 如果传入 --debug-info，打印接口信息后退出
     if args.debug_info {
-        let collector = Collector::new();
+        let collector = Collector::new(args.netlink);
         if args.emoji {
             println!("\n🔍🌐 Network Interfaces Debug Info 🖧✨");
         }

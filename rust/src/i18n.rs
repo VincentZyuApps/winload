@@ -62,6 +62,7 @@ fn t_en_us(key: &str) -> &'static str {
         "help_hide_separator" => "Hide separator line (the row of equals signs between header and panels)",
         "help_no_color" => "Disable all TUI colors (monochrome mode). Press 'c' to toggle at runtime",
         "help_npcap" => "[Windows only] Use Npcap to capture loopback traffic (recommended)\nRequires Npcap installed: https://npcap.com/#download",
+        "help_netlink" => "[Linux/Android only] Use RTNETLINK instead of sysinfo (useful in Termux proot distro or restricted environments without /proc/net/dev access)",
         "help_smart_max" => "[Rust only] Smart adaptive Y-axis max: decays after traffic spikes for a more dynamic graph (half-life in seconds, default: 10s)",
         "help_lang" => "Display language: en-us (default), zh-cn, zh-tw",
         // -- TUI --
@@ -85,6 +86,8 @@ fn t_en_us(key: &str) -> &'static str {
         "help_bar_emoji" => " ⬅️/➡️ Switch Device | 🔧 F3 Info | 🚪 q Quit",
         "help_bar_win" => " ←/→ Switch Device | F3 Info | q Quit | Loopback: --npcap",
         "help_bar_win_emoji" => " ⬅️/➡️ Switch Device | 🔧 F3 Info | 🚪 q Quit | 💡 Loopback: --npcap",
+        "help_bar_linux" => " ←/→ Switch Device | F3 Info | q Quit | Netlink: --netlink",
+        "help_bar_linux_emoji" => " ⬅️/➡️ Switch Device | 🔧 F3 Info | 🚪 q Quit | 🔗 Netlink: --netlink",
         "f3_help_bar" => " F3 Return | ←/→ Switch Device | q Quit",
         "f3_help_bar_emoji" => " 🔧 F3 Return | ⬅️/➡️ Switch | 🚪 q Quit",
         // F3 debug overlay
@@ -138,7 +141,7 @@ fn t_en_us(key: &str) -> &'static str {
         "exit_platform" => "[platform-specific]",
         "exit_platform_emoji" => "[🖥️]",
         "network_label" => "Network",
-        "netlink_fallback" => "netlink fallback",
+        "netlink_mode" => "netlink",
         "sysinfo_default" => "sysinfo default",
         _ => "",
     }
@@ -166,6 +169,7 @@ fn t_zh_cn(key: &str) -> &'static str {
         "help_hide_separator" => "隐藏分隔线（标题和面板之间的等号行）",
         "help_no_color" => "禁用所有 TUI 颜色（单色模式）。运行时按 'c' 切换",
         "help_npcap" => "[仅 Windows] 使用 Npcap 捕获回环流量（推荐）\n需要安装 Npcap：https://npcap.com/#download",
+        "help_netlink" => "[仅 Linux/Android] 使用 RTNETLINK 替代 sysinfo（在 Termux proot distro 或无法访问 /proc/net/dev 的环境中适用）",
         "help_smart_max" => "[仅 Rust] 智能自适应 Y 轴上限：流量尖峰后图形缩放自动回落，波形更生动（半衰期，秒，默认 10 秒）",
         "help_lang" => "显示语言：en-us（默认），zh-cn，zh-tw",
         // -- TUI --
@@ -189,6 +193,8 @@ fn t_zh_cn(key: &str) -> &'static str {
         "help_bar_emoji" => " ⬅️/➡️ 切换设备 | 🔧 F3 信息 | 🚪 q 退出",
         "help_bar_win" => " ←/→ 切换设备 | F3 信息 | q 退出 | 回环: --npcap",
         "help_bar_win_emoji" => " ⬅️/➡️ 切换设备 | 🔧 F3 信息 | 🚪 q 退出 | 💡 回环: --npcap",
+        "help_bar_linux" => " ←/→ 切换设备 | F3 信息 | q 退出 | Netlink: --netlink",
+        "help_bar_linux_emoji" => " ⬅️/➡️ 切换设备 | 🔧 F3 信息 | 🚪 q 退出 | 🔗 Netlink: --netlink",
         "f3_help_bar" => " F3 返回 | ←/→ 切换设备 | q 退出",
         "f3_help_bar_emoji" => " 🔧 F3 返回 | ⬅️/➡️ 切换 | 🚪 q 退出",
         // F3 debug overlay
@@ -242,7 +248,7 @@ fn t_zh_cn(key: &str) -> &'static str {
         "exit_platform" => "[平台独有]",
         "exit_platform_emoji" => "[🖥️]",
         "network_label" => "网络",
-        "netlink_fallback" => "netlink fallback",
+        "netlink_mode" => "netlink",
         "sysinfo_default" => "sysinfo 默认",
         _ => t_en_us(key),
     }
@@ -270,6 +276,7 @@ fn t_zh_tw(key: &str) -> &'static str {
         "help_hide_separator" => "隱藏分隔線（標題和面板之間的等號行）",
         "help_no_color" => "停用所有 TUI 顏色（單色模式）。執行時按 'c' 切換",
         "help_npcap" => "[僅 Windows] 使用 Npcap 擷取回環流量（建議）\n需要安裝 Npcap：https://npcap.com/#download",
+        "help_netlink" => "[僅 Linux/Android] 使用 RTNETLINK 替代 sysinfo（在 Termux proot distro 或無法存取 /proc/net/dev 的環境中適用）",
         "help_smart_max" => "[僅 Rust] 智慧自適應 Y 軸上限：流量尖峰後圖形縮放自動回落，波形更生動（半衰期，秒，預設 10 秒）",
         "help_lang" => "顯示語言：en-us（預設），zh-cn，zh-tw",
         // -- TUI --
@@ -293,6 +300,8 @@ fn t_zh_tw(key: &str) -> &'static str {
         "help_bar_emoji" => " ⬅️/➡️ 切換裝置 | 🔧 F3 資訊 | 🚪 q 退出",
         "help_bar_win" => " ←/→ 切換裝置 | F3 資訊 | q 退出 | 回環: --npcap",
         "help_bar_win_emoji" => " ⬅️/➡️ 切換裝置 | 🔧 F3 資訊 | 🚪 q 退出 | 💡 回環: --npcap",
+        "help_bar_linux" => " ←/→ 切換裝置 | F3 資訊 | q 退出 | Netlink: --netlink",
+        "help_bar_linux_emoji" => " ⬅️/➡️ 切換裝置 | 🔧 F3 資訊 | 🚪 q 退出 | 🔗 Netlink: --netlink",
         "f3_help_bar" => " F3 返回 | ←/→ 切換裝置 | q 退出",
         "f3_help_bar_emoji" => " 🔧 F3 返回 | ⬅️/➡️ 切換 | 🚪 q 退出",
         // F3 debug overlay
@@ -346,7 +355,7 @@ fn t_zh_tw(key: &str) -> &'static str {
         "exit_platform" => "[平臺獨有]",
         "exit_platform_emoji" => "[🖥️]",
         "network_label" => "網路",
-        "netlink_fallback" => "netlink fallback",
+        "netlink_mode" => "netlink",
         "sysinfo_default" => "sysinfo 預設",
         _ => t_en_us(key),
     }

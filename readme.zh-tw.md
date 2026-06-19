@@ -207,6 +207,7 @@ winload --title "我的監視器" # 使用自訂頂部標題
 winload --title ""   # 保持預設裝置標題
 winload -e           # 啟用 emoji 裝飾 🎉
 winload --npcap      # 擷取 127.0.0.1 回環流量 (Windows，需安裝 Npcap)
+winload --netlink    # 使用 RTNETLINK（Linux/Android，Termux proot distro 等受限環境）
 ```
 
 ### 參數選項
@@ -229,6 +230,7 @@ winload --npcap      # 擷取 127.0.0.1 回環流量 (Windows，需安裝 Npcap)
 | `--hide-separator` | 隱藏分隔線（等號一行） | 關閉 |
 | `--no-color` | 停用所有 TUI 顏色（單色模式） | 關閉 |
 | `--npcap` | **[Windows Rust Only]** 透過 Npcap 擷取回環流量（建議） | 關閉 |
+| `--netlink` | **[Linux/Android Rust Only]** 使用 RTNETLINK 替代 sysinfo（在 Termux proot distro 或受限環境中適用） | 關閉 |
 | `--debug-info` | 列印網路介面除錯資訊後退出 | — |
 | `-h`, `--help` | 列印說明（`--help --emoji` 可查看 emoji 版！） | — |
 | `-V`, `--version` | 列印版本號 | — |
@@ -270,6 +272,16 @@ winload --npcap
 > 📖 深入了解 Windows 回環為何失效，請閱讀 [docs/win_loopback.zh-tw.md](docs/win_loopback.zh-tw.md)
 
 在 Linux 和 macOS 上，回環流量開箱即用，無需額外參數。
+
+在 **Linux/Android** 上，如果無法存取 `/proc/net/dev`（例如在 Termux proot distro 或其他受限環境中），可使用 `--netlink` 透過 RTNETLINK 直接收集網路統計資訊：
+
+```bash
+winload --netlink
+```
+
+> 注意：`--netlink` 僅適用於 **Linux/Android**。macOS 不支援 netlink — 預設使用 sysinfo。
+>
+> 📖 深入了解 Linux/Android 網路統計採集原理，請閱讀 [docs/linux_android_netlink.zh-tw.md](docs/linux_android_netlink.zh-tw.md)
 
 ## 🖼️ 預覽
 #### Python 版預覽
