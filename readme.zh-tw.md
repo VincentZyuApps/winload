@@ -61,8 +61,9 @@ git clone https://github.com/VincentZyuApps/winload.git
 # 或從 Gitee 克隆（中國大陸更快）：
 # git clone https://gitee.com/vincent-zyu/winload.git
 cd winload/python
-pip install -r requirements.txt
-python main.py
+uv venv --python 3.13
+uv pip install -r requirements.txt
+uv run python main.py
 ```
 
 ### Rust
