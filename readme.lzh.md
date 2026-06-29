@@ -207,7 +207,7 @@ winload --title "吾監" # 自訂頂標題
 winload --title ""   # 守預設裝置標題
 winload -e           # 啟 emoji 飾 🎉
 winload --npcap      # 捕 127.0.0.1 回環流（Windows，需 Npcap）
-winload --netlink    # 用 RTNETLINK（Linux/Android，Termux proot distro 等受限境）
+winload --netlink    # 手啟 RTNETLINK（Linux/Android Rust 版，默關）
 ```
 
 ### 參數
@@ -273,13 +273,13 @@ winload --npcap
 
 Linux 及 macOS 上，回環流開箱即用，無需他參。
 
-在 **Linux/Android** 上，若 `/proc/net/dev` 不可讀（如 Termux proot distro 或其他受限之境），可以 `--netlink` 參，逕以 RTNETLINK 取網絡之數：
+在 **Linux/Android** 上，若 `/proc/net/dev` 不可讀（如 Termux proot distro 或其他受限之境），Rust 版可以 `--netlink` 參，逕以 RTNETLINK 取網絡之數：
 
 ```bash
 winload --netlink
 ```
 
-> 註：`--netlink` 惟 **Linux/Android** 可用。macOS 無 netlink — 默以 sysinfo 代之。
+> 註：`--netlink` 如 `--npcap`，乃手啟之可選後端，默不啟；常規 Linux/Android 仍默以 sysinfo。此參惟 **Linux/Android Rust 版** 可用；Python 版暫無 `--netlink`，仍用 psutil。macOS 無 netlink。
 >
 > 📖 欲知其詳，請閱 [docs/linux_android_netlink.zh-tw.md](docs/linux_android_netlink.zh-tw.md)
 
@@ -321,4 +321,3 @@ winload --netlink
 ## 🧭 結語
 
 夫網流無形，而 Winload 使之有象；包行於終端，聲息不驚，卻能令千端萬緒之吞吐，盡呈目前。若欲知一機之網脈，是器可為案上小燈，亦可為夜航之星。
-

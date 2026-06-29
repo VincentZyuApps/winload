@@ -659,7 +659,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add bucket/winload.json
-          git commit -m "🍺 Update winload to ${VERSION}" || echo "No changes to commit"
+          git commit -m "ci: 🍨 Update winload to ${VERSION}" || echo "No changes to commit"
           git push
 
           echo "✅ Scoop bucket updated!"
@@ -756,7 +756,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add bucket/winload.json
-          git commit -m "🍺 Update winload to ${VERSION}" || echo "No changes to commit"
+          git commit -m "ci: 🍨 Update winload to ${VERSION}" || echo "No changes to commit"
           git push
 
           echo "✅ Gitee Scoop bucket updated!"
@@ -862,7 +862,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/winload.rb
-          git commit -m "🍺 Update winload to ${VERSION}" || echo "No changes to commit"
+          git commit -m "ci: 🍺 Update winload to ${VERSION}" || echo "No changes to commit"
           git push
 
           echo "✅ Homebrew tap updated!"
@@ -966,7 +966,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/winload.rb
-          git commit -m "🍺 Update winload to ${VERSION}" || echo "No changes to commit"
+          git commit -m "ci: 🍺 Update winload to ${VERSION}" || echo "No changes to commit"
           git push
 
           echo "✅ Gitee Homebrew tap updated!"
@@ -1081,7 +1081,7 @@ jobs:
           git config user.name "VincentZyu"
           git config user.email "vincentzyu233@gmail.com"
           git add PKGBUILD .SRCINFO
-          git commit -m "Update to ${PKGVER}" || echo "No changes to commit"
+          git commit -m "ci: 🔼 Update to ${PKGVER}" || echo "No changes to commit"
           git push
 
           echo "✅ winload-rust-bin updated!"

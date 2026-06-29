@@ -207,7 +207,7 @@ winload --title "My Monitor" # カスタムヘッダータイトルを使う
 winload --title ""   # 既定のデバイスヘッダーを使う
 winload -e           # 絵文字装飾を有効にする 🎉
 winload --npcap      # 127.0.0.1 ループバックトラフィックをキャプチャ (Windows, Npcapが必要)
-winload --netlink    # RTNETLINK を使用（Linux/Android、Termux proot distro 等の制限環境）
+winload --netlink    # RTNETLINK を手動で有効化（Linux/Android Rust 版、既定はオフ）
 ```
 
 ### オプション
@@ -273,13 +273,13 @@ winload --npcap
 
 LinuxおよびmacOSでは、ループバックトラフィックは追加のフラグなしで標準で動作します。
 
-**Linux/Android** で `/proc/net/dev` にアクセスできない場合（Termux proot distro やその他の制限された環境など）、`--netlink` を使用して RTNETLINK 経由でネットワーク統計を直接収集できます：
+**Linux/Android** で `/proc/net/dev` にアクセスできない場合（Termux proot distro やその他の制限された環境など）、Rust 版では `--netlink` を使用して RTNETLINK 経由でネットワーク統計を直接収集できます：
 
 ```bash
 winload --netlink
 ```
 
-> 注：`--netlink` は **Linux/Android のみ** です。macOS では netlink は利用できません — デフォルトで sysinfo が使用されます。
+> 注：`--netlink` は `--npcap` と同じく**手動で有効化する任意のバックエンド**で、フラグを渡さない限り有効になりません。通常の Linux/Android では既定で sysinfo を使用します。このフラグは **Linux/Android Rust 版のみ**です。Python 版は `--netlink` をサポートせず、引き続き psutil を使用します。macOS では netlink は利用できません。
 >
 > 📖 Linux/Android ネットワーク統計収集の詳細は、[docs/linux_android_netlink.md](docs/linux_android_netlink.md) を参照してください
 

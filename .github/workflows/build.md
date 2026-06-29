@@ -231,7 +231,7 @@ flowchart TB
     SR1 --> SR2 --> SR3
 ```
 
-## 🍺 Scoop Publish (Rust)
+## 🍨 Scoop Publish (Rust)
 
 The `publish` keyword triggers an update to the [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) repository:
 

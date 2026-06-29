@@ -231,7 +231,7 @@ flowchart TB
     SR1 --> SR2 --> SR3
 ```
 
-## 🍺 Scoop 发布 (Rust)
+## 🍨 Scoop 发布 (Rust)
 
 `publish` 关键词会触发 [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) 仓库的更新：
 

@@ -207,7 +207,7 @@ winload --title "我的监视器" # 使用自定义顶部标题
 winload --title ""   # 保持默认设备标题
 winload -e           # 启用 emoji 装饰 🎉
 winload --npcap      # 捕获 127.0.0.1 回环流量 (Windows，需安装 Npcap)
-winload --netlink    # 使用 RTNETLINK（Linux/Android，Termux proot distro 等受限环境）
+winload --netlink    # 手动启用 RTNETLINK（Linux/Android Rust 版，默认关闭）
 ```
 
 ### 参数选项
@@ -273,13 +273,13 @@ winload --npcap
 
 在 Linux 和 macOS 上，回环流量开箱即用，无需额外参数。
 
-在 **Linux/Android** 上，如果无法访问 `/proc/net/dev`（例如在 Termux proot distro 或其他受限环境中），可使用 `--netlink` 通过 RTNETLINK 直接收集网络统计信息：
+在 **Linux/Android** 上，如果无法访问 `/proc/net/dev`（例如在 Termux proot distro 或其他受限环境中），Rust 版可使用 `--netlink` 通过 RTNETLINK 直接收集网络统计信息：
 
 ```bash
 winload --netlink
 ```
 
-> 注意：`--netlink` 仅适用于 **Linux/Android**。macOS 不支持 netlink — 默认使用 sysinfo。
+> 注意：`--netlink` 和 `--npcap` 一样是**手动启用的可选后端**，默认不会启用；普通 Linux/Android 仍默认使用 sysinfo。该参数仅适用于 **Linux/Android Rust 版**；Python 版暂不支持 `--netlink`，仍使用 psutil。macOS 不支持 netlink。
 >
 > 📖 深入了解 Linux/Android 网络统计采集原理，请阅读 [docs/linux_android_netlink.zh-cn.md](docs/linux_android_netlink.zh-cn.md)
 

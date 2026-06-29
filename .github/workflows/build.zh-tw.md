@@ -231,7 +231,7 @@ flowchart TB
     SR1 --> SR2 --> SR3
 ```
 
-## 🍺 Scoop 發佈 (Rust)
+## 🍨 Scoop 發佈 (Rust)
 
 `publish` 關鍵字會觸發 [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) 儲存庫的更新：
 
