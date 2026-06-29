@@ -202,10 +202,11 @@ which winload
 winload              # 監所有活網口
 winload -t 200       # 置刷新間隔 200ms
 winload -d "Wi-Fi"   # 啟時徑定 Wi-Fi 網卡
-winload --title      # 頂標題示 "winload <版號>"
 winload --title "吾監" # 自訂頂標題
-winload --title ""   # 守預設裝置標題
 winload -e           # 啟 emoji 飾 🎉
+winload --max-mode smart --max-half-life 10 # 智適 Y 軸（默）
+winload --max-mode legacy # nload 舊式，以可見歷史峰值縮放
+winload --max-mode fixed --max-y-value 10M # 固 Y 軸上限
 winload --npcap      # 捕 127.0.0.1 回環流（Windows，需 Npcap）
 winload --netlink    # 手啟 RTNETLINK（Linux/Android Rust 版，默關）
 ```
@@ -224,8 +225,9 @@ winload --netlink    # 手啟 RTNETLINK（Linux/Android Rust 版，默關）
 | `-b`, `--bar-style <STYLE>` | 條樣式：`fill`、`color` 或 `plain` | `fill` |
 | `--in-color <HEX>` | 入图形色，十六進 RGB（如 `0x00d7ff`） | 青 |
 | `--out-color <HEX>` | 出图形色，十六進 RGB（如 `0xffaf00`） | 金 |
-| `-m`, `--max <VALUE>` | 固 Y 軸極值（如 `10M`、`1G`、`500K`）—— *與 `--smart-max` 相剋* | 自動 |
-| `--smart-max [SECS]` | 智適 Y 軸：尖峰後自回落（半衰期，秒，預設 10s）—— *與 `--max` 相剋* | 關 |
+| `--max-mode <MODE>` | Y 軸縮放模式：`smart`、`legacy`、`fixed` | `smart` |
+| `--max-half-life <SECS>` | smart 模式指數衰減半衰期 | `10` |
+| `--max-y-value <VALUE>` | fixed 模式固定 Y 軸上限（如 `10M`、`1G`、`500K`） | — |
 | `-n`, `--no-graph` | 隱圖，僅示統計 | 關 |
 | `--hide-separator` | 隱分隔線（等號一行） | 關 |
 | `--no-color` | 禁 TUI 色（單色） | 關 |
@@ -235,15 +237,15 @@ winload --netlink    # 手啟 RTNETLINK（Linux/Android Rust 版，默關）
 | `-h`, `--help` | 示助（`--help --emoji` 可得 emoji 版！） | — |
 | `-V`, `--version` | 示版號 | — |
 
-> **Y 軸縮放模式** —— 以下三者互斥：
+> **Y 軸縮放模式**
 >
 > | 模式 | 參數 | 行為 |
 > |------|------|------|
-> | **固定極值** | `--max <VALUE>` | Y 軸鎖定為指定值（如 `10M`、`1G`）。 |
-> | **智適極值** | `--smart-max [SECS]` | Y 軸自適：突增即升，隨後平滑衰減（指數衰減，預設半衰期 10 秒）。 |
-> | **歷史峰值** | *（皆不加）* | Y 軸隨各指標之歷史最大值 —— 預設行止。 |
+> | **smart** | `--max-mode smart --max-half-life 10` | 默認。流突增則升，後以指數平滑回落。 |
+> | **legacy** | `--max-mode legacy` | nload 舊式，依可見圖形窗口峰值自縮放。 |
+> | **fixed** | `--max-mode fixed --max-y-value 10M` | Y 軸鎖定為指定值。 |
 >
-> ⚠️ `--max` 與 `--smart-max` **相剋** —— 二者不可並用。
+> `--max-y-value` 惟 `--max-mode fixed` 可用；`--max-half-life` 惟 `--max-mode smart` 可用。
 
 ### 捷鍵
 

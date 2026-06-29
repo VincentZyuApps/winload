@@ -131,8 +131,14 @@ def parse_max_value(s: str) -> float:
     }
     for suffix, mul in multipliers.items():
         if s.endswith(suffix):
-            return float(s[:-1]) * mul
-    return float(s)
+            value = float(s[:-1]) * mul
+            if value <= 0:
+                raise ValueError("value must be greater than 0")
+            return value
+    value = float(s)
+    if value <= 0:
+        raise ValueError("value must be greater than 0")
+    return value
 
 
 def parse_hex_color(s: str):
@@ -222,23 +228,27 @@ def parse_args() -> argparse.Namespace:
         default="bit",
         help=t("help_unit"),
     )
-    max_group = parser.add_mutually_exclusive_group()
-    max_group.add_argument(
-        "-m",
-        "--max",
+    parser.add_argument(
+        "--max-mode",
+        type=str,
+        choices=["smart", "legacy", "fixed"],
+        default="smart",
+        metavar="MODE",
+        help=t("help_max_mode"),
+    )
+    parser.add_argument(
+        "--max-half-life",
+        type=float,
+        default=10.0,
+        metavar="SECS",
+        help=t("help_max_half_life"),
+    )
+    parser.add_argument(
+        "--max-y-value",
         type=str,
         default=None,
         metavar="VALUE",
-        help=t("help_max"),
-    )
-    max_group.add_argument(
-        "--smart-max",
-        type=float,
-        nargs="?",
-        const=10.0,
-        default=None,
-        metavar="SECS",
-        help=t("help_smart_max"),
+        help=t("help_max_y_value"),
     )
     parser.add_argument(
         "-n",
@@ -309,7 +319,27 @@ def parse_args() -> argparse.Namespace:
         metavar="LANG",
         help=t("help_lang"),
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.max_half_life <= 0:
+        parser.error("--max-half-life must be greater than 0")
+    if args.max_mode == "fixed":
+        if args.max_y_value is None:
+            parser.error("--max-mode fixed requires --max-y-value <VALUE>")
+        try:
+            args.max_y_value = parse_max_value(args.max_y_value)
+        except (ValueError, IndexError) as e:
+            parser.error(f"invalid --max-y-value: {e}")
+        raw_args = sys.argv[1:]
+        if any(a == "--max-half-life" or a.startswith("--max-half-life=") for a in raw_args):
+            parser.error("--max-half-life can only be used with --max-mode smart")
+    else:
+        if args.max_y_value is not None:
+            parser.error("--max-y-value can only be used with --max-mode fixed")
+        if args.max_mode == "legacy":
+            raw_args = sys.argv[1:]
+            if any(a == "--max-half-life" or a.startswith("--max-half-life=") for a in raw_args):
+                parser.error("--max-half-life can only be used with --max-mode smart")
+    return args
 
 
 def resolve_title(raw_title: str | None) -> str | None:
@@ -324,14 +354,6 @@ def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
     """curses 主循环"""
     collector = Collector()
 
-    # 解析 --max 参数
-    fixed_max = None
-    if args.max:
-        try:
-            fixed_max = parse_max_value(args.max)
-        except (ValueError, IndexError):
-            pass
-
     ui = UI(
         stdscr,
         collector,
@@ -339,7 +361,9 @@ def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
         title_align=args.title_align,
         emoji=args.emoji,
         unit=args.unit,
-        fixed_max=fixed_max,
+        max_mode=args.max_mode,
+        max_half_life=args.max_half_life,
+        max_y_value=args.max_y_value,
         no_graph=args.no_graph,
         unicode=args.unicode,
         bar_style=args.bar_style,
@@ -347,7 +371,6 @@ def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
         out_color=args.out_color,
         hide_separator=args.hide_separator,
         no_color=args.no_color,
-        smart_max_half_life=args.smart_max,
         interval=args.interval,
         average=args.average,
     )

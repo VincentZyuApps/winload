@@ -47,11 +47,13 @@ class UI:
                  title: Optional[str] = None,
                  title_align: str = "center",
                  emoji: bool = False, unit: str = "bit",
-                 fixed_max: Optional[float] = None, no_graph: bool = False,
+                 max_mode: str = "smart",
+                 max_half_life: float = 10.0,
+                 max_y_value: Optional[float] = None,
+                 no_graph: bool = False,
                  unicode: bool = False, bar_style: str = "fill",
                  in_color: Optional[tuple] = None, out_color: Optional[tuple] = None,
                  hide_separator: bool = False, no_color: bool = False,
-                 smart_max_half_life: Optional[float] = None,
                  interval: int = 500, average: int = 300):
         self.stdscr = stdscr
         self.collector = collector
@@ -61,7 +63,9 @@ class UI:
         self.title_align = title_align
         self.emoji = emoji
         self.unit = unit
-        self.fixed_max = fixed_max
+        self.max_mode = max_mode
+        self.max_half_life = max_half_life
+        self.max_y_value = max_y_value
         self.no_graph = no_graph
         self.unicode = unicode
         self.bar_style = bar_style
@@ -69,7 +73,7 @@ class UI:
         self.out_color_rgb = out_color
         self.hide_separator = hide_separator
         self.no_color = no_color
-        self.smart_max_half_life = smart_max_half_life
+        self.smart_max_half_life = max_half_life if max_mode == "smart" else None
         self.interval = interval
         self.average = average
         self.show_debug = False
@@ -247,8 +251,6 @@ class UI:
 
         # ── Incoming 面板 ──
         in_label = t("incoming_emoji") if self.emoji else t("incoming")
-        smart_in = view.engine.incoming_smooth_peak if self.smart_max_half_life is not None else None
-        smart_in_rising = view.engine.incoming_smooth_peak_rising if self.smart_max_half_life is not None else None
         self._draw_panel(
             start_row=row,
             max_x=max_x,
@@ -257,15 +259,13 @@ class UI:
             stats=view.engine.incoming,
             history=view.engine.incoming_history,
             is_incoming=True,
-            smart_max_peak=smart_in,
-            smart_max_rising=smart_in_rising,
+            smart_max_peak=view.engine.incoming_smooth_peak,
+            smart_max_rising=view.engine.incoming_smooth_peak_rising,
         )
         row += panel_height
 
         # ── Outgoing 面板 ──
         out_label = t("outgoing_emoji") if self.emoji else t("outgoing")
-        smart_out = view.engine.outgoing_smooth_peak if self.smart_max_half_life is not None else None
-        smart_out_rising = view.engine.outgoing_smooth_peak_rising if self.smart_max_half_life is not None else None
         self._draw_panel(
             start_row=row,
             max_x=max_x,
@@ -274,8 +274,8 @@ class UI:
             stats=view.engine.outgoing,
             history=view.engine.outgoing_history,
             is_incoming=False,
-            smart_max_peak=smart_out,
-            smart_max_rising=smart_out_rising,
+            smart_max_peak=view.engine.outgoing_smooth_peak,
+            smart_max_rising=view.engine.outgoing_smooth_peak_rising,
         )
         row += panel_height
 
@@ -304,8 +304,8 @@ class UI:
         stats: TrafficStats,
         history,
         is_incoming: bool = True,
-        smart_max_peak: Optional[float] = None,
-        smart_max_rising: Optional[bool] = None,
+        smart_max_peak: float = 0.0,
+        smart_max_rising: bool = False,
     ) -> None:
         """绘制一个流量面板（图形 + 统计）"""
         # 选择颜色
@@ -316,10 +316,10 @@ class UI:
         stat_lines = self._format_stats(stats)
         stat_width = max(len(s) for s in stat_lines) + 2 if stat_lines else 20
 
-        # 确定缩放上限 (优先级: fixed_max > smart_max > history peak)
-        if self.fixed_max is not None:
-            scale_max = self.fixed_max
-        elif smart_max_peak is not None:
+        # 确定缩放上限
+        if self.max_mode == "fixed":
+            scale_max = self.max_y_value or next_power_of_2_scaled(max(history) if history else 0.0)
+        elif self.max_mode == "smart":
             scale_max = next_power_of_2_scaled(smart_max_peak)
         else:
             peak = max(history) if history else 0.0
@@ -328,15 +328,13 @@ class UI:
         # 标签行
         scale_label = get_graph_scale_label_unit(scale_max, self.unit)
         mode_tag = ""
-        if self.fixed_max is not None:
-            mode_tag = f" [{t('tag_fixed')}: {format_speed_unit(self.fixed_max, self.unit)}]"
-        elif self.smart_max_half_life is not None:
-            arrow = ""
-            if smart_max_rising is True:
-                arrow = f" {t('arrow_up')}"
-            elif smart_max_rising is False:
-                arrow = f" {t('arrow_down')}"
-            mode_tag = f" [{t('tag_smart_max')} {self.smart_max_half_life}s]{arrow}"
+        if self.max_mode == "fixed":
+            mode_tag = f" [{t('tag_fixed')}: {format_speed_unit(self.max_y_value or scale_max, self.unit)}]"
+        elif self.max_mode == "smart":
+            arrow = t("arrow_up") if smart_max_rising else t("arrow_down")
+            mode_tag = f" [{t('tag_smart_max')} {self.max_half_life}s] {arrow}"
+        else:
+            mode_tag = f" [{t('tag_legacy')}]"
         label_text = f"{label} ({scale_label}){mode_tag}:"
         label_attr = self._color(self._get_bar_attr(label_color, bold=True))
         if self.bar_style == "fill":
@@ -558,16 +556,16 @@ class UI:
 
         # Y-axis Scaling
         row = section(row, t("debug_section_yaxis"))
-        if self.fixed_max is not None:
-            mode_str = t("yaxis_fixed").format(val=format_speed_unit(self.fixed_max, self.unit))
-        elif self.smart_max_half_life is not None:
-            mode_str = t("yaxis_smart").format(sec=self.smart_max_half_life)
+        if self.max_mode == "fixed":
+            mode_str = t("yaxis_fixed").format(val=format_speed_unit(self.max_y_value or 0.0, self.unit))
+        elif self.max_mode == "smart":
+            mode_str = t("yaxis_smart").format(sec=self.max_half_life)
         else:
-            mode_str = t("yaxis_auto")
+            mode_str = t("yaxis_legacy")
         row = kv(row, t("debug_yaxis_mode"), mode_str)
 
         view = self.current_view
-        if self.smart_max_half_life is not None:
+        if self.max_mode == "smart":
             row = kv(row, t("debug_in_smooth"), format_speed_unit(
                 view.engine.incoming_smooth_peak, self.unit))
             row = kv(row, t("debug_out_smooth"), format_speed_unit(

@@ -202,10 +202,11 @@ which winload
 winload              # Monitor all active network interfaces
 winload -t 200       # Set refresh interval to 200ms
 winload -d "Wi-Fi"   # Start with a specific device
-winload --title      # Show "winload <version>" as the header title
 winload --title "My Monitor" # Use a custom header title
-winload --title ""   # Keep the default device header
 winload -e           # Enable emoji decorations 🎉
+winload --max-mode smart --max-half-life 10 # Smooth adaptive Y-axis (default)
+winload --max-mode legacy # nload-style visible-history scaling
+winload --max-mode fixed --max-y-value 10M # Fixed Y-axis max
 winload --npcap      # Capture 127.0.0.1 loopback traffic (Windows, requires Npcap)
 winload --netlink    # Manually enable RTNETLINK (Linux/Android Rust edition, off by default)
 ```
@@ -224,8 +225,9 @@ winload --netlink    # Manually enable RTNETLINK (Linux/Android Rust edition, of
 | `-b`, `--bar-style <STYLE>` | Bar style: `fill`, `color`, or `plain` | `fill` |
 | `--in-color <HEX>` | Incoming graph color, hex RGB (e.g. `0x00d7ff`) | cyan |
 | `--out-color <HEX>` | Outgoing graph color, hex RGB (e.g. `0xffaf00`) | gold |
-| `-m`, `--max <VALUE>` | Fixed Y-axis max (e.g. `10M`, `1G`, `500K`) — *conflicts with `--smart-max`* | auto |
-| `--smart-max [SECS]` | Smart adaptive Y-axis: auto-decays after traffic spikes (default half-life: 10s) — *conflicts with `--max`* | off |
+| `--max-mode <MODE>` | Y-axis scaling mode: `smart`, `legacy`, or `fixed` | `smart` |
+| `--max-half-life <SECS>` | Half-life for smart Y-axis decay | `10` |
+| `--max-y-value <VALUE>` | Fixed Y-axis max for `--max-mode fixed` (e.g. `10M`, `1G`, `500K`) | — |
 | `-n`, `--no-graph` | Hide graph, show stats only | off |
 | `--hide-separator` | Hide the separator line (row of equals signs) | off |
 | `--no-color` | Disable all TUI colors (monochrome mode) | off |
@@ -235,15 +237,15 @@ winload --netlink    # Manually enable RTNETLINK (Linux/Android Rust edition, of
 | `-h`, `--help` | Print help (`--help --emoji` for emoji version!) | — |
 | `-V`, `--version` | Print version | — |
 
-> **Y-axis scaling modes** — there are three mutually exclusive scenarios:
+> **Y-axis scaling modes**
 >
 > | Mode | Flag | Behavior |
 > |------|------|----------|
-> | **Fixed max** | `--max <VALUE>` | Y-axis is locked to the specified value (e.g. `10M`, `1G`). |
-> | **Smart max** | `--smart-max [SECS]` | Y-axis adapts automatically: jumps up on traffic spikes, then smoothly decays back down (exponential decay, default half-life 10 s). |
-> | **History peak** | *(neither flag)* | Y-axis follows the historical maximum of each metric — the default behavior. |
+> | **smart** | `--max-mode smart --max-half-life 10` | Default. Jumps up on traffic spikes, then smoothly decays back down. |
+> | **legacy** | `--max-mode legacy` | nload-style scaling based on the visible graph history peak. |
+> | **fixed** | `--max-mode fixed --max-y-value 10M` | Locks the Y-axis to the specified value. |
 >
-> ⚠️ `--max` and `--smart-max` **conflict with each other** — you can only use one at a time.
+> `--max-y-value` is only valid with `--max-mode fixed`; `--max-half-life` is only valid with `--max-mode smart`.
 
 ### Keyboard Shortcuts
 

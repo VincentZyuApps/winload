@@ -202,10 +202,11 @@ which winload
 winload              # すべてのアクティブなネットワークインターフェースを監視
 winload -t 200       # 更新間隔を200ミリ秒に設定
 winload -d "Wi-Fi"   # 特定のデバイス名で開始
-winload --title      # ヘッダーに "winload <version>" を表示
 winload --title "My Monitor" # カスタムヘッダータイトルを使う
-winload --title ""   # 既定のデバイスヘッダーを使う
 winload -e           # 絵文字装飾を有効にする 🎉
+winload --max-mode smart --max-half-life 10 # スムーズな適応型 Y 軸（既定）
+winload --max-mode legacy # nload 風の表示履歴ピークスケーリング
+winload --max-mode fixed --max-y-value 10M # Y 軸上限を固定
 winload --npcap      # 127.0.0.1 ループバックトラフィックをキャプチャ (Windows, Npcapが必要)
 winload --netlink    # RTNETLINK を手動で有効化（Linux/Android Rust 版、既定はオフ）
 ```
@@ -224,8 +225,9 @@ winload --netlink    # RTNETLINK を手動で有効化（Linux/Android Rust 版�
 | `-b`, `--bar-style <STYLE>` | バースタイル: `fill`, `color`, `plain` | `fill` |
 | `--in-color <HEX>` | 受信グラフの色、16進数RGB (例: `0x00d7ff`) | シアン |
 | `--out-color <HEX>` | 送信グラフの色、16進数RGB (例: `0xffaf00`) | ゴールド |
-| `-m`, `--max <VALUE>` | Y軸の最大値を固定 (例: `10M`, `1G`, `500K`) —— *`--smart-max` と併用不可* | 自動 |
-| `--smart-max [SECS]` | スマート適応型Y軸上限：トラフィックスパイク後に自動的に指数減衰し、波形がより動的に（半減期、秒、デフォルト10秒）—— *`--max` と併用不可* | オフ |
+| `--max-mode <MODE>` | Y 軸スケーリングモード：`smart`、`legacy`、`fixed` | `smart` |
+| `--max-half-life <SECS>` | smart モードの指数減衰半減期 | `10` |
+| `--max-y-value <VALUE>` | fixed モードの Y 軸上限（例：`10M`、`1G`、`500K`） | — |
 | `-n`, `--no-graph` | グラフを非表示にし、統計のみを表示 | オフ |
 | `--hide-separator` | 区切り線（イコール記号の行）を非表示にする | オフ |
 | `--no-color` | すべてのTUIカラーを無効にする（モノクロモード） | オフ |
@@ -235,15 +237,15 @@ winload --netlink    # RTNETLINK を手動で有効化（Linux/Android Rust 版�
 | `-h`, `--help` | ヘルプを表示 (`--help --emoji` で絵文字版ヘルプ！) | — |
 | `-V`, `--version` | バージョンを表示 | — |
 
-> **Y軸スケーリングモード** —— 以下の3つのシナリオは排他的です：
+> **Y軸スケーリングモード**
 >
 > | モード | フラグ | 動作 |
 > |--------|--------|------|
-> | **固定最大値** | `--max <VALUE>` | Y軸を指定した値に固定します（例：`10M`、`1G`）。 |
-> | **スマート最大値** | `--smart-max [SECS]` | Y軸が自動適応：トラフィック急増時に即座に上昇し、その後スムーズに減衰します（指数減衰、デフォルト半減期 10 秒）。 |
-> | **履歴ピーク** | *（どちらも指定なし）* | Y軸は各指標の過去最大値に追従します —— デフォルトの動作です。 |
+> | **smart** | `--max-mode smart --max-half-life 10` | 既定。スパイク時に上昇し、その後スムーズに指数減衰します。 |
+> | **legacy** | `--max-mode legacy` | nload 風に、表示中のグラフ履歴ピークで自動スケーリングします。 |
+> | **fixed** | `--max-mode fixed --max-y-value 10M` | Y 軸を指定値に固定します。 |
 >
-> ⚠️ `--max` と `--smart-max` は**併用不可**です —— どちらか一方のみ指定できます。
+> `--max-y-value` は `--max-mode fixed` 専用、`--max-half-life` は `--max-mode smart` 専用です。
 
 ### キーボードショートカット
 

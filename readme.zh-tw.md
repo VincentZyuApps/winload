@@ -202,10 +202,11 @@ which winload
 winload              # 監控所有活躍網路藉口
 winload -t 200       # 設定刷新間隔為 200ms
 winload -d "Wi-Fi"   # 啟動時定位到 Wi-Fi 網卡
-winload --title      # 頂部標題顯示為 "winload <版本號>"
 winload --title "我的監視器" # 使用自訂頂部標題
-winload --title ""   # 保持預設裝置標題
 winload -e           # 啟用 emoji 裝飾 🎉
+winload --max-mode smart --max-half-life 10 # 平滑自適應 Y 軸（預設）
+winload --max-mode legacy # nload 風格的可見歷史峰值縮放
+winload --max-mode fixed --max-y-value 10M # 固定 Y 軸上限
 winload --npcap      # 擷取 127.0.0.1 回環流量 (Windows，需安裝 Npcap)
 winload --netlink    # 手動啟用 RTNETLINK（Linux/Android Rust 版，預設關閉）
 ```
@@ -224,8 +225,9 @@ winload --netlink    # 手動啟用 RTNETLINK（Linux/Android Rust 版，預設�
 | `-b`, `--bar-style <STYLE>` | 狀態列樣式：`fill`、`color` 或 `plain` | `fill` |
 | `--in-color <HEX>` | 下行圖形顏色，十六進位 RGB（如 `0x00d7ff`） | 青色 |
 | `--out-color <HEX>` | 上行圖形顏色，十六進位 RGB（如 `0xffaf00`） | 金色 |
-| `-m`, `--max <VALUE>` | 固定 Y 軸最大值（如 `10M`、`1G`、`500K`）—— *與 `--smart-max` 衝突* | 自動 |
-| `--smart-max [SECS]` | 智慧自適應 Y 軸上限：流量尖峰後自動指數回落，波形更生動（半衰期，秒，預設 10s）—— *與 `--max` 衝突* | 關閉 |
+| `--max-mode <MODE>` | Y 軸縮放模式：`smart`、`legacy` 或 `fixed` | `smart` |
+| `--max-half-life <SECS>` | smart 模式指數衰減半衰期 | `10` |
+| `--max-y-value <VALUE>` | fixed 模式固定 Y 軸上限（如 `10M`、`1G`、`500K`） | — |
 | `-n`, `--no-graph` | 隱藏圖形，僅顯示統計資訊 | 關閉 |
 | `--hide-separator` | 隱藏分隔線（等號一行） | 關閉 |
 | `--no-color` | 停用所有 TUI 顏色（單色模式） | 關閉 |
@@ -235,15 +237,15 @@ winload --netlink    # 手動啟用 RTNETLINK（Linux/Android Rust 版，預設�
 | `-h`, `--help` | 列印說明（`--help --emoji` 可查看 emoji 版！） | — |
 | `-V`, `--version` | 列印版本號 | — |
 
-> **Y 軸縮放模式** —— 以下三種情境互斥：
+> **Y 軸縮放模式**
 >
 > | 模式 | 參數 | 行為 |
 > |------|------|------|
-> | **固定最大值** | `--max <VALUE>` | Y 軸鎖定為指定值（如 `10M`、`1G`）。 |
-> | **智慧最大值** | `--smart-max [SECS]` | Y 軸自適應：流量突增時立即跳升，隨後平滑衰減（指數衰減，預設半衰期 10 秒）。 |
-> | **歷史峰值** | *（都不加）* | Y 軸跟隨各指標的歷史最大值 —— 這是預設行為。 |
+> | **smart** | `--max-mode smart --max-half-life 10` | 預設。流量突增時立即跳升，隨後平滑指數回落。 |
+> | **legacy** | `--max-mode legacy` | nload 風格，按目前可見圖形視窗峰值自動縮放。 |
+> | **fixed** | `--max-mode fixed --max-y-value 10M` | Y 軸鎖定為指定值。 |
 >
-> ⚠️ `--max` 與 `--smart-max` **相互衝突** —— 只能二擇一。
+> `--max-y-value` 僅可用於 `--max-mode fixed`；`--max-half-life` 僅可用於 `--max-mode smart`。
 
 ### 快捷鍵
 

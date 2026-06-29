@@ -22,10 +22,15 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_title": "Override header title: no value shows winload <version>; empty string keeps default device header",
         "help_emoji": "Enable emoji decorations in TUI 🎉",
         "help_unit": "Display unit: bit (default) or byte",
-        "help_max": (
-            "Fixed graph Y-axis max (e.g. 100M, 1G, 500K)\n\n"
-            "[default: auto-scale]"
+        "help_max_mode": (
+            "Y-axis scaling mode: smart (default), legacy, fixed\n\n"
+            "[default: smart]"
         ),
+        "help_max_half_life": (
+            "Half-life in seconds for smart Y-axis decay\n\n"
+            "[default: 10]"
+        ),
+        "help_max_y_value": "Fixed Y-axis value for --max-mode fixed (e.g. 100M, 1G, 500K)",
         "help_no_graph": "Hide traffic graphs, show only statistics",
         "help_unicode": "Use Unicode block characters for graph (█▓░· instead of #|..)",
         "help_bar_style": "Bar style: fill (default), color, plain",
@@ -40,10 +45,6 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_hide_separator": "Hide separator line (the row of equals signs between header and panels)",
         "help_version": "Print version",
         "help_no_color": "Disable all TUI colors (monochrome mode), press 'c' to toggle at runtime",
-        "help_smart_max": (
-            "Smart adaptive Y-axis: auto-decays after traffic spikes\n\n"
-            "[default half-life: 10s]"
-        ),
         "help_debug_info": "Print debug info about network interfaces and exit",
         "help_lang": "Display language: en-us (default), zh-cn, zh-tw",
         # ── TUI strings ──
@@ -106,12 +107,13 @@ _STRINGS: dict[str, dict[str, str]] = {
         "debug_out_color": "Out Color:",
         # ── Panel mode tags ──
         "tag_fixed": "fixed",
-        "tag_smart_max": "smart-max",
+        "tag_smart_max": "smart",
+        "tag_legacy": "legacy",
         "tag_auto": "auto",
         # ── Y-axis mode descriptions ──
-        "yaxis_auto": "auto (history peak)",
         "yaxis_fixed": "fixed-max ({val})",
-        "yaxis_smart": "smart-max (half-life: {sec}s)",
+        "yaxis_smart": "smart (half-life: {sec}s)",
+        "yaxis_legacy": "legacy (visible history peak)",
         # ── Misc ──
         "on": "on",
         "off": "off",
@@ -136,10 +138,15 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_title": "覆盖顶部标题：不带值时显示 winload <版本号>；空字符串保持默认设备标题",
         "help_emoji": "启用 emoji 装饰模式 🎉",
         "help_unit": "显示单位：bit（默认）或 byte",
-        "help_max": (
-            "固定图形 Y 轴最大值（如 100M、1G、500K）\n\n"
-            "[默认: 自动缩放]"
+        "help_max_mode": (
+            "Y 轴缩放模式：smart（默认）、legacy、fixed\n\n"
+            "[默认: smart]"
         ),
+        "help_max_half_life": (
+            "smart 模式指数衰减半衰期，单位秒\n\n"
+            "[默认: 10]"
+        ),
+        "help_max_y_value": "fixed 模式固定 Y 轴上限（如 100M、1G、500K）",
         "help_no_graph": "隐藏流量图形，仅显示统计信息",
         "help_unicode": "使用 Unicode 块字符绘制图形（█▓░· 代替 #|..）",
         "help_bar_style": "状态栏样式：fill（默认），color，plain",
@@ -154,10 +161,6 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_hide_separator": "隐藏分隔线（标题和面板之间的等号行）",
         "help_version": "打印版本号",
         "help_no_color": "禁用所有 TUI 颜色（单色模式），运行时按 c 可切换",
-        "help_smart_max": (
-            "智能自适应 Y 轴上限：流量尖峰后自动指数回落\n\n"
-            "[默认半衰期: 10秒]"
-        ),
         "help_debug_info": "打印网卡调试信息并退出",
         "help_lang": "显示语言：en-us（默认），zh-cn，zh-tw",
         # ── TUI strings ──
@@ -221,11 +224,12 @@ _STRINGS: dict[str, dict[str, str]] = {
         # ── Panel mode tags ──
         "tag_fixed": "固定",
         "tag_smart_max": "智能",
+        "tag_legacy": "传统",
         "tag_auto": "自动",
         # ── Y-axis mode descriptions ──
-        "yaxis_auto": "自动（历史峰值）",
         "yaxis_fixed": "固定最大值（{val}）",
         "yaxis_smart": "智能自适应（半衰期：{sec}秒）",
+        "yaxis_legacy": "传统模式（可见历史峰值）",
         # ── Misc ──
         "on": "开",
         "off": "关",
@@ -250,10 +254,15 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_title": "覆蓋頂部標題：不帶值時顯示 winload <版本號>；空字串保持預設裝置標題",
         "help_emoji": "啟用 emoji 裝飾模式 🎉",
         "help_unit": "顯示單位：bit（預設）或 byte",
-        "help_max": (
-            "固定圖形 Y 軸最大值（如 100M、1G、500K）\n\n"
-            "[預設: 自動縮放]"
+        "help_max_mode": (
+            "Y 軸縮放模式：smart（預設）、legacy、fixed\n\n"
+            "[預設: smart]"
         ),
+        "help_max_half_life": (
+            "smart 模式指數衰減半衰期，單位秒\n\n"
+            "[預設: 10]"
+        ),
+        "help_max_y_value": "fixed 模式固定 Y 軸上限（如 100M、1G、500K）",
         "help_no_graph": "隱藏流量圖形，僅顯示統計資訊",
         "help_unicode": "使用 Unicode 區塊字元繪製圖形（█▓░· 取代 #|..）",
         "help_bar_style": "狀態列樣式：fill（預設），color，plain",
@@ -268,10 +277,6 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_hide_separator": "隱藏分隔線（標題和面板之間的等號行）",
         "help_version": "列印版本號",
         "help_no_color": "停用所有 TUI 顏色（單色模式），執行時按 c 可切換",
-        "help_smart_max": (
-            "智慧自適應 Y 軸上限：流量尖峰後自動指數回落\n\n"
-            "[預設半衰期: 10秒]"
-        ),
         "help_debug_info": "列印網路卡除錯資訊並退出",
         "help_lang": "顯示語言：en-us（預設），zh-cn，zh-tw",
         # ── TUI strings ──
@@ -335,11 +340,12 @@ _STRINGS: dict[str, dict[str, str]] = {
         # ── Panel mode tags ──
         "tag_fixed": "固定",
         "tag_smart_max": "智能",
+        "tag_legacy": "傳統",
         "tag_auto": "自動",
         # ── Y-axis mode descriptions ──
-        "yaxis_auto": "自動（歷史峰值）",
         "yaxis_fixed": "固定最大值（{val}）",
         "yaxis_smart": "智能自適應（半衰期：{sec}秒）",
+        "yaxis_legacy": "傳統模式（可見歷史峰值）",
         # ── Misc ──
         "on": "開",
         "off": "關",

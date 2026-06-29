@@ -49,9 +49,9 @@ pub struct StatisticsEngine {
     /// 发方向速率历史
     pub outgoing_history: VecDeque<f64>,
 
-    /// 收方向平滑峰值 (smart-max 用)
+    /// 收方向平滑峰值 (smart 模式用)
     pub incoming_smooth_peak: f64,
-    /// 发方向平滑峰值 (smart-max 用)
+    /// 发方向平滑峰值 (smart 模式用)
     pub outgoing_smooth_peak: f64,
     /// 收方向平滑峰值是否在上升 (↑ spike / ↓ decay)
     pub incoming_smooth_peak_rising: bool,

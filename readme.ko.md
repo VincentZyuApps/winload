@@ -202,10 +202,11 @@ which winload
 winload              # 활성화된 모든 네트워크 인터페이스 모니터링
 winload -t 200       # 새로고침 간격을 200ms로 설정
 winload -d "Wi-Fi"   # 특정 장치 이름으로 시작 (부분 일치 가능)
-winload --title      # 헤더 제목을 "winload <version>"으로 표시
 winload --title "My Monitor" # 사용자 지정 헤더 제목 사용
-winload --title ""   # 기본 장치 헤더 유지
 winload -e           # TUI에 이모지 장식 활성화 🎉
+winload --max-mode smart --max-half-life 10 # 부드러운 적응형 Y축 (기본값)
+winload --max-mode legacy # nload 스타일 표시 히스토리 피크 스케일링
+winload --max-mode fixed --max-y-value 10M # Y축 상한 고정
 winload --npcap      # 127.0.0.1 루프백 트래픽 캡처 (Windows, Npcap 필요)
 winload --netlink    # RTNETLINK 수동 활성화（Linux/Android Rust 에디션, 기본 꺼짐）
 ```
@@ -224,8 +225,9 @@ winload --netlink    # RTNETLINK 수동 활성화（Linux/Android Rust 에디션
 | `-b`, `--bar-style <STYLE>` | 바 스타일: `fill`, `color`, 또는 `plain` | `fill` |
 | `--in-color <HEX>` | 수신 그래프 색상, 16진수 RGB (예: `0x00d7ff`) | Cyan |
 | `--out-color <HEX>` | 송신 그래프 색상, 16진수 RGB (예: `0xffaf00`) | Gold |
-| `-m`, `--max <VALUE>` | Y축 최대값 고정 (예: `10M`, `1G`, `500K`) —— *`--smart-max`와 충돌* | 자동 |
-| `--smart-max [SECS]` | 스마트 적응형 Y축 상한: 트래픽 스파이크 후 자동으로 지수 감쇠하여 파형이 더 생동감 있게 표시 (반감기, 초, 기본값 10초) —— *`--max`와 충돌* | 비활성 |
+| `--max-mode <MODE>` | Y축 스케일링 모드: `smart`, `legacy`, `fixed` | `smart` |
+| `--max-half-life <SECS>` | smart 모드 지수 감쇠 반감기 | `10` |
+| `--max-y-value <VALUE>` | fixed 모드 Y축 상한 (예: `10M`, `1G`, `500K`) | — |
 | `-n`, `--no-graph` | 그래프를 숨기고 통계만 표시 | 비활성 |
 | `--hide-separator` | 구분선(등호 행) 숨기기 | 비활성 |
 | `--no-color` | 모든 TUI 색상 비활성화 (흑백 모드) | 비활성 |
@@ -239,11 +241,11 @@ winload --netlink    # RTNETLINK 수동 활성화（Linux/Android Rust 에디션
 >
 > | 모드 | 플래그 | 동작 |
 > |------|--------|------|
-> | **고정 최댓값** | `--max <VALUE>` | Y축을 지정한 값으로 고정합니다 (예: `10M`, `1G`). |
-> | **스마트 최댓값** | `--smart-max [SECS]` | Y축이 자동 적응: 트래픽 급증 시 즉시 상승한 뒤, 부드럽게 감쇠합니다 (지수 감쇠, 기본 반감기 10초). |
-> | **히스토리 피크** | *(둘 다 미지정)* | Y축이 각 지표의 과거 최댓값을 따릅니다 — 기본 동작입니다. |
+> | **smart** | `--max-mode smart --max-half-life 10` | 기본값. 트래픽 급증 시 상승한 뒤 부드럽게 지수 감쇠합니다. |
+> | **legacy** | `--max-mode legacy` | nload 스타일로 표시 중인 그래프 히스토리 피크에 따라 자동 스케일링합니다. |
+> | **fixed** | `--max-mode fixed --max-y-value 10M` | Y축을 지정한 값으로 고정합니다. |
 >
-> ⚠️ `--max`와 `--smart-max`는 **서로 충돌**합니다 — 둘 중 하나만 사용할 수 있습니다.
+> `--max-y-value`는 `--max-mode fixed`에서만, `--max-half-life`는 `--max-mode smart`에서만 사용할 수 있습니다.
 
 ### 키보드 단축키
 

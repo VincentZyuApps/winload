@@ -61,6 +61,16 @@ pub enum TitleAlign {
     Right,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+pub enum MaxMode {
+    /// Smart adaptive Y-axis with exponential decay (default)
+    Smart,
+    /// nload-style auto scale based on the visible graph history
+    Legacy,
+    /// Fixed Y-axis value from --max-y-value
+    Fixed,
+}
+
 /// 解析人类可读的流量值，如 "100M" → 100*1024*1024 bytes/s
 pub fn parse_max_value(s: &str) -> Result<f64, String> {
     let s = s.trim();
@@ -77,7 +87,11 @@ pub fn parse_max_value(s: &str) -> Result<f64, String> {
         (s, 1.0)
     };
     let num: f64 = num_str.parse().map_err(|e| format!("invalid number: {e}"))?;
-    Ok(num * multiplier)
+    let value = num * multiplier;
+    if value <= 0.0 {
+        return Err("value must be greater than 0".to_string());
+    }
+    Ok(value)
 }
 
 /// 解析十六进制颜色码，支持 0xRRGGBB 或 RRGGBB 格式
@@ -146,9 +160,17 @@ struct Args {
     #[arg(long = "out-color", value_parser = parse_hex_color)]
     out_color: Option<ratatui::style::Color>,
 
-    /// Fixed graph Y-axis max (e.g. 100M, 1G, 500K)
-    #[arg(short = 'm', long = "max", value_parser = parse_max_value, conflicts_with = "smart_max")]
-    max: Option<f64>,
+    /// Y-axis scaling mode: smart, legacy, fixed
+    #[arg(long = "max-mode", value_enum, default_value = "smart")]
+    max_mode: MaxMode,
+
+    /// Half-life in seconds for smart Y-axis decay
+    #[arg(long = "max-half-life", default_value = "10", value_name = "SECS")]
+    max_half_life: f64,
+
+    /// Fixed graph Y-axis value for --max-mode fixed (e.g. 100M, 1G, 500K)
+    #[arg(long = "max-y-value", value_parser = parse_max_value, value_name = "VALUE")]
+    max_y_value: Option<f64>,
 
     /// Hide traffic graphs, show only statistics
     #[arg(short = 'n', long = "no-graph")]
@@ -171,10 +193,6 @@ struct Args {
     /// where /proc/net/dev is not accessible.
     #[arg(long = "netlink")]
     netlink: bool,
-
-    /// Smart adaptive Y-axis max with exponential decay (half-life in seconds)
-    #[arg(long = "smart-max", default_missing_value = "10", num_args = 0..=1, value_name = "SECS")]
-    smart_max: Option<f64>,
 
     /// Display language
     #[arg(long = "lang", value_enum, default_value = "en-us")]
@@ -201,14 +219,15 @@ pub struct App {
     pub bar_style: BarStyle,
     pub in_color: ratatui::style::Color,
     pub out_color: ratatui::style::Color,
-    pub fixed_max: Option<f64>,
+    pub max_mode: MaxMode,
+    pub max_half_life: f64,
+    pub max_y_value: Option<f64>,
     pub no_graph: bool,
     pub hide_separator: bool,
     pub no_color: bool,
     pub interval: u64,
     pub average: u64,
     pub show_debug: bool,
-    pub smart_max_half_life: Option<f64>,
     pub loopback_mode: LoopbackMode,
     pub loopback_info: Option<String>,
     loopback_counters: Option<LoopbackCounters>,
@@ -219,12 +238,17 @@ impl App {
     fn new(args: &Args) -> Self {
         let collector = Collector::new(args.netlink);
         let devices = collector.devices();
+        let smart_half_life = if args.max_mode == MaxMode::Smart {
+            Some(args.max_half_life)
+        } else {
+            None
+        };
 
         let views: Vec<DeviceView> = devices
             .into_iter()
             .map(|info| DeviceView {
                 info,
-                engine: StatisticsEngine::new(args.interval, args.average, args.smart_max),
+                engine: StatisticsEngine::new(args.interval, args.average, smart_half_life),
             })
             .collect();
 
@@ -257,14 +281,15 @@ impl App {
             bar_style: args.bar_style,
             in_color: args.in_color.unwrap_or(ratatui::style::Color::Rgb(0x00, 0xd7, 0xff)),
             out_color: args.out_color.unwrap_or(ratatui::style::Color::Rgb(0xff, 0xaf, 0x00)),
-            fixed_max: args.max,
+            max_mode: args.max_mode,
+            max_half_life: args.max_half_life,
+            max_y_value: args.max_y_value,
             no_graph: args.no_graph,
             hide_separator: args.hide_separator,
             no_color: args.no_color,
             interval: args.interval,
             average: args.average,
             show_debug: false,
-            smart_max_half_life: args.smart_max,
             loopback_mode,
             loopback_info: None,
             loopback_counters: None,
@@ -471,14 +496,47 @@ fn build_translated_command() -> clap::Command {
         .mut_arg("bar_style", |a| a.help(t("help_bar_style")))
         .mut_arg("in_color", |a| a.help(t("help_in_color")))
         .mut_arg("out_color", |a| a.help(t("help_out_color")))
-        .mut_arg("max", |a| a.help(t("help_max")))
+        .mut_arg("max_mode", |a| a.help(t("help_max_mode")))
+        .mut_arg("max_half_life", |a| a.help(t("help_max_half_life")))
+        .mut_arg("max_y_value", |a| a.help(t("help_max_y_value")))
         .mut_arg("no_graph", |a| a.help(t("help_no_graph")))
         .mut_arg("hide_separator", |a| a.help(t("help_hide_separator")))
         .mut_arg("no_color", |a| a.help(t("help_no_color")))
         .mut_arg("npcap", |a| a.help(t("help_npcap")))
         .mut_arg("netlink", |a| a.help(t("help_netlink")))
-        .mut_arg("smart_max", |a| a.help(t("help_smart_max")))
         .mut_arg("lang", |a| a.help(t("help_lang")))
+}
+
+fn validate_args(args: &Args) -> Result<(), String> {
+    if args.max_half_life <= 0.0 {
+        return Err("--max-half-life must be greater than 0".to_string());
+    }
+    let max_half_life_was_explicit =
+        std::env::args().any(|a| a == "--max-half-life" || a.starts_with("--max-half-life="));
+    match args.max_mode {
+        MaxMode::Fixed => {
+            if args.max_y_value.is_none() {
+                return Err("--max-mode fixed requires --max-y-value <VALUE>".to_string());
+            }
+            if max_half_life_was_explicit {
+                return Err("--max-half-life can only be used with --max-mode smart".to_string());
+            }
+        }
+        MaxMode::Smart => {
+            if args.max_y_value.is_some() {
+                return Err("--max-y-value can only be used with --max-mode fixed".to_string());
+            }
+        }
+        MaxMode::Legacy => {
+            if args.max_y_value.is_some() {
+                return Err("--max-y-value can only be used with --max-mode fixed".to_string());
+            }
+            if max_half_life_was_explicit {
+                return Err("--max-half-life can only be used with --max-mode smart".to_string());
+            }
+        }
+    }
+    Ok(())
 }
 
 fn main() -> io::Result<()> {
@@ -504,6 +562,10 @@ fn main() -> io::Result<()> {
     let matches = cmd.get_matches();
     let args = Args::from_arg_matches(&matches)
         .unwrap_or_else(|e| e.exit());
+    if let Err(e) = validate_args(&args) {
+        eprintln!("error: {e}");
+        std::process::exit(2);
+    }
 
     // 如果传入 --debug-info，打印接口信息后退出
     if args.debug_info {

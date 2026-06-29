@@ -13,7 +13,7 @@ use ratatui::{
 
 use crate::graph;
 use crate::stats::{self, TrafficStats};
-use crate::{App, BarStyle, Unit};
+use crate::{App, BarStyle, MaxMode, Unit};
 use crate::i18n::t;
 #[cfg(target_os = "windows")]
 use crate::loopback::LoopbackMode;
@@ -266,10 +266,6 @@ fn draw_panels(frame: &mut Frame, area: Rect, app: &App) {
         } else {
             (t("incoming"), t("outgoing"))
         };
-        let smart_in = app.smart_max_half_life.map(|_| view.engine.incoming_smooth_peak);
-        let smart_out = app.smart_max_half_life.map(|_| view.engine.outgoing_smooth_peak);
-        let smart_in_rising = app.smart_max_half_life.map(|_| view.engine.incoming_smooth_peak_rising);
-        let smart_out_rising = app.smart_max_half_life.map(|_| view.engine.outgoing_smooth_peak_rising);
         draw_traffic_panel(
             frame,
             panels[0],
@@ -281,10 +277,11 @@ fn draw_panels(frame: &mut Frame, area: Rect, app: &App) {
             app.unit,
             app.bar_style,
             app.in_color,
-            app.fixed_max,
-            smart_in,
-            app.smart_max_half_life,
-            smart_in_rising,
+            app.max_mode,
+            app.max_half_life,
+            app.max_y_value,
+            view.engine.incoming_smooth_peak,
+            view.engine.incoming_smooth_peak_rising,
             app.no_graph,
             app.no_color,
         );
@@ -299,10 +296,11 @@ fn draw_panels(frame: &mut Frame, area: Rect, app: &App) {
             app.unit,
             app.bar_style,
             app.out_color,
-            app.fixed_max,
-            smart_out,
-            app.smart_max_half_life,
-            smart_out_rising,
+            app.max_mode,
+            app.max_half_life,
+            app.max_y_value,
+            view.engine.outgoing_smooth_peak,
+            view.engine.outgoing_smooth_peak_rising,
             app.no_graph,
             app.no_color,
         );
@@ -320,10 +318,11 @@ fn draw_traffic_panel(
     unit: Unit,
     bar_style: BarStyle,
     graph_color: Color,
-    fixed_max: Option<f64>,
-    smart_max_peak: Option<f64>,
-    smart_max_half_life: Option<f64>,
-    smart_max_rising: Option<bool>,
+    max_mode: MaxMode,
+    max_half_life: f64,
+    max_y_value: Option<f64>,
+    smart_max_peak: f64,
+    smart_max_rising: bool,
     no_graph: bool,
     no_color: bool,
 ) {
@@ -338,26 +337,24 @@ fn draw_traffic_panel(
         .split(area);
 
     // ── 标签行 ──
-    let scale_max = if let Some(m) = fixed_max {
-        m
-    } else if let Some(sp) = smart_max_peak {
-        graph::next_power_of_2_scaled(sp)
-    } else {
-        let peak = history.iter().cloned().fold(0.0_f64, f64::max);
-        graph::next_power_of_2_scaled(peak)
+    let history_peak = || history.iter().cloned().fold(0.0_f64, f64::max);
+    let scale_max = match max_mode {
+        MaxMode::Fixed => max_y_value.unwrap_or_else(|| graph::next_power_of_2_scaled(history_peak())),
+        MaxMode::Smart => graph::next_power_of_2_scaled(smart_max_peak),
+        MaxMode::Legacy => graph::next_power_of_2_scaled(history_peak()),
     };
     let scale_label = graph::get_graph_scale_label_unit(scale_max, unit);
-    let mode_tag = if let Some(m) = fixed_max {
-        format!(" [{}: {}]", t("tag_fixed"), stats::format_speed_unit(m, unit))
-    } else if let Some(hl) = smart_max_half_life {
-        let arrow = match smart_max_rising {
-            Some(true) => format!(" {}", t("arrow_up")),
-            Some(false) => format!(" {}", t("arrow_down")),
-            None => String::new(),
-        };
-        format!(" [{} {}s]{}", t("tag_smart_max"), hl, arrow)
-    } else {
-        String::new()
+    let mode_tag = match max_mode {
+        MaxMode::Fixed => format!(
+            " [{}: {}]",
+            t("tag_fixed"),
+            stats::format_speed_unit(max_y_value.unwrap_or(scale_max), unit),
+        ),
+        MaxMode::Smart => {
+            let arrow = if smart_max_rising { t("arrow_up") } else { t("arrow_down") };
+            format!(" [{} {}s] {}", t("tag_smart_max"), max_half_life, arrow)
+        }
+        MaxMode::Legacy => format!(" [{}]", t("tag_legacy")),
     };
     let label_text = format!("{label} ({scale_label}){mode_tag}:");
     let width = area.width as usize;
@@ -611,16 +608,17 @@ fn draw_debug_overlay(frame: &mut Frame, area: Rect, app: &App) {
 
     // Y-axis Scaling
     lines.push(Line::from(Span::styled(t("debug_section_yaxis"), section_style)));
-    let mode_str = if let Some(m) = app.fixed_max {
-        t("yaxis_fixed").replace("{val}", &stats::format_speed_unit(m, app.unit))
-    } else if let Some(hl) = app.smart_max_half_life {
-        t("yaxis_smart").replace("{sec}", &hl.to_string())
-    } else {
-        t("yaxis_auto").to_string()
+    let mode_str = match app.max_mode {
+        MaxMode::Fixed => t("yaxis_fixed").replace(
+            "{val}",
+            &stats::format_speed_unit(app.max_y_value.unwrap_or_default(), app.unit),
+        ),
+        MaxMode::Smart => t("yaxis_smart").replace("{sec}", &app.max_half_life.to_string()),
+        MaxMode::Legacy => t("yaxis_legacy").to_string(),
     };
     lines.push(kv(t("debug_yaxis_mode").to_string(), mode_str));
     if let Some(view) = app.current_view() {
-        if app.smart_max_half_life.is_some() {
+        if app.max_mode == MaxMode::Smart {
             lines.push(kv(t("debug_in_smooth").to_string(), stats::format_speed_unit(
                 view.engine.incoming_smooth_peak, app.unit)));
             lines.push(kv(t("debug_out_smooth").to_string(), stats::format_speed_unit(
