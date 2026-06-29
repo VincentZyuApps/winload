@@ -60,7 +60,7 @@ https://github.com/rolandriegel/nload
 git clone https://github.com/VincentZyuApps/winload.git
 # or clone from Gitee (faster in China Mainland):
 # git clone https://gitee.com/vincent-zyu/winload.git
-cd winload/py
+cd winload/python
 pip install -r requirements.txt
 python main.py
 ```
@@ -165,8 +165,10 @@ which winload
 ### macOS / Linux (Homebrew)
 > 📄 [Homebrew Formula (GitHub)](https://github.com/VincentZyuApps/homebrew-tap/blob/main/Formula/winload.rb)
 > 📄 [Homebrew Formula (Gitee)](https://gitee.com/vincent-zyu/homebrew-tap/blob/main/Formula/winload.rb)
+> Recent Homebrew versions may require trusting third-party tap formulae before installation.
 ```bash
 brew tap vincentzyuapps/tap
+brew trust vincentzyuapps/tap
 # or from Gitee (manual tap clone):
 # git clone https://gitee.com/vincent-zyu/homebrew-tap.git "$(brew --prefix)/Library/Taps/vincentzyuapps/homebrew-tap"
 brew update && brew install winload
@@ -208,7 +210,7 @@ winload --max-mode smart --max-half-life 10 # Smooth adaptive Y-axis (default)
 winload --max-mode legacy # nload-style visible-history scaling
 winload --max-mode fixed --max-y-value 10M # Fixed Y-axis max
 winload --npcap      # Capture 127.0.0.1 loopback traffic (Windows, requires Npcap)
-winload --netlink    # Manually enable RTNETLINK (Linux/Android Rust edition, off by default)
+winload --netlink    # Manually enable RTNETLINK (Linux/Android, off by default)
 ```
 
 ### Options
@@ -232,7 +234,7 @@ winload --netlink    # Manually enable RTNETLINK (Linux/Android Rust edition, of
 | `--hide-separator` | Hide the separator line (row of equals signs) | off |
 | `--no-color` | Disable all TUI colors (monochrome mode) | off |
 | `--npcap` | **[Windows Rust Only]** Capture loopback traffic via Npcap (recommended) | off |
-| `--netlink` | **[Linux/Android Rust Only]** Use RTNETLINK instead of sysinfo (for Termux proot distro or restricted environments) | off |
+| `--netlink` | **[Linux/Android Only]** Use RTNETLINK instead of the default backend (for Termux proot distro or restricted environments) | off |
 | `--debug-info` | Print network interface debug info and exit | — |
 | `-h`, `--help` | Print help (`--help --emoji` for emoji version!) | — |
 | `-V`, `--version` | Print version | — |
@@ -275,13 +277,13 @@ This requires [Npcap](https://npcap.com/#download) installed with "Support loopb
 
 On Linux and macOS, loopback traffic works out of the box — no extra flags needed.
 
-On **Linux/Android**, if `/proc/net/dev` is not accessible (e.g. inside a Termux proot distro or other restricted environments), the Rust edition can use `--netlink` to collect network stats via RTNETLINK directly:
+On **Linux/Android**, if `/proc/net/dev` is not accessible (e.g. inside a Termux proot distro or other restricted environments), use `--netlink` to collect network stats via RTNETLINK directly:
 
 ```bash
 winload --netlink
 ```
 
-> Note: `--netlink` is an **opt-in backend**, similar to `--npcap`; it is never enabled unless you pass the flag. Normal Linux/Android runs still use sysinfo by default. This flag is **Linux/Android Rust edition only**; the Python edition does not support `--netlink` and continues to use psutil. macOS does not support netlink.
+> Note: `--netlink` is an **opt-in backend**, similar to `--npcap`; it is never enabled unless you pass the flag. Normal Linux/Android runs still use the default backend (Rust: sysinfo, Python: psutil). The Python edition uses `pyroute2` for RTNETLINK on Linux/Android. macOS does not support netlink.
 >
 > 📖 For a deep dive into Linux/Android network statistics collection, see [docs/linux_android_netlink.md](docs/linux_android_netlink.md)
 
@@ -308,6 +310,7 @@ winload --netlink
 |:---|:---|:---|
 | [![Python](https://img.shields.io/badge/Python-3.13.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13.11 | Programming language |
 | [![psutil](https://img.shields.io/badge/psutil-≥7.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/giampaolo/psutil) | ≥7.0 | Process and system utilities |
+| [![pyroute2](https://img.shields.io/badge/pyroute2-≥0.9.6-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/svinota/pyroute2) | ≥0.9.6 | RTNETLINK backend on Linux/Android |
 | [![windows-curses](https://img.shields.io/badge/windows--curses-≥2.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/zhirui2020/windows-curses) | ≥2.0 | Windows curses support |
 
 ### Rust Edition

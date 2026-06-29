@@ -1,0 +1,5 @@
+# Keep shell scripts executable on Linux/WSL.
+*.sh text eol=lf
+
+# Keep GitHub Actions YAML stable across Windows edits.
+.github/workflows/*.yml text eol=lf

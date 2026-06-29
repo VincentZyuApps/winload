@@ -136,7 +136,7 @@ check ──→ build ──→ release ──→ publish
   │    Mirror all branches/tags to Gitee via hub-mirror-action
   │
   ├─→ benchmark (independent, triggered by 'run benchmark')
-  │    Run benchmark_go/benchmark.sh
+  │    Run benchmark/benchmark.sh
   │    Commit & Push docs/benchmark/benchmark.svg
   │
   ├─→ publish-crates-io (after build success, parallel with Scoop/AUR/npm)
@@ -278,7 +278,7 @@ A repository secret `NPM_TOKEN` must be set in **Settings → Secrets → Action
 The `pypi publish` keyword triggers publishing the Python package to PyPI:
 
 1. Installs `uv` via [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv)
-2. Builds the package using `uv build` in the `py/` directory
+2. Builds the package using `uv build` in the `python/` directory
 3. Publishes to PyPI using `uv publish`
 
 ### Prerequisite
@@ -327,7 +327,7 @@ Runs **after `release` job succeeds** (parallel with Scoop/AUR/npm):
 
 ## 📌 Version
 
-The version is automatically extracted from `rust/Cargo.toml` (Rust) or `py/pyproject.toml` (Python) and used for:
+The version is automatically extracted from `rust/Cargo.toml` (Rust) or `python/pyproject.toml` (Python) and used for:
 - Release tag name (e.g. `v0.1.5`)
 - Artifact filenames (e.g. `winload-windows-x86_64-msvc-npcap-v0.1.5.exe`)
 - Scoop/AUR/npm/PyPI/crates.io manifest version field

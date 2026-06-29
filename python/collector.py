@@ -1,6 +1,7 @@
 """
 collector.py - 网络流量数据采集模块
 通过 psutil 采集各网卡的累计收发字节数，供上层统计和绘图使用。
+Linux/Android 可通过 --netlink 显式启用 RTNETLINK backend。
 """
 
 import time
@@ -33,13 +34,28 @@ class Collector:
     每次调用 collect() 会读取所有网卡的累计字节数并生成 Snapshot。
     """
 
-    def __init__(self, ignored_interfaces: Optional[List[str]] = None):
+    def __init__(self, ignored_interfaces: Optional[List[str]] = None, use_netlink: bool = False):
         self._ignored = set(ignored_interfaces or [])
+        self._use_netlink = use_netlink
         self._devices: Dict[str, DeviceInfo] = {}
         self._refresh_devices()
 
+    @property
+    def using_netlink(self) -> bool:
+        return self._use_netlink
+
     def _refresh_devices(self) -> None:
         """刷新可用网卡列表及其 IP 地址"""
+        if self._use_netlink:
+            from netlink import netlink_devices
+
+            self._devices.clear()
+            for dev in netlink_devices():
+                if dev.name in self._ignored:
+                    continue
+                self._devices[dev.name] = DeviceInfo(name=dev.name, addrs=dev.addrs)
+            return
+
         addrs = psutil.net_if_addrs()
         stats = psutil.net_if_stats()
         self._devices.clear()
@@ -70,6 +86,24 @@ class Collector:
         返回 {device_name: Snapshot}
         """
         ts = time.time()
+        if self._use_netlink:
+            from netlink import netlink_collect
+
+            counters = netlink_collect()
+            result: Dict[str, Snapshot] = {}
+            for name in self._devices:
+                if name not in counters:
+                    continue
+                c = counters[name]
+                result[name] = Snapshot(
+                    timestamp=ts,
+                    bytes_recv=c.bytes_recv,
+                    bytes_sent=c.bytes_sent,
+                    packets_recv=c.packets_recv,
+                    packets_sent=c.packets_sent,
+                )
+            return result
+
         counters = psutil.net_io_counters(pernic=True)
         result: Dict[str, Snapshot] = {}
         for name in self._devices:

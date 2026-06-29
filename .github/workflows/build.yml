@@ -134,9 +134,8 @@ jobs:
 
       - name: Run benchmark
         run: |
-          chmod +x benchmark_go/benchmark.sh
-          cd benchmark_go
-          ./benchmark.sh
+          chmod +x benchmark/benchmark.sh
+          ./benchmark/benchmark.sh
 
       - name: Commit and push benchmark results
         run: |
@@ -1304,15 +1303,15 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Copy readme for PyPI
-        run: cp readme.md py/readme.md
+        run: cp readme.md python/readme.md
 
       - name: Build package
-        working-directory: py
+        working-directory: python
         run: |
           uv build
 
       - name: Publish to PyPI
-        working-directory: py
+        working-directory: python
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |

@@ -4,11 +4,9 @@ Probe pyroute2 RTNETLINK support for winload.
 
 Run on Linux / Android Termux / Termux proot:
 
-    python test/netlink/probe_pyroute2_netlink.py
+    uv pip install pyroute2
+    uv run python test/netlink/probe_pyroute2_netlink.py
 
-Install dependency if needed:
-
-    python -m pip install pyroute2
 """
 
 from __future__ import annotations

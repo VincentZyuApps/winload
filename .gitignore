@@ -1,179 +1,175 @@
 # ============================================================
-# winload - 网络流量监控工具
-# Python + Rust 混合项目的统一 .gitignore
+# 🚦 winload - unified .gitignore
+# Python + Rust + npm + benchmark helper files
 # ============================================================
 
+
 # ============================================================
-# Python (py/ 目录)
+# 🐍 Python package (python/)
 # ============================================================
 
-# Virtual environments
-py/.venv/
-py/venv/
-py/ENV/
-py/env/
-py/.env
+# 🧪 Virtual environments
+python/.venv/
+python/venv/
+python/ENV/
+python/env/
+python/.env
 **/.venv/
 **/venv/
+**/ENV/
+**/env/
 
-# Python 缓存
-py/__pycache__/
-py/**/__pycache__/
-py/*.py[cod]
-py/**/*.py[cod]
-py/*$py.class
+# 🧊 Python bytecode and caches
+python/__pycache__/
+python/**/__pycache__/
+python/*.py[cod]
+python/**/*.py[cod]
+python/*$py.class
+**/__pycache__/
+*.pyc
+.ruff_cache/
+python/.ruff_cache/
 
-# Distribution / packaging
-py/.Python
-py/build/
-py/develop-eggs/
-py/dist/
-py/downloads/
-py/eggs/
-py/.eggs/
-py/lib/
-py/lib64/
-py/parts/
-py/sdist/
-py/var/
-py/wheels/
-py/share/python-wheels/
-py/*.egg-info/
-py/.installed.cfg
-py/*.egg
-py/MANIFEST
+# 📦 Python build and packaging output
+python/.Python
+python/build/
+python/develop-eggs/
+python/dist/
+python/downloads/
+python/eggs/
+python/.eggs/
+python/lib/
+python/lib64/
+python/parts/
+python/sdist/
+python/var/
+python/wheels/
+python/share/python-wheels/
+python/*.egg-info/
+python/.installed.cfg
+python/*.egg
+python/MANIFEST
 
-# PyInstaller
-py/*.manifest
-py/*.spec
+# 🛠 Python tooling
+python/.tox/
+python/.nox/
+python/.coverage
+python/.coverage.*
+python/.cache/
+python/htmlcov/
+python/nosetests.xml
+python/coverage.xml
+python/*.cover
+python/*.py,cover
+python/.hypothesis/
+python/.pytest_cache/
+python/cover/
+python/.mypy_cache/
+python/.dmypy.json
+python/dmypy.json
+python/.pyre/
+python/.pytype/
+python/cython_debug/
+python/.ipynb_checkpoints/
+python/profile_default/
+python/ipython_config.py
+python/.python-version
 
-# Installer logs
-py/pip-log.txt
-py/pip-delete-this-directory.txt
+# 🚢 Python app builders and uv
+python/*.manifest
+python/*.spec
+python/pip-log.txt
+python/pip-delete-this-directory.txt
+python/.uv/
+python/uv.lock
 
-# Unit test / coverage reports
-py/htmlcov/
-py/.tox/
-py/.nox/
-py/.coverage
-py/.coverage.*
-py/.cache
-py/nosetests.xml
-py/coverage.xml
-py/*.cover
-py/*.py,cover
-py/.hypothesis/
-py/.pytest_cache/
-py/cover/
-
-# Jupyter Notebook
-py/.ipynb_checkpoints
-
-# IPython
-py/profile_default/
-py/ipython_config.py
-
-# pyenv
-py/.python-version
-
-# mypy
-py/.mypy_cache/
-py/.dmypy.json
-py/dmypy.json
-
-# Pyre type checker
-py/.pyre/
-
-# pytype static type analyzer
-py/.pytype/
-
-# Cython debug symbols
-py/cython_debug/
-
-# uv
-py/.uv/
-py/uv.lock
-
-# Generic Python environment & cache ignore (Any folder)
-*venv*/
-*env*/
-*__pycache__*
 
 # ============================================================
-# Rust (rust/ 目录)
+# 🦀 Rust package (rust/)
 # ============================================================
 
-# Compiled output
+# 🎯 Cargo build output
 rust/target/
 rust/**/target/
-
-# Distribution / built binaries
 rust/dist/
 rust/**/dist/
 
-# Cargo.lock — 二进制项目应提交 Cargo.lock 以保证可复现构建
-# 如果是 library 项目，取消下面的注释来忽略
+# 🔒 Cargo.lock is intentionally tracked for this binary project
 # rust/Cargo.lock
 
-# Cargo build artifacts
+# 🧩 Rust temporary and debug artifacts
 rust/**/*.rs.bk
 rust/**/*.pdb
-
-# Debug files
 rust/**/*.dSYM/
-
-# IDE / editor generated
 rust/**/*.swp
 rust/**/*.swo
 rust/**/*~
 
-# Profiling data
+# 📈 Rust profiling output
 rust/perf.data
 rust/perf.data.old
 rust/flamegraph.svg
 
 
 # ============================================================
-# 编辑器 / IDE
+# 📊 Benchmark output (benchmark/)
 # ============================================================
 
-# VS Code
+# 🏗 Local benchmark build output
+benchmark/benchmark
+benchmark/benchmark.exe
+
+
+# ============================================================
+# 📦 npm package (npm/)
+# ============================================================
+
+# 🧱 Node dependencies and package-manager noise
+npm/node_modules/
+npm/.npm/
+npm/.pnpm-store/
+npm/.yarn/
+npm/npm-debug.log*
+npm/yarn-debug.log*
+npm/yarn-error.log*
+
+
+# ============================================================
+# 🧰 Editors and IDEs
+# ============================================================
+
+# 💻 VS Code
 .vscode/
 *.code-workspace
 
-# JetBrains IDEs (PyCharm, IntelliJ IDEA, CLion, RustRover)
+# 🧠 JetBrains IDEs
 .idea/
 *.iml
 *.ipr
 *.iws
 .idea_modules/
 
-# Vim
+# ✍️ Terminal editors
 *.swp
 *.swo
 *~
-
-# Emacs
-*~
 \#*\#
 .\#*
-
-# Sublime Text
 *.sublime-project
 *.sublime-workspace
 
 
 # ============================================================
-# 操作系统
+# 🖥 Operating systems
 # ============================================================
 
-# macOS
+# 🍎 macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 ._*
 
-# Windows
+# 🪟 Windows
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
@@ -181,36 +177,31 @@ ehthumbs_vista.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# Linux
+# 🐧 Linux
 .Trash-*
 .nfs*
 
 
 # ============================================================
-# 项目相关
+# 🧪 Project-local generated files
 # ============================================================
 
-# 日志文件
+# 📝 Logs
 *.log
 
-# 临时文件
+# 🧹 Temporary files and folders
 *.tmp
 *.temp
 *.bak
-*.swp
-
-# 测试输出
 test_output/
-
-# 本地配置（如果有）
-local_config.*
-.env.local
-
-# 临时文件夹
 tmp/
 **/tmp/
 temp/
 **/temp/
 
-# npm
+# 🔐 Local configuration
+local_config.*
+.env.local
+
+# ⚙️ Local npm publish config
 .npmrc

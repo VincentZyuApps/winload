@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 # 0. Environment Setup
 # Get the absolute path to the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Go to project root (parent directory of benchmark_go)
+# Go to project root (parent directory of benchmark)
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$PROJECT_ROOT"
 
@@ -59,8 +59,15 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}Error: Python3 is not installed.${NC}"
+if ! command -v uv &> /dev/null; then
+    echo -e "${YELLOW}uv not found. Installing uv...${NC}"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    source $HOME/.cargo/env
+fi
+
+if ! uv python find 3.13 &> /dev/null; then
+    echo -e "${RED}Error: Python 3.13 is not available to uv.${NC}"
+    echo -e "${YELLOW}Try: uv python install 3.13${NC}"
     exit 1
 fi
 
@@ -96,49 +103,39 @@ fi
 # 3. Setup Python Environment
 echo -e "${YELLOW}🐍 Setting up Python environment with uv...${NC}"
 
-# Check for uv
-if ! command -v uv &> /dev/null; then
-    echo -e "${YELLOW}uv not found. Installing uv...${NC}"
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    source $HOME/.cargo/env
-fi
-
 # Create venv and install
 # Remove existing venv to avoid interactive prompt
 rm -rf venv_bench
-uv venv venv_bench
+uv venv --python 3.13 venv_bench
 source venv_bench/bin/activate
+python --version
 
-# Install from py/ directory
-# We need to copy README.md to py/ directory because hatchling expects it to be next to pyproject.toml
+# Install from python/ directory
+# We need to copy README.md to python/ directory because hatchling expects it to be next to pyproject.toml
 # Also need to check if we are in case-sensitive FS.
 # The previous fail was: OSError: Readme file does not exist: readme.md
 # So we need to copy to 'readme.md' or make sure it matches.
 # The repo file is 'readme.md' (lowercase) or 'README.md'?
 # Checking file list it seems to be 'readme.md' mostly.
-# Copy all potential readme variants to be safe.
-cp -f readme.md py/ 2>/dev/null || true
-cp -f README.md py/ 2>/dev/null || true
-cp -f readme.zh-cn.md py/ 2>/dev/null || true
-cp -f readme.zh-tw.md py/ 2>/dev/null || true
-cp -f readme.jp.md py/ 2>/dev/null || true
-cp -f readme.ko.md py/ 2>/dev/null || true
+# Copy the package README used by python/pyproject.toml.
+cp -f readme.md python/ 2>/dev/null || true
+cp -f README.md python/ 2>/dev/null || true
 
-uv pip install ./py
+uv pip install ./python
 PY_CMD="winload"
 
 # 4. Run Benchmarks (Hyperfine)
 echo -e "${YELLOW}⏱️  Running startup time benchmarks with Hyperfine...${NC}"
 
 # Ensure output directory exists (relative to PROJECT_ROOT)
-mkdir -p benchmark_go
+mkdir -p benchmark
 
 # All three use --help consistently for fair startup time comparison.
 # --help measures: binary load → runtime init → arg parse → print → exit.
 # This captures the real runtime overhead (e.g. Python module imports vs native code).
 # -N (--shell=none) skips shell startup for more accurate sub-10ms measurements.
 
-hyperfine --warmup 3 --min-runs 10 -N --export-json benchmark_go/startup_time.json \
+hyperfine --warmup 3 --min-runs 10 -N --export-json benchmark/startup_time.json \
     "nload --help" \
     "./rust/$RUST_BIN --help" \
     "$PY_CMD --help"
@@ -206,7 +203,7 @@ echo "  - Rust size:  $(($RUST_SIZE/1024)) KB, mem: ${RUST_MEM} KB, cpu: ${RUST_
 echo "  - Py size:    $(($PY_SIZE/1024)) KB, mem: ${PY_MEM} KB, cpu: ${PY_CPU}%"
 
 # Write metrics.json
-cat <<EOF > benchmark_go/metrics.json
+cat <<EOF > benchmark/metrics.json
 {
   "binary_size": {
     "nload (C++)": $NLOAD_SIZE,
@@ -226,8 +223,9 @@ cat <<EOF > benchmark_go/metrics.json
 }
 EOF
 
-# Clean up copied readmes in py/ to avoid dirty git status
-rm -f py/readme.md py/README.md py/readme.zh-cn.md py/readme.zh-tw.md py/readme.jp.md py/readme.ko.md
+# Clean up copied readmes in python/ to avoid dirty git status.
+# Keep python/readme.md because it is the tracked local-development placeholder.
+rm -f python/README.md
 
 # 6. Generate SVG
 echo -e "${YELLOW}🎨 Generating SVG...${NC}"
@@ -264,7 +262,7 @@ if [ -z "$BENCHMARK_SYS_INFO" ]; then
     export BENCHMARK_SYS_INFO="Runner: $(uname -n) | OS: $(uname -s) $(uname -r) | CPU: ${CPU_INFO} | RAM: ${MEM_INFO}"
 fi
 
-cd benchmark_go
+cd benchmark
 go run main.go
 cd ..
 

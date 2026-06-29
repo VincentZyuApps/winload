@@ -60,7 +60,7 @@ https://github.com/rolandriegel/nload
 git clone https://github.com/VincentZyuApps/winload.git
 # 中土網路若遲，亦可取 Gitee：
 # git clone https://gitee.com/vincent-zyu/winload.git
-cd winload/py
+cd winload/python
 pip install -r requirements.txt
 python main.py
 ```
@@ -165,8 +165,10 @@ which winload
 ### macOS / Linux（Homebrew）
 > 📄 [Homebrew Formula (GitHub)](https://github.com/VincentZyuApps/homebrew-tap/blob/main/Formula/winload.rb)
 > 📄 [Homebrew Formula (Gitee)](https://gitee.com/vincent-zyu/homebrew-tap/blob/main/Formula/winload.rb)
+> 近版 Homebrew 或須先信第三方 tap formula，然後可裝。
 ```bash
 brew tap vincentzyuapps/tap
+brew trust vincentzyuapps/tap
 # 或從 Gitee（手動克隆 tap）：
 # git clone https://gitee.com/vincent-zyu/homebrew-tap.git "$(brew --prefix)/Library/Taps/vincentzyuapps/homebrew-tap"
 brew update && brew install winload
@@ -208,7 +210,7 @@ winload --max-mode smart --max-half-life 10 # 智適 Y 軸（默）
 winload --max-mode legacy # nload 舊式，以可見歷史峰值縮放
 winload --max-mode fixed --max-y-value 10M # 固 Y 軸上限
 winload --npcap      # 捕 127.0.0.1 回環流（Windows，需 Npcap）
-winload --netlink    # 手啟 RTNETLINK（Linux/Android Rust 版，默關）
+winload --netlink    # 手啟 RTNETLINK（Linux/Android，默關）
 ```
 
 ### 參數
@@ -232,7 +234,7 @@ winload --netlink    # 手啟 RTNETLINK（Linux/Android Rust 版，默關）
 | `--hide-separator` | 隱分隔線（等號一行） | 關 |
 | `--no-color` | 禁 TUI 色（單色） | 關 |
 | `--npcap` | **[Windows Rust Only]** 以 Npcap 捕回環流 | 關 |
-| `--netlink` | **[Linux/Android Rust Only]** 以 RTNETLINK 代 sysinfo（Termux proot distro 或受限境中用） | 關 |
+| `--netlink` | **[Linux/Android Only]** 以 RTNETLINK 代預設後端（Termux proot distro 或受限境中用） | 關 |
 | `--debug-info` | 印網口除錯信息後退 | — |
 | `-h`, `--help` | 示助（`--help --emoji` 可得 emoji 版！） | — |
 | `-V`, `--version` | 示版號 | — |
@@ -275,13 +277,13 @@ winload --npcap
 
 Linux 及 macOS 上，回環流開箱即用，無需他參。
 
-在 **Linux/Android** 上，若 `/proc/net/dev` 不可讀（如 Termux proot distro 或其他受限之境），Rust 版可以 `--netlink` 參，逕以 RTNETLINK 取網絡之數：
+在 **Linux/Android** 上，若 `/proc/net/dev` 不可讀（如 Termux proot distro 或其他受限之境），可以 `--netlink` 參，逕以 RTNETLINK 取網絡之數：
 
 ```bash
 winload --netlink
 ```
 
-> 註：`--netlink` 如 `--npcap`，乃手啟之可選後端，默不啟；常規 Linux/Android 仍默以 sysinfo。此參惟 **Linux/Android Rust 版** 可用；Python 版暫無 `--netlink`，仍用 psutil。macOS 無 netlink。
+> 註：`--netlink` 如 `--npcap`，乃手啟之可選後端，默不啟；常規 Linux/Android 仍用預設後端（Rust: sysinfo，Python: psutil）。Python 本於 Linux/Android 以 `pyroute2` 用 RTNETLINK。macOS 無 netlink。
 >
 > 📖 欲知其詳，請閱 [docs/linux_android_netlink.zh-tw.md](docs/linux_android_netlink.zh-tw.md)
 
@@ -308,6 +310,7 @@ winload --netlink
 |:---|:---|:---|
 | [![Python](https://img.shields.io/badge/Python-3.13.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13.11 | 編程言語 |
 | [![psutil](https://img.shields.io/badge/psutil-≥7.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/giampaolo/psutil) | ≥7.0 | 進程及系統工具 |
+| [![pyroute2](https://img.shields.io/badge/pyroute2-≥0.9.6-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/svinota/pyroute2) | ≥0.9.6 | Linux/Android RTNETLINK 後端 |
 | [![windows-curses](https://img.shields.io/badge/windows--curses-≥2.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/zhirui2020/windows-curses) | ≥2.0 | Windows curses 支援 |
 
 ### Rust 本

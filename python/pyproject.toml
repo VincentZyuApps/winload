@@ -1,15 +1,16 @@
 [project]
 name = "winload"
-version = "0.1.10-beta.1"
+version = "0.1.11-beta.2"
 description = "Network Load Monitor - nload-like TUI tool for Windows"
 readme = "readme.md"
 license = { text = "MIT" }
 authors = [
     { name = "VincentZyu", email = "1830540513zyu@gmail.com" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "psutil>=7.0",
+    "pyroute2>=0.9.6; sys_platform == 'linux' or sys_platform == 'android'",
     "windows-curses>=2.0; platform_system == 'Windows'",
 ]
 

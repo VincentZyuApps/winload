@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * @vincentzyuapps/winload — CLI entry point
+ * 📦 winload npm CLI entry point.
  *
- * 定位当前平台的预编译二进制并透传所有参数执行。
- * 用户通过 `npx @vincentzyuapps/winload` 或全局安装后直接 `winload` 即可运行。
+ * 🚀 This launcher is shared by the Rust binary npm distribution.
+ * 🧭 Users can install it in three ways:
+ *   - npm install -g @vincentzyuapps/winload
+ *   - npm install -g winload-rust-bin
+ *   - npm install -g @vincentzyuapps/winload --registry https://npm.pkg.github.com
+ *
+ * 🔎 It resolves the current platform package and forwards all CLI arguments to
+ * the precompiled Rust binary.
  */
 
 "use strict";

@@ -55,8 +55,37 @@ def print_system_info() -> None:
     print(f"\n{get_system_info()}", file=sys.stderr)
 
 
-def print_debug_info(emoji: bool = False) -> None:
+def print_debug_info(emoji: bool = False, use_netlink: bool = False) -> None:
     """Print network interface debug info and exit"""
+    if use_netlink:
+        from netlink import netlink_collect, netlink_devices
+
+        if emoji:
+            print("\n\U0001f50d\U0001f310 Network Interfaces Debug Info (netlink) \U0001f5a7\u2728")
+
+        print("\n=== Network Interfaces Debug Info (netlink) ===")
+        print("Using RTNETLINK via pyroute2.\n")
+
+        devices = netlink_devices()
+        counters = netlink_collect()
+        print(f"Total interfaces detected by netlink: {len(devices)}\n")
+
+        for dev in devices:
+            print(f"Interface: {dev.name}")
+            print(f"  IPv4: {', '.join(dev.addrs) if dev.addrs else '(none)'}")
+            if dev.name in counters:
+                c = counters[dev.name]
+                print(f"  Total received: {c.bytes_recv} bytes")
+                print(f"  Total transmitted: {c.bytes_sent} bytes")
+            print()
+
+        print(f"Filtered devices (netlink): {len(devices)}\n")
+        for dev in devices:
+            print(f"  - {dev.name} [{', '.join(dev.addrs)}]")
+
+        print(f"\n{get_system_info()}")
+        return
+
     import psutil
 
     if emoji:
@@ -312,6 +341,12 @@ def parse_args() -> argparse.Namespace:
         help=t("help_debug_info"),
     )
     parser.add_argument(
+        "--netlink",
+        action="store_true",
+        default=False,
+        help=t("help_netlink"),
+    )
+    parser.add_argument(
         "--lang",
         type=str,
         choices=["en-us", "zh-cn", "zh-tw"],
@@ -320,6 +355,8 @@ def parse_args() -> argparse.Namespace:
         help=t("help_lang"),
     )
     args = parser.parse_args()
+    if args.netlink and sys.platform not in ("linux", "android"):
+        parser.error("--netlink is only available on Linux/Android")
     if args.max_half_life <= 0:
         parser.error("--max-half-life must be greater than 0")
     if args.max_mode == "fixed":
@@ -352,7 +389,7 @@ def resolve_title(raw_title: str | None) -> str | None:
 
 def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
     """curses 主循环"""
-    collector = Collector()
+    collector = Collector(use_netlink=args.netlink)
 
     ui = UI(
         stdscr,
@@ -414,7 +451,13 @@ def main() -> None:
 
     # --debug-info: print and exit
     if args.debug_info:
-        print_debug_info(emoji=args.emoji)
+        try:
+            print_debug_info(emoji=args.emoji, use_netlink=args.netlink)
+        except RuntimeError as e:
+            if args.netlink:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+            raise
         return
 
     # Windows 需要 windows-curses
@@ -427,6 +470,11 @@ def main() -> None:
 
     try:
         curses.wrapper(lambda stdscr: main_loop(stdscr, args))
+    except RuntimeError as e:
+        if args.netlink:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+        raise
     except KeyboardInterrupt:
         pass
     finally:

@@ -60,7 +60,7 @@ https://github.com/rolandriegel/nload
 git clone https://github.com/VincentZyuApps/winload.git
 # または Gitee からクローン（中国本土で高速）：
 # git clone https://gitee.com/vincent-zyu/winload.git
-cd winload/py
+cd winload/python
 pip install -r requirements.txt
 python main.py
 ```
@@ -165,8 +165,10 @@ which winload
 ### macOS / Linux（Homebrew）
 > 📄 [Homebrew Formula (GitHub)](https://github.com/VincentZyuApps/homebrew-tap/blob/main/Formula/winload.rb)
 > 📄 [Homebrew Formula (Gitee)](https://gitee.com/vincent-zyu/homebrew-tap/blob/main/Formula/winload.rb)
+> 最近の Homebrew では、インストール前にサードパーティ tap の formula を信頼する必要がある場合があります。
 ```bash
 brew tap vincentzyuapps/tap
+brew trust vincentzyuapps/tap
 # または Gitee から（手動クローン）：
 # git clone https://gitee.com/vincent-zyu/homebrew-tap.git "$(brew --prefix)/Library/Taps/vincentzyuapps/homebrew-tap"
 brew update && brew install winload
@@ -208,7 +210,7 @@ winload --max-mode smart --max-half-life 10 # スムーズな適応型 Y 軸（�
 winload --max-mode legacy # nload 風の表示履歴ピークスケーリング
 winload --max-mode fixed --max-y-value 10M # Y 軸上限を固定
 winload --npcap      # 127.0.0.1 ループバックトラフィックをキャプチャ (Windows, Npcapが必要)
-winload --netlink    # RTNETLINK を手動で有効化（Linux/Android Rust 版、既定はオフ）
+winload --netlink    # RTNETLINK を手動で有効化（Linux/Android、既定はオフ）
 ```
 
 ### オプション
@@ -232,7 +234,7 @@ winload --netlink    # RTNETLINK を手動で有効化（Linux/Android Rust 版�
 | `--hide-separator` | 区切り線（イコール記号の行）を非表示にする | オフ |
 | `--no-color` | すべてのTUIカラーを無効にする（モノクロモード） | オフ |
 | `--npcap` | **[Windows Rust Only]** Npcap経由でループバックをキャプチャ | オフ |
-| `--netlink` | **[Linux/Android Rust Only]** RTNETLINK を sysinfo の代わりに使用（Termux proot distro や制限された環境向け） | オフ |
+| `--netlink` | **[Linux/Android Only]** RTNETLINK を既定バックエンドの代わりに使用（Termux proot distro や制限された環境向け） | オフ |
 | `--debug-info` | インターフェースのデバッグ情報を表示して終了 | — |
 | `-h`, `--help` | ヘルプを表示 (`--help --emoji` で絵文字版ヘルプ！) | — |
 | `-V`, `--version` | バージョンを表示 | — |
@@ -275,13 +277,13 @@ winload --npcap
 
 LinuxおよびmacOSでは、ループバックトラフィックは追加のフラグなしで標準で動作します。
 
-**Linux/Android** で `/proc/net/dev` にアクセスできない場合（Termux proot distro やその他の制限された環境など）、Rust 版では `--netlink` を使用して RTNETLINK 経由でネットワーク統計を直接収集できます：
+**Linux/Android** で `/proc/net/dev` にアクセスできない場合（Termux proot distro やその他の制限された環境など）、`--netlink` を使用して RTNETLINK 経由でネットワーク統計を直接収集できます：
 
 ```bash
 winload --netlink
 ```
 
-> 注：`--netlink` は `--npcap` と同じく**手動で有効化する任意のバックエンド**で、フラグを渡さない限り有効になりません。通常の Linux/Android では既定で sysinfo を使用します。このフラグは **Linux/Android Rust 版のみ**です。Python 版は `--netlink` をサポートせず、引き続き psutil を使用します。macOS では netlink は利用できません。
+> 注：`--netlink` は `--npcap` と同じく**手動で有効化する任意のバックエンド**で、フラグを渡さない限り有効になりません。通常の Linux/Android では既定バックエンド（Rust: sysinfo、Python: psutil）を使用します。Python 版は Linux/Android 上で `pyroute2` により RTNETLINK を使用します。macOS では netlink は利用できません。
 >
 > 📖 Linux/Android ネットワーク統計収集の詳細は、[docs/linux_android_netlink.md](docs/linux_android_netlink.md) を参照してください
 
@@ -308,6 +310,7 @@ winload --netlink
 |:---|:---|:---|
 | [![Python](https://img.shields.io/badge/Python-3.13.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13.11 | プログラミング言語 |
 | [![psutil](https://img.shields.io/badge/psutil-≥7.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/giampaolo/psutil) | ≥7.0 | プロセス・システムユーティリティ |
+| [![pyroute2](https://img.shields.io/badge/pyroute2-≥0.9.6-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/svinota/pyroute2) | ≥0.9.6 | Linux/Android の RTNETLINK バックエンド |
 | [![windows-curses](https://img.shields.io/badge/windows--curses-≥2.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/zhirui2020/windows-curses) | ≥2.0 | Windows カーサポート |
 
 ### Rust版

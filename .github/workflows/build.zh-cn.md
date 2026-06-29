@@ -136,7 +136,7 @@ check ──→ build ──→ release ──→ publish
   │    通过 hub-mirror-action 镜像所有分支/标签到 Gitee
   │
   ├─→ benchmark（独立运行，'run benchmark' 触发）
-  │    运行 benchmark_go/benchmark.sh
+  │    运行 benchmark/benchmark.sh
   │    提交并推送 docs/benchmark/benchmark.svg
   │
   ├─→ publish-crates-io（构建成功后并行，与 Scoop/AUR/npm 同时）
@@ -278,7 +278,7 @@ flowchart TB
 `pypi publish` 关键词会触发将 Python 包发布到 PyPI：
 
 1. 通过 [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv) 安装 `uv`
-2. 在 `py/` 目录下使用 `uv build` 构建包
+2. 在 `python/` 目录下使用 `uv build` 构建包
 3. 使用 `uv publish` 发布到 PyPI
 
 ### 前置条件
@@ -327,7 +327,7 @@ flowchart TB
 
 ## 📌 版本号
 
-版本号自动从 `rust/Cargo.toml` (Rust) 或 `py/pyproject.toml` (Python) 中提取，用于：
+版本号自动从 `rust/Cargo.toml` (Rust) 或 `python/pyproject.toml` (Python) 中提取，用于：
 - Release 标签名（如 `v0.1.5`）
 - 产物文件名（如 `winload-windows-x86_64-msvc-npcap-v0.1.5.exe`）
 - Scoop/AUR/npm/PyPI/crates.io 清单文件中的版本字段

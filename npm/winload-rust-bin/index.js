@@ -1,10 +1,17 @@
 /**
- * @vincentzyuapps/winload — binary path resolver
+ * 📦 winload npm binary path resolver.
  *
- * npm 安装时会根据 optionalDependencies 中各平台包的 os/cpu 字段，
- * 仅下载与当前平台匹配的那一个。此模块负责定位该平台包中的二进制。
+ * 🧭 The npm release is available as:
+ *   - @vincentzyuapps/winload on npm
+ *   - winload-rust-bin on npm
+ *   - @vincentzyuapps/winload on GitHub Packages
  *
- * 原理同 esbuild / @biomejs/biome / turbo 等项目。
+ * 🧩 optionalDependencies use each platform package's os/cpu fields, so npm only
+ * installs the package matching the current machine. This module locates that
+ * platform package and returns the bundled Rust binary path.
+ *
+ * 🛠 This follows the same packaging pattern used by projects such as esbuild,
+ * @biomejs/biome, and turbo.
  */
 
 "use strict";
@@ -12,9 +19,9 @@
 const path = require("path");
 
 /**
- * 平台映射表
+ * 🗺 Platform package mapping.
  * key:   `${process.platform}-${process.arch}`
- * value: npm 平台包名
+ * value: npm platform package name
  */
 const PLATFORMS = {
   "win32-x64":    "@vincentzyuapps/winload-win32-x64",
@@ -26,9 +33,9 @@ const PLATFORMS = {
 };
 
 /**
- * 获取当前平台对应的 winload 二进制绝对路径
- * @returns {string} 二进制路径
- * @throws {Error} 不支持的平台 / 平台包未安装
+ * 🔎 Resolve the absolute path to the winload binary for the current platform.
+ * @returns {string} Binary path
+ * @throws {Error} Unsupported platform or missing platform package
  */
 function getBinaryPath() {
   const key = `${process.platform}-${process.arch}`;
@@ -50,7 +57,10 @@ function getBinaryPath() {
   } catch {
     throw new Error(
       `winload: platform package "${pkg}" not found\n` +
-      `Try reinstalling: npm install @vincentzyuapps/winload\n` +
+      `Try reinstalling one of:\n` +
+      `  npm install @vincentzyuapps/winload\n` +
+      `  npm install winload-rust-bin\n` +
+      `  npm install @vincentzyuapps/winload --registry https://npm.pkg.github.com\n` +
       `Or download manually: https://github.com/VincentZyuApps/winload/releases`
     );
   }

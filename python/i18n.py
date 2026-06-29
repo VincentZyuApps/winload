@@ -46,6 +46,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_version": "Print version",
         "help_no_color": "Disable all TUI colors (monochrome mode), press 'c' to toggle at runtime",
         "help_debug_info": "Print debug info about network interfaces and exit",
+        "help_netlink": "[Linux/Android only] Use RTNETLINK via pyroute2 instead of psutil (useful in Termux proot distro or restricted environments)",
         "help_lang": "Display language: en-us (default), zh-cn, zh-tw",
         # ── TUI strings ──
         "device": "Device",
@@ -162,6 +163,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_version": "打印版本号",
         "help_no_color": "禁用所有 TUI 颜色（单色模式），运行时按 c 可切换",
         "help_debug_info": "打印网卡调试信息并退出",
+        "help_netlink": "[仅 Linux/Android] 使用 pyroute2 通过 RTNETLINK 替代 psutil（适用于 Termux proot distro 或受限环境）",
         "help_lang": "显示语言：en-us（默认），zh-cn，zh-tw",
         # ── TUI strings ──
         "device": "设备",
@@ -278,6 +280,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_version": "列印版本號",
         "help_no_color": "停用所有 TUI 顏色（單色模式），執行時按 c 可切換",
         "help_debug_info": "列印網路卡除錯資訊並退出",
+        "help_netlink": "[僅 Linux/Android] 使用 pyroute2 透過 RTNETLINK 取代 psutil（適用於 Termux proot distro 或受限環境）",
         "help_lang": "顯示語言：en-us（預設），zh-cn，zh-tw",
         # ── TUI strings ──
         "device": "裝置",

@@ -1,0 +1,3 @@
+psutil==7.2.2
+pyroute2>=0.9.6; sys_platform == 'linux' or sys_platform == 'android'
+windows-curses==2.4.0; sys_platform == 'win32'

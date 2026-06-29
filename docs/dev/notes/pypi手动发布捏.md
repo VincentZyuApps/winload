@@ -12,7 +12,7 @@
 ```bash
 # 从 pyproject.toml 读取版本
 wsl
-grep '^version' py/pyproject.toml
+grep '^version' python/pyproject.toml
 # 例: version = "0.1.6-beta.3"
 ```
 > 🔔 以下所有操作都用这个版本号替换 `${VERSION}`。
@@ -29,7 +29,7 @@ curl -LsSf https://gitee.com/wangnov/uv-custom/releases/download/0.10.5/uv-insta
 
 ### 3. 安装构建依赖
 ```bash
-cd py
+cd python
 uv sync
 ```
 
@@ -39,7 +39,7 @@ uv sync
 
 ### 使用 uv 构建（推荐）
 ```bash
-cd py
+cd python
 
 # 构建 wheel 和源码包
 uv build
@@ -55,7 +55,7 @@ ls dist/
 ### 方式 A: 使用 uv publish（推荐）
 
 ```bash
-cd py
+cd python
 
 # 发布到 TestPyPI（测试）
 # uv publish --index https://test.pypi.org/simple/
@@ -74,7 +74,7 @@ uv publish
 ### 方式 B: 使用 twine
 
 ```bash
-cd py
+cd python
 
 # 安装 twine
 pip install twine
@@ -110,8 +110,8 @@ winload --help
 ## 📝 发布检查清单
 
 每次发布新版本时：
-- [ ] 更新 `py/pyproject.toml` 中的版本号
-- [ ] 构建包：`cd py && uv build`
+- [ ] 更新 `python/pyproject.toml` 中的版本号
+- [ ] 构建包：`cd python && uv build`
 - [ ] 发布到 TestPyPI 并测试安装
 - [ ] 发布到正式 PyPI
 - [ ] 验证安装：`pip install winload && winload --version`

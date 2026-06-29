@@ -60,7 +60,7 @@ https://github.com/rolandriegel/nload
 git clone https://github.com/VincentZyuApps/winload.git
 # 또는 Gitee에서 클론 (중국 본토에서 더 빠름):
 # git clone https://gitee.com/vincent-zyu/winload.git
-cd winload/py
+cd winload/python
 pip install -r requirements.txt
 python main.py
 ```
@@ -165,8 +165,10 @@ which winload
 ### macOS / Linux（Homebrew）
 > 📄 [Homebrew Formula (GitHub)](https://github.com/VincentZyuApps/homebrew-tap/blob/main/Formula/winload.rb)
 > 📄 [Homebrew Formula (Gitee)](https://gitee.com/vincent-zyu/homebrew-tap/blob/main/Formula/winload.rb)
+> 최신 Homebrew에서는 설치 전에 서드파티 tap formula를 신뢰해야 할 수 있습니다.
 ```bash
 brew tap vincentzyuapps/tap
+brew trust vincentzyuapps/tap
 # 또는 Gitee에서（수동 탭 클론）：
 # git clone https://gitee.com/vincent-zyu/homebrew-tap.git "$(brew --prefix)/Library/Taps/vincentzyuapps/homebrew-tap"
 brew update && brew install winload
@@ -208,7 +210,7 @@ winload --max-mode smart --max-half-life 10 # 부드러운 적응형 Y축 (기�
 winload --max-mode legacy # nload 스타일 표시 히스토리 피크 스케일링
 winload --max-mode fixed --max-y-value 10M # Y축 상한 고정
 winload --npcap      # 127.0.0.1 루프백 트래픽 캡처 (Windows, Npcap 필요)
-winload --netlink    # RTNETLINK 수동 활성화（Linux/Android Rust 에디션, 기본 꺼짐）
+winload --netlink    # RTNETLINK 수동 활성화（Linux/Android, 기본 꺼짐）
 ```
 
 ### 옵션 상세
@@ -232,7 +234,7 @@ winload --netlink    # RTNETLINK 수동 활성화（Linux/Android Rust 에디션
 | `--hide-separator` | 구분선(등호 행) 숨기기 | 비활성 |
 | `--no-color` | 모든 TUI 색상 비활성화 (흑백 모드) | 비활성 |
 | `--npcap` | **[Windows Rust Only]** Npcap을 통해 루프백 트래픽 캡처 | 비활성 |
-| `--netlink` | **[Linux/Android Rust Only]** sysinfo 대신 RTNETLINK 사용 (Termux proot distro 또는 제한된 환경용) | 비활성 |
+| `--netlink` | **[Linux/Android Only]** 기본 백엔드 대신 RTNETLINK 사용 (Termux proot distro 또는 제한된 환경용) | 비활성 |
 | `--debug-info` | 네트워크 인터페이스 디버그 정보 출력 후 종료 | — |
 | `-h`, `--help` | 도움말 출력 (`--help --emoji`로 이모지 버전 확인 가능!) | — |
 | `-V`, `--version` | 버전 정보 출력 | — |
@@ -275,13 +277,13 @@ winload --npcap
 
 Linux 및 macOS에서는 별도의 설정 없이 루프백 트래픽 모니터링이 기본적으로 작동합니다.
 
-**Linux/Android**에서 `/proc/net/dev`에 접근할 수 없는 경우（Termux proot distro 또는 기타 제한된 환경 등），Rust 에디션은 `--netlink`를 사용하여 RTNETLINK를 통해 네트워크 통계를 직접 수집할 수 있습니다：
+**Linux/Android**에서 `/proc/net/dev`에 접근할 수 없는 경우（Termux proot distro 또는 기타 제한된 환경 등），`--netlink`를 사용하여 RTNETLINK를 통해 네트워크 통계를 직접 수집할 수 있습니다：
 
 ```bash
 winload --netlink
 ```
 
-> 참고：`--netlink`는 `--npcap`처럼 **수동으로 켜는 선택적 백엔드**이며, 플래그를 지정하지 않으면 활성화되지 않습니다. 일반 Linux/Android 실행은 기본적으로 sysinfo를 사용합니다. 이 플래그는 **Linux/Android Rust 에디션 전용**입니다. Python 에디션은 `--netlink`를 지원하지 않으며 계속 psutil을 사용합니다. macOS에서는 netlink를 사용할 수 없습니다.
+> 참고：`--netlink`는 `--npcap`처럼 **수동으로 켜는 선택적 백엔드**이며, 플래그를 지정하지 않으면 활성화되지 않습니다. 일반 Linux/Android 실행은 기본 백엔드(Rust: sysinfo, Python: psutil)를 사용합니다. Python 에디션은 Linux/Android에서 `pyroute2`로 RTNETLINK를 사용합니다. macOS에서는 netlink를 사용할 수 없습니다.
 >
 > 📖 Linux/Android 네트워크 통계 수집 원리에 대한 자세한 내용은 [docs/linux_android_netlink.md](docs/linux_android_netlink.md)를 참조하십시오
 
@@ -308,6 +310,7 @@ winload --netlink
 |:---|:---|:---|
 | [![Python](https://img.shields.io/badge/Python-3.13.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13.11 | 프로그래밍 언어 |
 | [![psutil](https://img.shields.io/badge/psutil-≥7.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/giampaolo/psutil) | ≥7.0 | 프로세스 및 시스템 유틸리티 |
+| [![pyroute2](https://img.shields.io/badge/pyroute2-≥0.9.6-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/svinota/pyroute2) | ≥0.9.6 | Linux/Android RTNETLINK 백엔드 |
 | [![windows-curses](https://img.shields.io/badge/windows--curses-≥2.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/zhirui2020/windows-curses) | ≥2.0 | Windows curses 지원 |
 
 ### Rust 버전

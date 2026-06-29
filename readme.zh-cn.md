@@ -60,7 +60,7 @@ https://github.com/rolandriegel/nload
 git clone https://github.com/VincentZyuApps/winload.git
 # 或从 Gitee 克隆（中国大陆更快）：
 # git clone https://gitee.com/vincent-zyu/winload.git
-cd winload/py
+cd winload/python
 pip install -r requirements.txt
 python main.py
 ```
@@ -165,8 +165,10 @@ which winload
 ### macOS / Linux（Homebrew）
 > 📄 [Homebrew Formula (GitHub)](https://github.com/VincentZyuApps/homebrew-tap/blob/main/Formula/winload.rb)
 > 📄 [Homebrew Formula (Gitee)](https://gitee.com/vincent-zyu/homebrew-tap/blob/main/Formula/winload.rb)
+> 较新的 Homebrew 可能要求先信任第三方 tap 的 formula 后再安装。
 ```bash
 brew tap vincentzyuapps/tap
+brew trust vincentzyuapps/tap
 # 或从 Gitee（手动克隆 tap）：
 # git clone https://gitee.com/vincent-zyu/homebrew-tap.git "$(brew --prefix)/Library/Taps/vincentzyuapps/homebrew-tap"
 brew update && brew install winload
@@ -208,7 +210,7 @@ winload --max-mode smart --max-half-life 10 # 平滑自适应 Y 轴（默认）
 winload --max-mode legacy # nload 风格的可见历史峰值缩放
 winload --max-mode fixed --max-y-value 10M # 固定 Y 轴上限
 winload --npcap      # 捕获 127.0.0.1 回环流量 (Windows，需安装 Npcap)
-winload --netlink    # 手动启用 RTNETLINK（Linux/Android Rust 版，默认关闭）
+winload --netlink    # 手动启用 RTNETLINK（Linux/Android，默认关闭）
 ```
 
 ### 参数选项
@@ -232,7 +234,7 @@ winload --netlink    # 手动启用 RTNETLINK（Linux/Android Rust 版，默认�
 | `--hide-separator` | 隐藏分隔线（等于号一行） | 关闭 |
 | `--no-color` | 禁用所有 TUI 颜色（单色模式） | 关闭 |
 | `--npcap` | **[Windows Rust Only]** 通过 Npcap 捕获回环流量（推荐） | 关闭 |
-| `--netlink` | **[Linux/Android Rust Only]** 使用 RTNETLINK 替代 sysinfo（在 Termux proot distro 或受限环境中适用） | 关闭 |
+| `--netlink` | **[Linux/Android Only]** 使用 RTNETLINK 替代默认后端（在 Termux proot distro 或受限环境中适用） | 关闭 |
 | `--debug-info` | 打印网络接口调试信息后退出 | — |
 | `-h`, `--help` | 打印帮助（`--help --emoji` 可查看 emoji 版！） | — |
 | `-V`, `--version` | 打印版本号 | — |
@@ -275,13 +277,13 @@ winload --npcap
 
 在 Linux 和 macOS 上，回环流量开箱即用，无需额外参数。
 
-在 **Linux/Android** 上，如果无法访问 `/proc/net/dev`（例如在 Termux proot distro 或其他受限环境中），Rust 版可使用 `--netlink` 通过 RTNETLINK 直接收集网络统计信息：
+在 **Linux/Android** 上，如果无法访问 `/proc/net/dev`（例如在 Termux proot distro 或其他受限环境中），可使用 `--netlink` 通过 RTNETLINK 直接收集网络统计信息：
 
 ```bash
 winload --netlink
 ```
 
-> 注意：`--netlink` 和 `--npcap` 一样是**手动启用的可选后端**，默认不会启用；普通 Linux/Android 仍默认使用 sysinfo。该参数仅适用于 **Linux/Android Rust 版**；Python 版暂不支持 `--netlink`，仍使用 psutil。macOS 不支持 netlink。
+> 注意：`--netlink` 和 `--npcap` 一样是**手动启用的可选后端**，默认不会启用；普通 Linux/Android 仍使用默认后端（Rust：sysinfo，Python：psutil）。Python 版在 Linux/Android 上通过 `pyroute2` 使用 RTNETLINK。macOS 不支持 netlink。
 >
 > 📖 深入了解 Linux/Android 网络统计采集原理，请阅读 [docs/linux_android_netlink.zh-cn.md](docs/linux_android_netlink.zh-cn.md)
 
@@ -308,6 +310,7 @@ winload --netlink
 |:---|:---|:---|
 | [![Python](https://img.shields.io/badge/Python-3.13.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13.11 | 编程语言 |
 | [![psutil](https://img.shields.io/badge/psutil-≥7.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/giampaolo/psutil) | ≥7.0 | 进程和系统工具 |
+| [![pyroute2](https://img.shields.io/badge/pyroute2-≥0.9.6-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/svinota/pyroute2) | ≥0.9.6 | Linux/Android 上的 RTNETLINK 后端 |
 | [![windows-curses](https://img.shields.io/badge/windows--curses-≥2.0-FFD43B?style=flat-square&logo=python&logoColor=white)](https://github.com/zhirui2020/windows-curses) | ≥2.0 | Windows curses 支持 |
 
 ### Rust 版本
