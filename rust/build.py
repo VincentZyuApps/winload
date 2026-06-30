@@ -4,12 +4,12 @@ Cross-compile winload for Windows x64 and Linux x64 from WSL.
 Usage: python3 build.py [--clean]
 """
 
-import argparse
 import os
 import re
-import shutil
-import subprocess
 import sys
+import shutil
+import argparse
+import subprocess
 from pathlib import Path
 from multiprocessing import cpu_count
 
