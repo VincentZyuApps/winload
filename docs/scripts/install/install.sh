@@ -1,6 +1,6 @@
 #!/bin/bash
 # winload installer — supports apt (deb) / dnf (rpm) / Termux on x86_64 / aarch64
-# Usage: curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/scripts/install/install.sh | bash
 # Install specific version: WINLOAD_VERSION=v0.1.7-rc.10 bash -c "$(curl -fsSL https://...)"
 set -e
 
@@ -117,4 +117,4 @@ echo "   📖 GitHub: https://github.com/${REPO}"
 echo "   📖 Gitee:  https://gitee.com/vincent-zyu/winload"
 echo ""
 echo "   🇨🇳 Gitee mirror (faster in China / 国内镜像，下载更快):"
-echo "   curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh | bash"
+echo "   curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh | bash"

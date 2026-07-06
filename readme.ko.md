@@ -149,17 +149,17 @@ which winload
 > Android의 Termux (aarch64)도 지원
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/scripts/install/install.sh | bash
 which winload
 ```
-> 📄 [설치 스크립트 소스 보기](https://github.com/VincentZyuApps/winload/blob/main/docs/install_scripts/install.sh)
+> 📄 [설치 스크립트 소스 보기](https://github.com/VincentZyuApps/winload/blob/main/docs/scripts/install/install.sh)
 
 **🇨🇳 Gitee 미러 (중국 본토 내 빠른 다운로드):**
 ```bash
-curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh | bash
+curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh | bash
 which winload
 ```
-> 📄 [Gitee 설치 스크립트 소스 보기](https://gitee.com/vincent-zyu/winload/blob/main/docs/install_scripts/install_gitee.sh)
+> 📄 [Gitee 설치 스크립트 소스 보기](https://gitee.com/vincent-zyu/winload/blob/main/docs/scripts/install/install_gitee.sh)
 
 > ⚠️ 위의 두 `curl ... | bash` 설치 스크립트는 **x86_64 / aarch64** 아키텍처에서 **apt**（Debian/Ubuntu）、**dnf**（Fedora/RHEL）또는 **Termux**（Android）를 사용하는 시스템을 지원합니다. 다른 플랫폼에서는 **npm**（`npm install -g @vincentzyuapps/winload`）또는 **Cargo**（`cargo install winload`）를 사용하세요.
 

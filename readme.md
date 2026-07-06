@@ -149,17 +149,17 @@ which winload
 > Also supports Termux on Android (aarch64)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/scripts/install/install.sh | bash
 which winload
 ```
-> 📄 [View install script source](https://github.com/VincentZyuApps/winload/blob/main/docs/install_scripts/install.sh)
+> 📄 [View install script source](https://github.com/VincentZyuApps/winload/blob/main/docs/scripts/install/install.sh)
 
 **🇨🇳 Gitee mirror (faster in China Mainland):**
 ```bash
-curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh | bash
+curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh | bash
 which winload
 ```
-> 📄 [View Gitee install script](https://gitee.com/vincent-zyu/winload/blob/main/docs/install_scripts/install_gitee.sh)
+> 📄 [View Gitee install script](https://gitee.com/vincent-zyu/winload/blob/main/docs/scripts/install/install_gitee.sh)
 
 > ⚠️ The two `curl ... | bash` install scripts above support **x86_64 / aarch64** systems with **apt** (Debian/Ubuntu), **dnf** (Fedora/RHEL), or **Termux** (Android). For other platforms, use **npm** (`npm install -g @vincentzyuapps/winload`) or **Cargo** (`cargo install winload`) instead.
 

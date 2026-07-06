@@ -3,10 +3,10 @@
 # 支持 apt (deb) / dnf (rpm) / Termux，架构 x86_64 / aarch64
 #
 # 用法:
-#   curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh | bash
+#   curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh | bash
 #
 # 安装指定版本:
-#   WINLOAD_VERSION=v0.1.7-rc.19 bash -c "$(curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh)"
+#   WINLOAD_VERSION=v0.1.7-rc.19 bash -c "$(curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh)"
 set -e
 
 OWNER="vincent-zyu"
@@ -124,4 +124,4 @@ echo "   📖 GitHub: https://github.com/VincentZyuApps/winload"
 echo "   📖 Gitee:  https://gitee.com/${OWNER}/${REPO}"
 echo ""
 echo "   🌐 GitHub install script (GitHub 安装脚本):"
-echo "   curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash"
+echo "   curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/scripts/install/install.sh | bash"

@@ -149,17 +149,17 @@ which winload
 > 亦支援 Android 之 Termux（aarch64）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/install_scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/VincentZyuApps/winload/main/docs/scripts/install/install.sh | bash
 which winload
 ```
-> 📄 [觀安裝腳本之源](https://github.com/VincentZyuApps/winload/blob/main/docs/install_scripts/install.sh)
+> 📄 [觀安裝腳本之源](https://github.com/VincentZyuApps/winload/blob/main/docs/scripts/install/install.sh)
 
 **🇨🇳 Gitee 鏡像（中土下載更速）：**
 ```bash
-curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh | bash
+curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh | bash
 which winload
 ```
-> 📄 [觀 Gitee 安裝腳本之源](https://gitee.com/vincent-zyu/winload/blob/main/docs/install_scripts/install_gitee.sh)
+> 📄 [觀 Gitee 安裝腳本之源](https://gitee.com/vincent-zyu/winload/blob/main/docs/scripts/install/install_gitee.sh)
 
 > ⚠️ 上二 `curl ... | bash` 安裝腳本支援 **x86_64 / aarch64** 架構之 **apt**（Debian/Ubuntu）、**dnf**（Fedora/RHEL）或 **Termux**（Android）系統。他方平臺請以 **npm**（`npm install -g @vincentzyuapps/winload`）或 **Cargo**（`cargo install winload`）安裝。
 
