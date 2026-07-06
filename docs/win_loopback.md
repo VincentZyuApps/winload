@@ -4,7 +4,7 @@
 > **[📖 简体中文(大陆)](win_loopback.zh-cn.md)**
 > **[📖 繁體中文(台灣)](win_loopback.zh-tw.md)**
 
-## TL;DR
+## ⚡ TL;DR
 
 Windows loopback (`127.0.0.1`) traffic is short-circuited inside `tcpip.sys`, **completely bypassing the NDIS network driver layer**. As a result, `GetIfEntry` / `GetIfTable` counters are always 0.
 
@@ -14,7 +14,7 @@ Npcap works around this by using a WFP (Windows Filtering Platform) callout driv
 
 ---
 
-## Windows Network Stack Architecture
+## 🏗️ Windows Network Stack Architecture
 
 ```
 App  →  Winsock  →  AFD.sys  →  tcpip.sys  →  NDIS  →  NIC driver  →  Hardware
@@ -45,7 +45,7 @@ Windows' "Loopback Pseudo-Interface 1" is essentially a **placeholder entry**. I
 
 ---
 
-## Why Can Npcap Capture Loopback Traffic?
+## 🪟 Why Can Npcap Capture Loopback Traffic?
 
 Npcap registers a **WFP (Windows Filtering Platform) callout driver** that intercepts packets **before** `tcpip.sys` performs the short-circuit, and copies them to userspace:
 
@@ -63,7 +63,7 @@ That's why Npcap's installer has the **"Support loopback traffic capture"** chec
 
 ---
 
-## Comparison with Linux and macOS
+## ⚖️ Comparison with Linux and macOS
 
 ### Linux
 
@@ -98,7 +98,7 @@ macOS inherits BSD's design philosophy: loopback is an ordinary network interfac
 
 ---
 
-## Design Philosophy Summary
+## 🧠 Design Philosophy Summary
 
 |                          | Windows                              | Linux                            | macOS                        |
 | ------------------------ | ------------------------------------ | -------------------------------- | ---------------------------- |
@@ -112,7 +112,7 @@ macOS inherits BSD's design philosophy: loopback is an ordinary network interfac
 
 ---
 
-## winload's Solution
+## 🧭 winload's Solution
 
 winload uses **Npcap** as its Windows loopback capture backend:
 
@@ -125,7 +125,7 @@ So yes — to monitor loopback traffic on Windows, you need to install a third-p
 
 On Linux / macOS, loopback traffic is obtained directly via the [`sysinfo`](https://crates.io/crates/sysinfo) crate — no extra flags needed.
 
-## Windows Distribution Matrix
+## 📦 Windows Distribution Matrix
 
 | Windows release / channel | OS / Arch | `--npcap` | Accurate Windows loopback capture | Uses system Npcap | Bundles Npcap | npm | Scoop | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

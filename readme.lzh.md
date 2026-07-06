@@ -274,7 +274,9 @@ winload --npcap
 
 > 嘗試輪詢 Windows 之 `GetIfEntry` API，然 loopback 計數恆零——loopback 虛口背後無 NDIS 驅以數之。今已去其徑。
 
-> 📖 欲知其詳，請閱 [docs/win_loopback.zh-cn.md](docs/win_loopback.zh-cn.md)
+> 📖 欲知其詳，請閱 [docs/win_loopback.zh-tw.md](docs/win_loopback.zh-tw.md)
+
+## 🐧 Linux / Android / Termux Netlink
 
 Linux 及 macOS 上，回環流開箱即用，無需他參。
 

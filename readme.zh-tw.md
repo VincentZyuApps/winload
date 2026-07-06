@@ -276,6 +276,8 @@ winload --npcap
 
 > 📖 深入了解 Windows 回環為何失效，請閱讀 [docs/win_loopback.zh-tw.md](docs/win_loopback.zh-tw.md)
 
+## 🐧 Linux / Android / Termux Netlink
+
 在 Linux 和 macOS 上，回環流量開箱即用，無需額外參數。
 
 在 **Linux/Android** 上，如果無法存取 `/proc/net/dev`（例如在 Termux proot distro 或其他受限環境中），可使用 `--netlink` 透過 RTNETLINK 直接收集網路統計資訊：

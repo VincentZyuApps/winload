@@ -1,16 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
+	"strings"
+	"encoding/json"
+	"path/filepath"
 )
 
-// ========== 配置 ==========
+// ========== ⚙️ 配置 ==========
 
 const (
 	svgWidth    = 600
@@ -20,7 +20,7 @@ const (
 	svgFileName = "benchmark.svg"
 )
 
-// ========== 数据结构 ==========
+// ========== 🧱 数据结构 ==========
 
 type HyperfineResult struct {
 	Results []struct {
@@ -44,7 +44,7 @@ type BenchmarkData struct {
 	SystemInfo  string
 }
 
-// ========== 颜色配置 ==========
+// ========== 🎨 颜色配置 ==========
 
 var toolColors = map[string]string{
 	"nload (C++)":    "#f34b7d",
@@ -52,7 +52,7 @@ var toolColors = map[string]string{
 	"winload (Py)":   "#3572A5",
 }
 
-// ========== SVG 生成 ==========
+// ========== 🖼️ SVG 生成 ==========
 
 func generateSVG(data BenchmarkData) string {
 	// 准备数据行
@@ -311,7 +311,7 @@ func parseCommandName(cmd string) string {
 	return cmd
 }
 
-// ========== Main ==========
+// ========== 🚀 Main ==========
 
 func main() {
 	// 读取 hyperfine json

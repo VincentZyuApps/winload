@@ -276,6 +276,8 @@ This requires [Npcap](https://npcap.com/#download) installed with "Support loopb
 
 > 📖 For a deep dive into why Windows loopback is broken, see [docs/win_loopback.md](docs/win_loopback.md)
 
+## 🐧 Linux / Android / Termux Netlink
+
 On Linux and macOS, loopback traffic works out of the box — no extra flags needed.
 
 On **Linux/Android**, if `/proc/net/dev` is not accessible (e.g. inside a Termux proot distro or other restricted environments), use `--netlink` to collect network stats via RTNETLINK directly:

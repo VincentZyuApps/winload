@@ -276,6 +276,8 @@ winload --npcap
 
 > 📖 なぜWindowsのループバックが制限されているのかについての詳細は、[docs/win_loopback.md](docs/win_loopback.md) を参照してください。
 
+## 🐧 Linux / Android / Termux Netlink
+
 LinuxおよびmacOSでは、ループバックトラフィックは追加のフラグなしで標準で動作します。
 
 **Linux/Android** で `/proc/net/dev` にアクセスできない場合（Termux proot distro やその他の制限された環境など）、`--netlink` を使用して RTNETLINK 経由でネットワーク統計を直接収集できます：

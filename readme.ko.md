@@ -276,6 +276,8 @@ winload --npcap
 
 > 📖 Windows 루프백 문제에 대한 기술적인 상세 내용은 [docs/win_loopback.md](docs/win_loopback.md)를 참조하십시오.
 
+## 🐧 Linux / Android / Termux Netlink
+
 Linux 및 macOS에서는 별도의 설정 없이 루프백 트래픽 모니터링이 기본적으로 작동합니다.
 
 **Linux/Android**에서 `/proc/net/dev`에 접근할 수 없는 경우（Termux proot distro 또는 기타 제한된 환경 등），`--netlink`를 사용하여 RTNETLINK를 통해 네트워크 통계를 직접 수집할 수 있습니다：

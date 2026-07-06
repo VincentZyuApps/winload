@@ -4,7 +4,7 @@
 > **[📖 简体中文(大陆)](linux_android_netlink.zh-cn.md)**
 > **[📖 繁體中文(台灣)](linux_android_netlink.zh-tw.md)**
 
-## TL;DR
+## ⚡ TL;DR
 
 Linux provides **two distinct pathways** for reading network interface traffic statistics:
 
@@ -15,7 +15,7 @@ On stock Linux desktops and servers, sysfs works flawlessly. On **Android Termux
 
 ---
 
-## Path 1: sysfs (The "Everything is a File" Way)
+## 📁 Path 1: sysfs (The "Everything is a File" Way)
 
 ### How the `sysinfo` Crate Works on Linux
 
@@ -101,7 +101,7 @@ Even on stock Linux, similar issues arise in:
 
 ---
 
-## Path 2: Netlink (The Socket Way)
+## 🔌 Path 2: Netlink (The Socket Way)
 
 > **💡 Wait, What's a Socket?**
 >
@@ -178,7 +178,7 @@ loop {
 
 ---
 
-## Comparison: sysfs vs Netlink
+## ⚖️ Comparison: sysfs vs Netlink
 
 | Aspect | sysfs (via `sysinfo`) | Netlink (`--netlink`) |
 |--------|-----------------------|-----------------------|
@@ -201,7 +201,7 @@ This two-path design reflects Linux's broader architectural maturity: simple thi
 
 ---
 
-## winload's Strategy
+## 🧭 winload's Strategy
 
 winload combines both approaches to maximize compatibility:
 
@@ -234,7 +234,7 @@ Netlink isn't the only way to talk to the kernel via sockets. Linux uses the sam
 
 ---
 
-## Further Reading
+## 📚 Further Reading
 
 - Linux kernel documentation: [rtnetlink(7)](https://man7.org/linux/man-pages/man7/rtnetlink.7.html), [netlink(7)](https://man7.org/linux/man-pages/man7/netlink.7.html)
 - `sysinfo` crate source: `src/unix/linux/network.rs` — the sysfs-based network stats implementation

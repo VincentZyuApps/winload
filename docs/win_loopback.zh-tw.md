@@ -4,7 +4,7 @@
 > **[📖 简体中文(大陆)](win_loopback.zh-cn.md)**
 > **[📖 繁體中文(台灣)](win_loopback.zh-tw.md)**
 
-## TL;DR
+## ⚡ TL;DR
 
 Windows 的 loopback (`127.0.0.1`) 流量在 `tcpip.sys` 內部直接短路，**完全繞過了 NDIS 網路驅動層**，導致 `GetIfEntry` / `GetIfTable` 的計數器始終為 0。
 
@@ -14,7 +14,7 @@ Npcap 透過 WFP (Windows Filtering Platform) callout driver 在短路之前攔�
 
 ---
 
-## Windows 網路棧架構
+## 🏗️ Windows 網路棧架構
 
 ```
 App  →  Winsock  →  AFD.sys  →  tcpip.sys  →  NDIS  →  NIC driver  →  Hardware
@@ -45,7 +45,7 @@ Windows 的 "Loopback Pseudo-Interface 1" 其實是一個**虛擬佔位符**。�
 
 ---
 
-## 為什麼 Npcap 能抓到？
+## 🪟 為什麼 Npcap 能抓到？
 
 Npcap 註冊了一個 **WFP (Windows Filtering Platform) callout driver**，在 `tcpip.sys` 做環回**之前**攔截資料包，然後複製一份到使用者態：
 
@@ -63,7 +63,7 @@ tcpip.sys send path
 
 ---
 
-## 與 Linux / macOS 的對比
+## ⚖️ 與 Linux / macOS 的對比
 
 ### Linux
 
@@ -98,7 +98,7 @@ macOS 繼承了 BSD 的設計哲學——loopback 就是一個普通網路介面
 
 ---
 
-## 設計哲學總結
+## 🧠 設計哲學總結
 
 |                          | Windows                              | Linux                            | macOS                        |
 | ------------------------ | ------------------------------------ | -------------------------------- | ---------------------------- |
@@ -112,7 +112,7 @@ macOS 繼承了 BSD 的設計哲學——loopback 就是一個普通網路介面
 
 ---
 
-## winload 的解決方案
+## 🧭 winload 的解決方案
 
 winload 使用 **Npcap** 作為 Windows loopback 擷取後端：
 
@@ -125,7 +125,7 @@ winload 使用 **Npcap** 作為 Windows loopback 擷取後端：
 
 在 Linux / macOS 上，loopback 流量透過 [`sysinfo`](https://crates.io/crates/sysinfo) crate 直接取得，不需額外參數。
 
-## Windows 發佈矩陣
+## 📦 Windows 發佈矩陣
 
 | Windows release / channel | OS / Arch | `--npcap` | Accurate Windows loopback capture | Uses system Npcap | Bundles Npcap | npm | Scoop | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

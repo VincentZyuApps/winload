@@ -4,7 +4,7 @@
 > **[📖 简体中文(大陆)](linux_android_netlink.zh-cn.md)**
 > **[📖 繁體中文(台灣)](linux_android_netlink.zh-tw.md)**
 
-## TL;DR
+## ⚡ TL;DR
 
 Linux 提供了 **两条截然不同的路径** 来读取网络接口流量统计：
 
@@ -15,7 +15,7 @@ Linux 提供了 **两条截然不同的路径** 来读取网络接口流量统�
 
 ---
 
-## 路径一：sysfs（"一切皆文件"之道）
+## 📁 路径一：sysfs（"一切皆文件"之道）
 
 ### `sysinfo` Crate 在 Linux 上的工作方式
 
@@ -101,7 +101,7 @@ Android 的 SELinux（Security-Enhanced Linux）实施了强制访问控制，�
 
 ---
 
-## 路径二：Netlink（套接字之道）
+## 🔌 路径二：Netlink（套接字之道）
 
 > **💡 等等，什么是套接字（Socket）？**
 >
@@ -178,7 +178,7 @@ loop {
 
 ---
 
-## 对比：sysfs vs Netlink
+## ⚖️ 对比：sysfs vs Netlink
 
 | 方面 | sysfs（通过 `sysinfo`） | Netlink（`--netlink`） |
 |--------|-----------------------|-----------------------|
@@ -201,7 +201,7 @@ Linux 设计的美妙之处在于它在**合适的层次提供了选择**：
 
 ---
 
-## winload 的策略
+## 🧭 winload 的策略
 
 winload 结合了两种方法以最大化兼容性：
 
@@ -234,7 +234,7 @@ Linux 的设计很巧妙——既然"套接字传真机"这么好用，除了跟
 
 ---
 
-## 延伸阅读
+## 📚 延伸阅读
 
 - Linux 内核文档：[rtnetlink(7)](https://man7.org/linux/man-pages/man7/rtnetlink.7.html)、[netlink(7)](https://man7.org/linux/man-pages/man7/netlink.7.html)
 - `sysinfo` crate 源码：`src/unix/linux/network.rs` —— 基于 sysfs 的网络统计实现
