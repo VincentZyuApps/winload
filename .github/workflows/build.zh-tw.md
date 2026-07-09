@@ -123,6 +123,7 @@ check ──→ build ──→ release ──→ publish
   │         │         │           └─ Gitee: 從 GitHub Release 下載附件
   │         │         │              透過 Gitee API 建立 Release
   │         │         │              上傳附件至 Gitee
+  │         │         │              然後更新 Gitee Scoop/Homebrew
   │         │         │
   │         │         └─ 下載建置產物
   │         │            刪除舊的 release/tag
@@ -175,6 +176,11 @@ flowchart TB
         S1[下載 Win 二進位檔]
         S2[生成 winload.json]
         S3[推送至 scoop-bucket]
+    end
+
+    subgraph giteePackage["publish-scoop/homebrew-gitee"]
+        G1[生成 Gitee manifest/formula]
+        G2[推送至 Gitee bucket/tap]
     end
     
     subgraph aur["publish-aur-bin"]
@@ -229,6 +235,9 @@ flowchart TB
     N1 --> N2 --> N3 --> N4
     R4 --> SR1
     SR1 --> SR2 --> SR3
+    SR3 --"build publish"--> G1
+    C2 --"publish from release：使用既有 Gitee Release"--> G1
+    G1 --> G2
 ```
 
 ## 🍨 Scoop 發佈 (Rust)
@@ -311,10 +320,12 @@ flowchart TB
 
 ### sync-gitee-release — Release 鏡像
 
-**在 `release` job 成功後運行**（與 Scoop/AUR/npm 並行）：
+**在 `release` job 成功後運行**（與 GitHub 側套件發佈並行）：
 1. 下載 GitHub Release 的所有附件
 2. 透過 API 在 Gitee 上建立對應的 Release
 3. 上傳所有二進位附件至 Gitee Release
+
+當 `build publish` 建立全新的 Release 時，Gitee Scoop 和 Gitee Homebrew 會等待此鏡像任務成功後，再將 manifest/formula 指向 Gitee 附件。`publish from release` 會繼續直接使用既有的 Gitee Release，不強制先運行此鏡像任務。
 
 ### 前置條件
 

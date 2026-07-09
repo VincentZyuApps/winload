@@ -123,6 +123,7 @@ check ──→ build ──→ release ──→ publish
   │         │         │           └─ Gitee: Download GitHub Release assets
   │         │         │              Create Gitee Release via API
   │         │         │              Upload assets to Gitee
+  │         │         │              Then update Gitee Scoop/Homebrew
   │         │         │
   │         │         └─ Download artifacts
   │         │            Delete old release/tag
@@ -175,6 +176,11 @@ flowchart TB
         S1[Download Win binaries]
         S2[Generate winload.json]
         S3[Push to scoop-bucket]
+    end
+
+    subgraph giteePackage["publish-scoop/homebrew-gitee"]
+        G1[Generate Gitee manifest/formula]
+        G2[Push to Gitee bucket/tap]
     end
     
     subgraph aur["publish-aur-bin"]
@@ -229,6 +235,9 @@ flowchart TB
     N1 --> N2 --> N3 --> N4
     R4 --> SR1
     SR1 --> SR2 --> SR3
+    SR3 --"build publish"--> G1
+    C2 --"publish from release: existing Gitee Release"--> G1
+    G1 --> G2
 ```
 
 ## 🍨 Scoop Publish (Rust)
@@ -311,10 +320,12 @@ Runs **on every push** (parallel with `check` job):
 
 ### sync-gitee-release — Release Mirror
 
-Runs **after `release` job succeeds** (parallel with Scoop/AUR/npm):
+Runs **after `release` job succeeds** (parallel with GitHub-side package publishing):
 1. Downloads all assets from the GitHub Release
 2. Creates a corresponding Release on Gitee via API
 3. Uploads all binary assets to Gitee Release
+
+When `build publish` creates a fresh Release, Gitee Scoop and Gitee Homebrew wait for this mirror job to succeed before pointing manifests/formulae at Gitee assets. `publish from release` keeps using the existing Gitee Release directly and does not force this mirror job first.
 
 ### Prerequisites
 

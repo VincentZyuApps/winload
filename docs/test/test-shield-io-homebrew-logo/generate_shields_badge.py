@@ -28,6 +28,17 @@ def image_to_png_bytes(image: Image.Image) -> bytes:
     return buffer.getvalue()
 
 
+def compress_png_bytes(image: Image.Image, *, colors: int) -> bytes:
+    """Quantize RGBA artwork before embedding it into a Shields.io URL."""
+    if not 2 <= colors <= 256:
+        raise ValueError("--colors must be in 2..256")
+
+    quantized = image.quantize(colors=colors, method=Image.Quantize.FASTOCTREE)
+    buffer = BytesIO()
+    quantized.save(buffer, format="PNG", optimize=True)
+    return buffer.getvalue()
+
+
 def load_png(image_path: Path) -> Image.Image:
     with Image.open(image_path) as image:
         return image.convert("RGBA")
@@ -135,16 +146,26 @@ def scale_from_center(
     return canvas
 
 
+def resize_logo(image: Image.Image, *, logo_size: int) -> Image.Image:
+    if logo_size <= 0:
+        raise ValueError("--logo-size must be > 0")
+    if image.width == logo_size and image.height == logo_size:
+        return image
+    return image.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+
+
 def make_with_background_logo(
     source_image: Image.Image,
     *,
     white_threshold: int,
     padding_ratio: float,
     scale: float,
+    logo_size: int,
 ) -> Image.Image:
     bbox = content_bbox_by_color(source_image, white_threshold=white_threshold)
     logo = crop_and_pad(source_image, bbox=bbox, padding_ratio=padding_ratio, background=WHITE)
-    return scale_from_center(logo, scale=scale, background=WHITE)
+    logo = scale_from_center(logo, scale=scale, background=WHITE)
+    return resize_logo(logo, logo_size=logo_size)
 
 
 def make_transparent_logo(
@@ -154,6 +175,7 @@ def make_transparent_logo(
     soft_threshold: int,
     padding_ratio: float,
     scale: float,
+    logo_size: int,
 ) -> Image.Image:
     transparent = remove_white_background(
         source_image,
@@ -162,7 +184,8 @@ def make_transparent_logo(
     )
     bbox = transparent.getbbox() or (0, 0, transparent.width, transparent.height)
     logo = crop_and_pad(transparent, bbox=bbox, padding_ratio=padding_ratio, background=TRANSPARENT)
-    return scale_from_center(logo, scale=scale, background=TRANSPARENT)
+    logo = scale_from_center(logo, scale=scale, background=TRANSPARENT)
+    return resize_logo(logo, logo_size=logo_size)
 
 
 def shields_url(
@@ -174,16 +197,24 @@ def shields_url(
     logo_data_uri: str,
     label_color: str | None = None,
 ) -> str:
-    params = {
-        "label": label,
-        "message": message,
-        "color": color,
-        "style": style,
-        "logo": logo_data_uri,
-    }
+    if message:
+        path = "static/v1"
+        params = {
+            "label": label,
+            "message": message,
+            "color": color,
+            "style": style,
+            "logo": logo_data_uri,
+        }
+    else:
+        path = f"badge/{quote(label, safe='')}-{quote(color, safe='')}"
+        params = {
+            "style": style,
+            "logo": logo_data_uri,
+        }
     if label_color:
         params["labelColor"] = label_color
-    return "https://img.shields.io/static/v1?" + urlencode(params, quote_via=quote)
+    return f"https://img.shields.io/{path}?" + urlencode(params, quote_via=quote)
 
 
 def markdown_badge(url: str, alt: str, link: str | None) -> str:
@@ -214,6 +245,8 @@ def build_markdown(
     with_bg_md: str,
     transparent_md: str,
     scale: float,
+    logo_size: int,
+    colors: int,
 ) -> str:
     return textwrap.dedent(
         f"""\
@@ -229,6 +262,7 @@ def build_markdown(
         - one badge removes white / near-white pixels and keeps transparent background
         - both badge logos crop away outer whitespace and re-pad the content so the beer icon is larger
         - both badge logos are scaled from the center by `{scale:g}x`
+        - both badge logos are resized to `{logo_size}x{logo_size}` and quantized to `{colors}` colors before base64 embedding
 
         ## With White Background
 
@@ -270,8 +304,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--soft-threshold", type=int, default=225, help="Pixels with all RGB channels >= this fade toward transparent")
     parser.add_argument("--padding-ratio", type=float, default=0.0, help="Padding around cropped logo content; smaller makes the logo larger")
     parser.add_argument("--scale", type=float, default=1.0, help="Center-scale the final logo canvas; keep 1.0 for compact base64")
+    parser.add_argument("--logo-size", type=int, default=32, help="Final embedded logo size in pixels")
+    parser.add_argument("--colors", type=int, default=96, help="Palette size for PNG quantization")
     parser.add_argument("--label", default="Homebrew", help="Badge label")
-    parser.add_argument("--message", default="tap", help="Badge message")
+    parser.add_argument("--message", default="", help="Badge message; empty keeps a single-color badge")
     parser.add_argument("--color", default="FBB040", help="Badge color")
     parser.add_argument("--label-color", default=None, help="Optional badge label color")
     parser.add_argument("--style", default="for-the-badge", help="Shields.io badge style")
@@ -296,16 +332,18 @@ def main() -> None:
         white_threshold=args.white_threshold,
         padding_ratio=args.padding_ratio,
         scale=args.scale,
+        logo_size=args.logo_size,
     )
-    with_bg_bytes = image_to_png_bytes(with_bg_image)
+    with_bg_bytes = compress_png_bytes(with_bg_image, colors=args.colors)
     transparent_image = make_transparent_logo(
         source_image,
         white_threshold=args.white_threshold,
         soft_threshold=args.soft_threshold,
         padding_ratio=args.padding_ratio,
         scale=args.scale,
+        logo_size=args.logo_size,
     )
-    transparent_bytes = image_to_png_bytes(transparent_image)
+    transparent_bytes = compress_png_bytes(transparent_image, colors=args.colors)
 
     with_bg_url, with_bg_md = build_badge(args, with_bg_bytes)
     transparent_url, transparent_md = build_badge(args, transparent_bytes)
@@ -318,6 +356,8 @@ def main() -> None:
         with_bg_md=with_bg_md,
         transparent_md=transparent_md,
         scale=args.scale,
+        logo_size=args.logo_size,
+        colors=args.colors,
     )
 
     output_path = Path(args.output)

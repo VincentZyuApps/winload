@@ -665,10 +665,11 @@ jobs:
 
   # ── 更新 Scoop Bucket (Gitee) ──────────────────────────────
   # 生成指向 Gitee Releases 的 scoop manifest，推送到 Gitee
+  # build publish 先等待 Gitee Release 同步完成；publish from release 使用已有 Gitee Release，不强制等待同步任务
   publish-scoop-gitee:
     name: 【Gitee码云】Update Scoop Bucket
-    needs: [check, release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    needs: [check, release, sync-gitee-release]
+    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') && (needs.check.outputs.should_release != 'true' || needs['sync-gitee-release'].result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows binaries from GitHub Releases (for hash)
@@ -868,10 +869,11 @@ jobs:
 
   # ── 更新 Homebrew Tap (Gitee) ─────────────────────────────
   # 生成指向 Gitee Releases 的 homebrew formula，推送到 Gitee homebrew-tap
+  # build publish 先等待 Gitee Release 同步完成；publish from release 使用已有 Gitee Release，不强制等待同步任务
   publish-homebrew-gitee:
     name: 【Gitee码云】Update Homebrew Tap
-    needs: [check, release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    needs: [check, release, sync-gitee-release]
+    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') && (needs.check.outputs.should_release != 'true' || needs['sync-gitee-release'].result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Fetch latest release info from Gitee
