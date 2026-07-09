@@ -37,7 +37,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_max_y_value": "Fixed Y-axis value for --max-mode fixed (e.g. 100M, 1G, 500K)",
         "help_no_graph": "Hide traffic graphs, show only statistics",
         "help_unicode": "Use Unicode block characters for graph (█▓░· instead of #|..)",
-        "help_bar_style": "Bar style: fill (default), color, plain",
+        "help_bar_style": "Bar style: plain (default), fill, color",
         "help_in_color": (
             "Incoming (download) graph color, hex RGB (e.g. 0x00d7ff)\n\n"
             "[default: cyan]"
@@ -160,7 +160,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_max_y_value": "fixed 模式固定 Y 轴上限（如 100M、1G、500K）",
         "help_no_graph": "隐藏流量图形，仅显示统计信息",
         "help_unicode": "使用 Unicode 块字符绘制图形（█▓░· 代替 #|..）",
-        "help_bar_style": "状态栏样式：fill（默认），color，plain",
+        "help_bar_style": "状态栏样式：plain（默认），fill，color",
         "help_in_color": (
             "入站（下载）图形颜色，十六进制 RGB（如 0x00d7ff）\n\n"
             "[默认: 青色]"
@@ -283,7 +283,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_max_y_value": "fixed 模式固定 Y 軸上限（如 100M、1G、500K）",
         "help_no_graph": "隱藏流量圖形，僅顯示統計資訊",
         "help_unicode": "使用 Unicode 區塊字元繪製圖形（█▓░· 取代 #|..）",
-        "help_bar_style": "狀態列樣式：fill（預設），color，plain",
+        "help_bar_style": "狀態列樣式：plain（預設），fill，color",
         "help_in_color": (
             "入站（下載）圖形顏色，十六進位 RGB（如 0x00d7ff）\n\n"
             "[預設: 青色]"

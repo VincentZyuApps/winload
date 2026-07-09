@@ -3,3 +3,9 @@
 
 # Keep GitHub Actions YAML stable across Windows edits.
 .github/workflows/*.yml text eol=lf
+
+# Count Markdown files in GitHub Linguist language statistics.
+*.md linguist-detectable=true
+
+# Exclude generated/test assets from GitHub Linguist statistics.
+docs/test/** linguist-generated=true

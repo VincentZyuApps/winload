@@ -150,7 +150,7 @@ struct Args {
     unit: Unit,
 
     /// Bar style for header/label/help
-    #[arg(short = 'b', long = "bar-style", value_enum, default_value = "fill")]
+    #[arg(short = 'b', long = "bar-style", value_enum, default_value = "plain")]
     bar_style: BarStyle,
 
     /// Incoming (download) graph color, hex RGB

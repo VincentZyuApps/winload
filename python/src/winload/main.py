@@ -307,7 +307,7 @@ def parse_args() -> argparse.Namespace:
         "--bar-style",
         type=str,
         choices=["fill", "color", "plain"],
-        default="fill",
+        default="plain",
         help=help_text("help_bar_style"),
     )
     parser.add_argument(

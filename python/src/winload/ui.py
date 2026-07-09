@@ -51,7 +51,7 @@ class UI:
                  max_half_life: float = 10.0,
                  max_y_value: Optional[float] = None,
                  no_graph: bool = False,
-                 unicode: bool = False, bar_style: str = "fill",
+                 unicode: bool = False, bar_style: str = "plain",
                  in_color: Optional[tuple] = None, out_color: Optional[tuple] = None,
                  hide_separator: bool = False, no_color: bool = False,
                  interval: int = 500, average: int = 300):

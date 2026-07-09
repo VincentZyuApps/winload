@@ -1,6 +1,6 @@
 [project]
 name = "winload"
-version = "0.1.12-beta.1"
+version = "0.1.12-beta.2"
 description = "📊 Winload: A real-time terminal network traffic monitor inspired by nload. Dual implementations in 🦀Rust and 🐍Python, with cross-platform support for Windows, Linux, macOS and Android Termux. 🖥️ "
 readme = "readme.md"
 license = { text = "MIT" }
@@ -8,6 +8,18 @@ authors = [
     { name = "VincentZyu", email = "1830540513zyu@gmail.com" }
 ]
 requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "psutil>=7.0",
     "pyroute2>=0.9.6; sys_platform == 'linux' or sys_platform == 'android'",
