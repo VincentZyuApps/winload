@@ -22,36 +22,59 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_title": "Override header title: no value shows winload <version>; empty string keeps default device header",
         "help_title_align": (
             "Title alignment: left, center, right\n\n"
+            "Possible values:\n"
+            "- left:   Align title to the left\n"
+            "- center: Center title (default)\n"
+            "- right:  Align title to the right\n\n"
             "[default: center]"
         ),
         "help_emoji": "Enable emoji decorations in help, TUI, and output",
-        "help_unit": "Display unit: bit (default) or byte",
+        "help_unit": (
+            "Display unit: bit (default) or byte\n\n"
+            "Possible values:\n"
+            "- bit:  Display rates in Bit/s (default)\n"
+            "- byte: Display rates in Byte/s\n\n"
+            "[default: bit]"
+        ),
         "help_max_mode": (
             "Y-axis scaling mode: smart (default), legacy, fixed\n\n"
+            "Possible values:\n"
+            "- smart:  Smart adaptive Y-axis with exponential decay (default)\n"
+            "- legacy: nload-style auto scale based on the visible graph history\n"
+            "- fixed:  Fixed Y-axis value from --max-y-value\n\n"
             "[default: smart]"
         ),
         "help_max_half_life": (
-            "Half-life in seconds for smart Y-axis decay\n\n"
+            "Half-life in seconds for smart Y-axis decay (default: 10)\n\n"
             "[default: 10]"
         ),
         "help_max_y_value": "Fixed Y-axis value for --max-mode fixed (e.g. 100M, 1G, 500K)",
         "help_no_graph": "Hide traffic graphs, show only statistics",
         "help_unicode": "Use Unicode block characters for graph (█▓░· instead of #|..)",
-        "help_bar_style": "Bar style: plain (default), fill, color",
-        "help_in_color": (
-            "Incoming (download) graph color, hex RGB (e.g. 0x00d7ff)\n\n"
-            "[default: cyan]"
+        "help_bar_style": (
+            "Bar style for header/label/help: plain (default), fill, color\n\n"
+            "Possible values:\n"
+            "- fill:  Background color fills entire line\n"
+            "- color: Background color only on text\n"
+            "- plain: No background, text color only (default)\n\n"
+            "[default: plain]"
         ),
-        "help_out_color": (
-            "Outgoing (upload) graph color, hex RGB (e.g. 0xffaf00)\n\n"
-            "[default: gold]"
-        ),
+        "help_in_color": "Incoming (download) graph color, hex RGB (e.g. 0x00d7ff). Default: cyan",
+        "help_out_color": "Outgoing (upload) graph color, hex RGB (e.g. 0xffaf00). Default: gold",
         "help_hide_separator": "Hide separator line (the row of equals signs between header and panels)",
         "help_version": "Print version",
-        "help_no_color": "Disable all TUI colors (monochrome mode), press 'c' to toggle at runtime",
+        "help_no_color": "Disable all TUI colors (monochrome mode). Press 'c' to toggle at runtime",
         "help_debug_info": "Print debug info about network interfaces and exit",
-        "help_netlink": "[Linux/Android only] Use RTNETLINK via pyroute2 instead of psutil (useful in Termux proot distro or restricted environments)",
-        "help_lang": "Display language: en-us (default), zh-cn, zh-tw",
+        "help_netlink": "[Linux/Android only] Use RTNETLINK via pyroute2 instead of psutil (useful in Termux proot distro or restricted environments without /proc/net/dev access)",
+        "help_lang": (
+            "Display language: en-us (default), zh-cn, zh-tw\n\n"
+            "Possible values:\n"
+            "- en-us: English (United States) — English (US)\n"
+            "- zh-cn: Simplified Chinese (Mainland China) — 简体中文（大陆）\n"
+            "- zh-tw: Traditional Chinese (Taiwan) — 繁體中文（台灣）\n\n"
+            "[default: en-us]"
+        ),
+        "help_help": "Print help (see a summary with '-h')",
         "help_system": "System",
         "help_arch": "Arch",
         # ── TUI strings ──
@@ -145,36 +168,59 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_title": "覆盖顶部标题：不带值时显示 winload <版本号>；空字符串保持默认设备标题",
         "help_title_align": (
             "标题对齐方式：left、center、right\n\n"
+            "Possible values:\n"
+            "- left:   Align title to the left\n"
+            "- center: Center title (default)\n"
+            "- right:  Align title to the right\n\n"
             "[默认: center]"
         ),
         "help_emoji": "在帮助、TUI 和输出中启用 emoji 装饰",
-        "help_unit": "显示单位：bit（默认）或 byte",
+        "help_unit": (
+            "显示单位：bit（默认）或 byte\n\n"
+            "Possible values:\n"
+            "- bit:  Display rates in Bit/s (default)\n"
+            "- byte: Display rates in Byte/s\n\n"
+            "[默认: bit]"
+        ),
         "help_max_mode": (
             "Y 轴缩放模式：smart（默认）、legacy、fixed\n\n"
+            "Possible values:\n"
+            "- smart:  Smart adaptive Y-axis with exponential decay (default)\n"
+            "- legacy: nload-style auto scale based on the visible graph history\n"
+            "- fixed:  Fixed Y-axis value from --max-y-value\n\n"
             "[默认: smart]"
         ),
         "help_max_half_life": (
-            "smart 模式指数衰减半衰期，单位秒\n\n"
+            "smart 模式指数衰减半衰期，单位秒（默认：10）\n\n"
             "[默认: 10]"
         ),
         "help_max_y_value": "fixed 模式固定 Y 轴上限（如 100M、1G、500K）",
         "help_no_graph": "隐藏流量图形，仅显示统计信息",
         "help_unicode": "使用 Unicode 块字符绘制图形（█▓░· 代替 #|..）",
-        "help_bar_style": "状态栏样式：plain（默认），fill，color",
-        "help_in_color": (
-            "入站（下载）图形颜色，十六进制 RGB（如 0x00d7ff）\n\n"
-            "[默认: 青色]"
+        "help_bar_style": (
+            "状态栏/帮助栏样式：plain（默认），fill，color\n\n"
+            "Possible values:\n"
+            "- fill:  Background color fills entire line\n"
+            "- color: Background color only on text\n"
+            "- plain: No background, text color only (default)\n\n"
+            "[默认: plain]"
         ),
-        "help_out_color": (
-            "出站（上传）图形颜色，十六进制 RGB（如 0xffaf00）\n\n"
-            "[默认: 金色]"
-        ),
+        "help_in_color": "入站（下载）图形颜色，十六进制 RGB（如 0x00d7ff）。默认：青色",
+        "help_out_color": "出站（上传）图形颜色，十六进制 RGB（如 0xffaf00）。默认：金色",
         "help_hide_separator": "隐藏分隔线（标题和面板之间的等号行）",
         "help_version": "打印版本号",
-        "help_no_color": "禁用所有 TUI 颜色（单色模式），运行时按 c 可切换",
+        "help_no_color": "禁用所有 TUI 颜色（单色模式）。运行时按 'c' 切换",
         "help_debug_info": "打印网卡调试信息并退出",
-        "help_netlink": "[仅 Linux/Android] 使用 pyroute2 通过 RTNETLINK 替代 psutil（适用于 Termux proot distro 或受限环境）",
-        "help_lang": "显示语言：en-us（默认），zh-cn，zh-tw",
+        "help_netlink": "[仅 Linux/Android] 使用 pyroute2 通过 RTNETLINK 替代 psutil（适用于 Termux proot distro 或无法访问 /proc/net/dev 的受限环境）",
+        "help_lang": (
+            "显示语言：en-us（默认），zh-cn，zh-tw\n\n"
+            "Possible values:\n"
+            "- en-us: English (United States) — English (US)\n"
+            "- zh-cn: Simplified Chinese (Mainland China) — 简体中文（大陆）\n"
+            "- zh-tw: Traditional Chinese (Taiwan) — 繁體中文（台灣）\n\n"
+            "[默认: en-us]"
+        ),
+        "help_help": "打印帮助（使用 '-h' 查看简短摘要）",
         "help_system": "系统",
         "help_arch": "架构",
         # ── TUI strings ──
@@ -268,36 +314,59 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_title": "覆蓋頂部標題：不帶值時顯示 winload <版本號>；空字串保持預設裝置標題",
         "help_title_align": (
             "標題對齊方式：left、center、right\n\n"
+            "Possible values:\n"
+            "- left:   Align title to the left\n"
+            "- center: Center title (default)\n"
+            "- right:  Align title to the right\n\n"
             "[預設: center]"
         ),
         "help_emoji": "在說明、TUI 和輸出中啟用 emoji 裝飾",
-        "help_unit": "顯示單位：bit（預設）或 byte",
+        "help_unit": (
+            "顯示單位：bit（預設）或 byte\n\n"
+            "Possible values:\n"
+            "- bit:  Display rates in Bit/s (default)\n"
+            "- byte: Display rates in Byte/s\n\n"
+            "[預設: bit]"
+        ),
         "help_max_mode": (
             "Y 軸縮放模式：smart（預設）、legacy、fixed\n\n"
+            "Possible values:\n"
+            "- smart:  Smart adaptive Y-axis with exponential decay (default)\n"
+            "- legacy: nload-style auto scale based on the visible graph history\n"
+            "- fixed:  Fixed Y-axis value from --max-y-value\n\n"
             "[預設: smart]"
         ),
         "help_max_half_life": (
-            "smart 模式指數衰減半衰期，單位秒\n\n"
+            "smart 模式指數衰減半衰期，單位秒（預設：10）\n\n"
             "[預設: 10]"
         ),
         "help_max_y_value": "fixed 模式固定 Y 軸上限（如 100M、1G、500K）",
         "help_no_graph": "隱藏流量圖形，僅顯示統計資訊",
         "help_unicode": "使用 Unicode 區塊字元繪製圖形（█▓░· 取代 #|..）",
-        "help_bar_style": "狀態列樣式：plain（預設），fill，color",
-        "help_in_color": (
-            "入站（下載）圖形顏色，十六進位 RGB（如 0x00d7ff）\n\n"
-            "[預設: 青色]"
+        "help_bar_style": (
+            "狀態列/說明列樣式：plain（預設），fill，color\n\n"
+            "Possible values:\n"
+            "- fill:  Background color fills entire line\n"
+            "- color: Background color only on text\n"
+            "- plain: No background, text color only (default)\n\n"
+            "[預設: plain]"
         ),
-        "help_out_color": (
-            "出站（上傳）圖形顏色，十六進位 RGB（如 0xffaf00）\n\n"
-            "[預設: 金色]"
-        ),
+        "help_in_color": "入站（下載）圖形顏色，十六進位 RGB（如 0x00d7ff）。預設：青色",
+        "help_out_color": "出站（上傳）圖形顏色，十六進位 RGB（如 0xffaf00）。預設：金色",
         "help_hide_separator": "隱藏分隔線（標題和面板之間的等號行）",
         "help_version": "列印版本號",
-        "help_no_color": "停用所有 TUI 顏色（單色模式），執行時按 c 可切換",
+        "help_no_color": "停用所有 TUI 顏色（單色模式）。執行時按 'c' 切換",
         "help_debug_info": "列印網路卡除錯資訊並退出",
-        "help_netlink": "[僅 Linux/Android] 使用 pyroute2 透過 RTNETLINK 取代 psutil（適用於 Termux proot distro 或受限環境）",
-        "help_lang": "顯示語言：en-us（預設），zh-cn，zh-tw",
+        "help_netlink": "[僅 Linux/Android] 使用 pyroute2 透過 RTNETLINK 取代 psutil（適用於 Termux proot distro 或無法存取 /proc/net/dev 的受限環境）",
+        "help_lang": (
+            "顯示語言：en-us（預設），zh-cn，zh-tw\n\n"
+            "Possible values:\n"
+            "- en-us: English (United States) — English (US)\n"
+            "- zh-cn: Simplified Chinese (Mainland China) — 简体中文（大陆）\n"
+            "- zh-tw: Traditional Chinese (Taiwan) — 繁體中文（台灣）\n\n"
+            "[預設: en-us]"
+        ),
+        "help_help": "列印說明（使用 '-h' 查看簡短摘要）",
         "help_system": "系統",
         "help_arch": "架構",
         # ── TUI strings ──

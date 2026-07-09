@@ -87,8 +87,8 @@ pip install winload
 # https://gitee.com/wangnov/uv-custom/releases
 uv venv --python 3.13
 uv pip install winload
-uv run winload
 uv run python -c "import shutil; print(shutil.which('winload'))"
+uv run winload
 ```
 
 ## 📥 Rust 本安置（薦）

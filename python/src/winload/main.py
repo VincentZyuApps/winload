@@ -24,6 +24,28 @@ from .i18n import t, set_lang, get_lang
 TITLE_FLAG_ONLY = "__WINLOAD_TITLE_FLAG_ONLY__"
 
 
+class WinloadArgumentParser(argparse.ArgumentParser):
+    """Render help closer to clap's description -> usage -> options layout."""
+
+    def format_help(self) -> str:
+        formatter = self._get_formatter()
+
+        formatter.add_text(self.description)
+        formatter.add_usage(self.usage, self._actions, self._mutually_exclusive_groups)
+
+        for action_group in self._action_groups:
+            formatter.start_section(action_group.title)
+            formatter.add_arguments(action_group._group_actions)
+            formatter.end_section()
+
+        formatter.add_text(self.epilog)
+        return (
+            formatter.format_help()
+            .replace("usage:", "Usage:", 1)
+            .replace("\noptions:", "\nOptions:")
+        )
+
+
 def get_version() -> str:
     try:
         return get_pkg_version("winload")
@@ -204,10 +226,12 @@ def parse_args() -> argparse.Namespace:
     def help_text(key: str) -> str:
         return decorate(emoji_enabled, key, t(key))
 
-    parser = argparse.ArgumentParser(
+    parser = WinloadArgumentParser(
         prog="winload",
-        description=f"winload {get_version()} (Python edition)\n{help_text('description')}",
+        usage="%(prog)s [OPTIONS]",
+        description=help_text("description"),
         epilog=f"\n{get_help_system_info(emoji_enabled)}",
+        add_help=False,
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
@@ -223,7 +247,7 @@ def parse_args() -> argparse.Namespace:
         "--average",
         type=int,
         default=300,
-        metavar="SEC",
+        metavar="AVERAGE",
         help=help_text("help_average"),
     )
     parser.add_argument(
@@ -231,7 +255,7 @@ def parse_args() -> argparse.Namespace:
         "--device",
         type=str,
         default=None,
-        metavar="NAME",
+        metavar="DEVICE",
         help=help_text("help_device"),
     )
     parser.add_argument(
@@ -248,8 +272,14 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["left", "center", "right"],
         default="center",
-        metavar="ALIGN",
+        metavar="TITLE_ALIGN",
         help=help_text("help_title_align"),
+    )
+    parser.add_argument(
+        "--debug-info",
+        action="store_true",
+        default=False,
+        help=help_text("help_debug_info"),
     )
     parser.add_argument(
         "-e",
@@ -259,19 +289,50 @@ def parse_args() -> argparse.Namespace:
         help=help_text("help_emoji"),
     )
     parser.add_argument(
+        "-U",
+        "--unicode",
+        action="store_true",
+        default=False,
+        help=help_text("help_unicode"),
+    )
+    parser.add_argument(
         "-u",
         "--unit",
         type=str,
         choices=["bit", "byte"],
         default="bit",
+        metavar="UNIT",
         help=help_text("help_unit"),
+    )
+    parser.add_argument(
+        "-b",
+        "--bar-style",
+        type=str,
+        choices=["fill", "color", "plain"],
+        default="plain",
+        metavar="BAR_STYLE",
+        help=help_text("help_bar_style"),
+    )
+    parser.add_argument(
+        "--in-color",
+        type=parse_hex_color,
+        default=None,
+        metavar="IN_COLOR",
+        help=help_text("help_in_color"),
+    )
+    parser.add_argument(
+        "--out-color",
+        type=parse_hex_color,
+        default=None,
+        metavar="OUT_COLOR",
+        help=help_text("help_out_color"),
     )
     parser.add_argument(
         "--max-mode",
         type=str,
         choices=["smart", "legacy", "fixed"],
         default="smart",
-        metavar="MODE",
+        metavar="MAX_MODE",
         help=help_text("help_max_mode"),
     )
     parser.add_argument(
@@ -296,58 +357,16 @@ def parse_args() -> argparse.Namespace:
         help=help_text("help_no_graph"),
     )
     parser.add_argument(
-        "-U",
-        "--unicode",
-        action="store_true",
-        default=False,
-        help=help_text("help_unicode"),
-    )
-    parser.add_argument(
-        "-b",
-        "--bar-style",
-        type=str,
-        choices=["fill", "color", "plain"],
-        default="plain",
-        help=help_text("help_bar_style"),
-    )
-    parser.add_argument(
-        "--in-color",
-        type=parse_hex_color,
-        default=None,
-        metavar="HEX",
-        help=help_text("help_in_color"),
-    )
-    parser.add_argument(
-        "--out-color",
-        type=parse_hex_color,
-        default=None,
-        metavar="HEX",
-        help=help_text("help_out_color"),
-    )
-    parser.add_argument(
         "--hide-separator",
         action="store_true",
         default=False,
         help=help_text("help_hide_separator"),
     )
     parser.add_argument(
-        "-V",
-        "--version",
-        action="version",
-        version=f"winload {get_version()} (Python edition)",
-        help=help_text("help_version"),
-    )
-    parser.add_argument(
         "--no-color",
         action="store_true",
         default=False,
         help=help_text("help_no_color"),
-    )
-    parser.add_argument(
-        "--debug-info",
-        action="store_true",
-        default=False,
-        help=help_text("help_debug_info"),
     )
     parser.add_argument(
         "--netlink",
@@ -362,6 +381,20 @@ def parse_args() -> argparse.Namespace:
         default="en-us",
         metavar="LANG",
         help=help_text("help_lang"),
+    )
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help=help_text("help_help"),
+    )
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"winload {get_version()} (Python edition)",
+        help=help_text("help_version"),
     )
     args = parser.parse_args()
     if args.netlink and sys.platform not in ("linux", "android"):

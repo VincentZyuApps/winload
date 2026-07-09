@@ -22,7 +22,6 @@ _ICONS = {
     "help_max_y_value": "📏",
     "help_no_graph": "🚫",
     "help_hide_separator": "➖",
-    "help_version": "🏷️",
     "help_no_color": "⚫",
     "help_npcap": "🪟",
     "help_netlink": "🔗",
