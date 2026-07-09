@@ -7,7 +7,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Optional
 
-from collector import Snapshot
+from .collector import Snapshot
 
 
 @dataclass

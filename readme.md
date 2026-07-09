@@ -61,9 +61,7 @@ git clone https://github.com/VincentZyuApps/winload.git
 # or clone from Gitee (faster in China Mainland):
 # git clone https://gitee.com/vincent-zyu/winload.git
 cd winload/python
-uv venv --python 3.13
-uv pip install -r requirements.txt
-uv run python main.py
+uv run python -m winload
 ```
 
 ### Rust
@@ -301,7 +299,7 @@ winload --netlink
 ![docs/images/preview-rust.gif](docs/images/preview-rust.gif)
 
 ##### Terminal Recording
-<a href="https://asciinema.org/a/1030894?startAt=30" target="_blank"><img src="https://asciinema.org/a/1030894.svg" alt="winload demo" width="100%" /></a>
+[![asciicast](https://asciinema.org/a/1030894.svg)](https://asciinema.org/a/1030894?t=30)
 
 > ↑ Recorded by [asciinema](https://github.com/asciinema/asciinema)
 

@@ -11,6 +11,7 @@
 //!     q / Esc       退出
 
 mod collector;
+mod emoji;
 mod graph;
 mod i18n;
 mod loopback;
@@ -476,35 +477,62 @@ fn pre_scan_lang() -> Lang {
     Lang::EnUs
 }
 
-fn build_translated_command() -> clap::Command {
-    let after_help = format!("\nSystem: {} | Arch: {} | Target: {}", 
-        std::env::consts::OS, 
-        std::env::consts::ARCH,
-        env!("TARGET"));
+fn pre_scan_emoji() -> bool {
+    std::env::args().skip(1).any(|arg| {
+        arg == "--emoji"
+            || arg == "-e"
+            || (arg.starts_with('-')
+                && !arg.starts_with("--")
+                && arg.chars().skip(1).any(|ch| ch == 'e'))
+    })
+}
+
+fn help_text(key: &str, emoji_enabled: bool) -> String {
+    emoji::decorate(emoji_enabled, key, t(key))
+}
+
+fn build_translated_command(emoji_enabled: bool) -> clap::Command {
+    let after_help = format!(
+        "\n{}",
+        emoji::decorate(
+            emoji_enabled,
+            "help_system_info",
+            format!(
+                "{}: {} | {}: {} | {}: {}",
+                t("help_system"),
+                std::env::consts::OS,
+                t("help_arch"),
+                std::env::consts::ARCH,
+                t("help_target"),
+                env!("TARGET")
+            )
+        )
+    );
 
     Args::command()
-        .about(t("description"))
+        .about(emoji::decorate(emoji_enabled, "description", t("description")))
         .after_help(after_help)
-        .mut_arg("interval", |a| a.help(t("help_interval")))
-        .mut_arg("average", |a| a.help(t("help_average")))
-        .mut_arg("device", |a| a.help(t("help_device")))
-        .mut_arg("title", |a| a.help(t("help_title")))
-        .mut_arg("debug_info", |a| a.help(t("help_debug_info")))
-        .mut_arg("emoji", |a| a.help(t("help_emoji")))
-        .mut_arg("unicode", |a| a.help(t("help_unicode")))
-        .mut_arg("unit", |a| a.help(t("help_unit")))
-        .mut_arg("bar_style", |a| a.help(t("help_bar_style")))
-        .mut_arg("in_color", |a| a.help(t("help_in_color")))
-        .mut_arg("out_color", |a| a.help(t("help_out_color")))
-        .mut_arg("max_mode", |a| a.help(t("help_max_mode")))
-        .mut_arg("max_half_life", |a| a.help(t("help_max_half_life")))
-        .mut_arg("max_y_value", |a| a.help(t("help_max_y_value")))
-        .mut_arg("no_graph", |a| a.help(t("help_no_graph")))
-        .mut_arg("hide_separator", |a| a.help(t("help_hide_separator")))
-        .mut_arg("no_color", |a| a.help(t("help_no_color")))
-        .mut_arg("npcap", |a| a.help(t("help_npcap")))
-        .mut_arg("netlink", |a| a.help(t("help_netlink")))
-        .mut_arg("lang", |a| a.help(t("help_lang")))
+        .mut_arg("interval", |a| a.help(help_text("help_interval", emoji_enabled)))
+        .mut_arg("average", |a| a.help(help_text("help_average", emoji_enabled)))
+        .mut_arg("device", |a| a.help(help_text("help_device", emoji_enabled)))
+        .mut_arg("title", |a| a.help(help_text("help_title", emoji_enabled)))
+        .mut_arg("title_align", |a| a.help(help_text("help_title_align", emoji_enabled)))
+        .mut_arg("debug_info", |a| a.help(help_text("help_debug_info", emoji_enabled)))
+        .mut_arg("emoji", |a| a.help(help_text("help_emoji", emoji_enabled)))
+        .mut_arg("unicode", |a| a.help(help_text("help_unicode", emoji_enabled)))
+        .mut_arg("unit", |a| a.help(help_text("help_unit", emoji_enabled)))
+        .mut_arg("bar_style", |a| a.help(help_text("help_bar_style", emoji_enabled)))
+        .mut_arg("in_color", |a| a.help(help_text("help_in_color", emoji_enabled)))
+        .mut_arg("out_color", |a| a.help(help_text("help_out_color", emoji_enabled)))
+        .mut_arg("max_mode", |a| a.help(help_text("help_max_mode", emoji_enabled)))
+        .mut_arg("max_half_life", |a| a.help(help_text("help_max_half_life", emoji_enabled)))
+        .mut_arg("max_y_value", |a| a.help(help_text("help_max_y_value", emoji_enabled)))
+        .mut_arg("no_graph", |a| a.help(help_text("help_no_graph", emoji_enabled)))
+        .mut_arg("hide_separator", |a| a.help(help_text("help_hide_separator", emoji_enabled)))
+        .mut_arg("no_color", |a| a.help(help_text("help_no_color", emoji_enabled)))
+        .mut_arg("npcap", |a| a.help(help_text("help_npcap", emoji_enabled)))
+        .mut_arg("netlink", |a| a.help(help_text("help_netlink", emoji_enabled)))
+        .mut_arg("lang", |a| a.help(help_text("help_lang", emoji_enabled)))
 }
 
 fn validate_args(args: &Args) -> Result<(), String> {
@@ -543,6 +571,7 @@ fn main() -> io::Result<()> {
     // Pre-scan --lang before clap parses (for translated --help)
     let lang = pre_scan_lang();
     set_lang(lang);
+    let emoji_enabled = pre_scan_emoji();
 
     // Pre-scan --version / -V for styled output with system info
     // (intercept before clap, so we can use ANSI bold + append system info)
@@ -558,7 +587,7 @@ fn main() -> io::Result<()> {
         }
     }
 
-    let cmd = build_translated_command();
+    let cmd = build_translated_command(emoji_enabled);
     let matches = cmd.get_matches();
     let args = Args::from_arg_matches(&matches)
         .unwrap_or_else(|e| e.exit());

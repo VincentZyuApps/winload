@@ -7,10 +7,10 @@ import curses
 import sys
 from typing import List, Optional
 
-from collector import Collector, DeviceInfo
-from i18n import t
-from stats import StatisticsEngine, TrafficStats, format_speed, format_speed_unit, format_bytes
-from graph import render_graph, next_power_of_2_scaled, get_graph_scale_label_unit
+from .collector import Collector, DeviceInfo
+from .i18n import t
+from .stats import StatisticsEngine, TrafficStats, format_speed, format_speed_unit, format_bytes
+from .graph import render_graph, next_power_of_2_scaled, get_graph_scale_label_unit
 
 
 class DeviceView:
@@ -506,7 +506,7 @@ class UI:
     def _draw_debug_overlay(self, max_y: int, max_x: int) -> None:
         """Draw F3 debug overlay (Minecraft-style runtime info)"""
         import platform
-        from i18n import get_lang
+        from .i18n import get_lang
 
         title_attr = self._color(curses.color_pair(self.COLOR_SEPARATOR) | curses.A_BOLD)
         section_attr = self._color(curses.color_pair(self.COLOR_HELP) | curses.A_BOLD)

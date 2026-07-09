@@ -3,9 +3,9 @@ winload - Windows Network Load Monitor
 仿 Linux nload 的终端网络流量监控工具
 
 用法:
-    python main.py              # 监控所有活跃网卡
-    python main.py -t 200       # 设置刷新间隔 200ms
-    python main.py -d "Wi-Fi"   # 指定默认设备
+    python -m winload              # 监控所有活跃网卡
+    python -m winload -t 200       # 设置刷新间隔 200ms
+    python -m winload -d "Wi-Fi"   # 指定默认设备
 
 快捷键:
     ←/→  或 ↑/↓   切换网卡
@@ -13,15 +13,13 @@ winload - Windows Network Load Monitor
 """
 
 import argparse
-import curses
 import platform
 import sys
 import time
 from importlib.metadata import version as get_pkg_version
 
-from collector import Collector
-from i18n import t, set_lang, get_lang
-from ui import UI
+from .emoji import decorate
+from .i18n import t, set_lang, get_lang
 
 TITLE_FLAG_ONLY = "__WINLOAD_TITLE_FLAG_ONLY__"
 
@@ -35,7 +33,7 @@ def get_version() -> str:
     try:
         import re
         from pathlib import Path
-        toml_path = Path(__file__).resolve().parent / "pyproject.toml"
+        toml_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
         text = toml_path.read_text(encoding="utf-8")
         m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)
         if m:
@@ -50,6 +48,12 @@ def get_system_info() -> str:
     return f"System: {platform.system()} | Arch: {platform.machine()}"
 
 
+def get_help_system_info(emoji: bool = False) -> str:
+    """Get localized system information for CLI help epilog."""
+    text = f"{t('help_system')}: {platform.system()} | {t('help_arch')}: {platform.machine()}"
+    return decorate(emoji, "help_system_info", text)
+
+
 def print_system_info() -> None:
     """Print system information to stderr"""
     print(f"\n{get_system_info()}", file=sys.stderr)
@@ -58,7 +62,7 @@ def print_system_info() -> None:
 def print_debug_info(emoji: bool = False, use_netlink: bool = False) -> None:
     """Print network interface debug info and exit"""
     if use_netlink:
-        from netlink import netlink_collect, netlink_devices
+        from .netlink import netlink_collect, netlink_devices
 
         if emoji:
             print("\n\U0001f50d\U0001f310 Network Interfaces Debug Info (netlink) \U0001f5a7\u2728")
@@ -189,16 +193,21 @@ def parse_hex_color(s: str):
 
 
 def parse_args() -> argparse.Namespace:
-    # First pass: extract --lang early so we can set language before building help texts
+    # First pass: extract display options before building localized help texts.
     pre_parser = argparse.ArgumentParser(add_help=False)
     pre_parser.add_argument("--lang", type=str, default="en-us")
+    pre_parser.add_argument("-e", "--emoji", action="store_true", default=False)
     pre_args, _ = pre_parser.parse_known_args()
     set_lang(pre_args.lang)
+    emoji_enabled = pre_args.emoji
+
+    def help_text(key: str) -> str:
+        return decorate(emoji_enabled, key, t(key))
 
     parser = argparse.ArgumentParser(
         prog="winload",
-        description=f"winload {get_version()} (Python edition)\n{t('description')}",
-        epilog=f"\n{get_system_info()}",
+        description=f"winload {get_version()} (Python edition)\n{help_text('description')}",
+        epilog=f"\n{get_help_system_info(emoji_enabled)}",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(
@@ -207,7 +216,7 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=500,
         metavar="INTERVAL",
-        help=t("help_interval"),
+        help=help_text("help_interval"),
     )
     parser.add_argument(
         "-a",
@@ -215,7 +224,7 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=300,
         metavar="SEC",
-        help=t("help_average"),
+        help=help_text("help_average"),
     )
     parser.add_argument(
         "-d",
@@ -223,7 +232,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default=None,
         metavar="NAME",
-        help=t("help_device"),
+        help=help_text("help_device"),
     )
     parser.add_argument(
         "--title",
@@ -232,7 +241,7 @@ def parse_args() -> argparse.Namespace:
         const=TITLE_FLAG_ONLY,
         default=None,
         metavar="TITLE",
-        help=t("help_title"),
+        help=help_text("help_title"),
     )
     parser.add_argument(
         "--title-align",
@@ -240,14 +249,14 @@ def parse_args() -> argparse.Namespace:
         choices=["left", "center", "right"],
         default="center",
         metavar="ALIGN",
-        help="Title alignment: left, center, right\n\n[default: center]",
+        help=help_text("help_title_align"),
     )
     parser.add_argument(
         "-e",
         "--emoji",
         action="store_true",
         default=False,
-        help=t("help_emoji"),
+        help=help_text("help_emoji"),
     )
     parser.add_argument(
         "-u",
@@ -255,7 +264,7 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["bit", "byte"],
         default="bit",
-        help=t("help_unit"),
+        help=help_text("help_unit"),
     )
     parser.add_argument(
         "--max-mode",
@@ -263,35 +272,35 @@ def parse_args() -> argparse.Namespace:
         choices=["smart", "legacy", "fixed"],
         default="smart",
         metavar="MODE",
-        help=t("help_max_mode"),
+        help=help_text("help_max_mode"),
     )
     parser.add_argument(
         "--max-half-life",
         type=float,
         default=10.0,
         metavar="SECS",
-        help=t("help_max_half_life"),
+        help=help_text("help_max_half_life"),
     )
     parser.add_argument(
         "--max-y-value",
         type=str,
         default=None,
         metavar="VALUE",
-        help=t("help_max_y_value"),
+        help=help_text("help_max_y_value"),
     )
     parser.add_argument(
         "-n",
         "--no-graph",
         action="store_true",
         default=False,
-        help=t("help_no_graph"),
+        help=help_text("help_no_graph"),
     )
     parser.add_argument(
         "-U",
         "--unicode",
         action="store_true",
         default=False,
-        help=t("help_unicode"),
+        help=help_text("help_unicode"),
     )
     parser.add_argument(
         "-b",
@@ -299,52 +308,52 @@ def parse_args() -> argparse.Namespace:
         type=str,
         choices=["fill", "color", "plain"],
         default="fill",
-        help=t("help_bar_style"),
+        help=help_text("help_bar_style"),
     )
     parser.add_argument(
         "--in-color",
         type=parse_hex_color,
         default=None,
         metavar="HEX",
-        help=t("help_in_color"),
+        help=help_text("help_in_color"),
     )
     parser.add_argument(
         "--out-color",
         type=parse_hex_color,
         default=None,
         metavar="HEX",
-        help=t("help_out_color"),
+        help=help_text("help_out_color"),
     )
     parser.add_argument(
         "--hide-separator",
         action="store_true",
         default=False,
-        help=t("help_hide_separator"),
+        help=help_text("help_hide_separator"),
     )
     parser.add_argument(
         "-V",
         "--version",
         action="version",
         version=f"winload {get_version()} (Python edition)",
-        help=t("help_version"),
+        help=help_text("help_version"),
     )
     parser.add_argument(
         "--no-color",
         action="store_true",
         default=False,
-        help=t("help_no_color"),
+        help=help_text("help_no_color"),
     )
     parser.add_argument(
         "--debug-info",
         action="store_true",
         default=False,
-        help=t("help_debug_info"),
+        help=help_text("help_debug_info"),
     )
     parser.add_argument(
         "--netlink",
         action="store_true",
         default=False,
-        help=t("help_netlink"),
+        help=help_text("help_netlink"),
     )
     parser.add_argument(
         "--lang",
@@ -352,7 +361,7 @@ def parse_args() -> argparse.Namespace:
         choices=["en-us", "zh-cn", "zh-tw"],
         default="en-us",
         metavar="LANG",
-        help=t("help_lang"),
+        help=help_text("help_lang"),
     )
     args = parser.parse_args()
     if args.netlink and sys.platform not in ("linux", "android"):
@@ -389,6 +398,11 @@ def resolve_title(raw_title: str | None) -> str | None:
 
 def main_loop(stdscr: "curses.window", args: argparse.Namespace) -> None:
     """curses 主循环"""
+    import curses
+
+    from .collector import Collector
+    from .ui import UI
+
     collector = Collector(use_netlink=args.netlink)
 
     ui = UI(
@@ -462,14 +476,14 @@ def main() -> None:
 
     # Windows 需要 windows-curses
     try:
-        import curses as _curses  # noqa: F401
+        import curses as curses_module
     except ImportError:
         print(t("error_no_curses"))
         print("  pip install windows-curses")
         sys.exit(1)
 
     try:
-        curses.wrapper(lambda stdscr: main_loop(stdscr, args))
+        curses_module.wrapper(lambda stdscr: main_loop(stdscr, args))
     except RuntimeError as e:
         if args.netlink:
             print(f"Error: {e}", file=sys.stderr)

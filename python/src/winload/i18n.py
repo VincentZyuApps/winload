@@ -20,7 +20,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
         "help_device": "Default device name (partial match)",
         "help_title": "Override header title: no value shows winload <version>; empty string keeps default device header",
-        "help_emoji": "Enable emoji decorations in TUI 🎉",
+        "help_title_align": (
+            "Title alignment: left, center, right\n\n"
+            "[default: center]"
+        ),
+        "help_emoji": "Enable emoji decorations in help, TUI, and output",
         "help_unit": "Display unit: bit (default) or byte",
         "help_max_mode": (
             "Y-axis scaling mode: smart (default), legacy, fixed\n\n"
@@ -48,6 +52,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_debug_info": "Print debug info about network interfaces and exit",
         "help_netlink": "[Linux/Android only] Use RTNETLINK via pyroute2 instead of psutil (useful in Termux proot distro or restricted environments)",
         "help_lang": "Display language: en-us (default), zh-cn, zh-tw",
+        "help_system": "System",
+        "help_arch": "Arch",
         # ── TUI strings ──
         "device": "Device",
         "device_emoji": "🖧 Device",
@@ -137,7 +143,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
         "help_device": "默认网卡名称（支持部分匹配）",
         "help_title": "覆盖顶部标题：不带值时显示 winload <版本号>；空字符串保持默认设备标题",
-        "help_emoji": "启用 emoji 装饰模式 🎉",
+        "help_title_align": (
+            "标题对齐方式：left、center、right\n\n"
+            "[默认: center]"
+        ),
+        "help_emoji": "在帮助、TUI 和输出中启用 emoji 装饰",
         "help_unit": "显示单位：bit（默认）或 byte",
         "help_max_mode": (
             "Y 轴缩放模式：smart（默认）、legacy、fixed\n\n"
@@ -165,6 +175,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_debug_info": "打印网卡调试信息并退出",
         "help_netlink": "[仅 Linux/Android] 使用 pyroute2 通过 RTNETLINK 替代 psutil（适用于 Termux proot distro 或受限环境）",
         "help_lang": "显示语言：en-us（默认），zh-cn，zh-tw",
+        "help_system": "系统",
+        "help_arch": "架构",
         # ── TUI strings ──
         "device": "设备",
         "device_emoji": "🖧 设备",
@@ -254,7 +266,11 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
         "help_device": "預設網路卡名稱（支援部分匹配）",
         "help_title": "覆蓋頂部標題：不帶值時顯示 winload <版本號>；空字串保持預設裝置標題",
-        "help_emoji": "啟用 emoji 裝飾模式 🎉",
+        "help_title_align": (
+            "標題對齊方式：left、center、right\n\n"
+            "[預設: center]"
+        ),
+        "help_emoji": "在說明、TUI 和輸出中啟用 emoji 裝飾",
         "help_unit": "顯示單位：bit（預設）或 byte",
         "help_max_mode": (
             "Y 軸縮放模式：smart（預設）、legacy、fixed\n\n"
@@ -282,6 +298,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "help_debug_info": "列印網路卡除錯資訊並退出",
         "help_netlink": "[僅 Linux/Android] 使用 pyroute2 透過 RTNETLINK 取代 psutil（適用於 Termux proot distro 或受限環境）",
         "help_lang": "顯示語言：en-us（預設），zh-cn，zh-tw",
+        "help_system": "系統",
+        "help_arch": "架構",
         # ── TUI strings ──
         "device": "裝置",
         "device_emoji": "🖧 裝置",
