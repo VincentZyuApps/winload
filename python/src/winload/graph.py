@@ -1,3 +1,4 @@
+# 📊 Renders incoming and outgoing traffic graphs for terminal display.
 """
 graph.py - ASCII 流量图形渲染
 仿 nload 的柱状图效果，使用 4 级 ASCII 字符: ' ', '.', '|', '#'

@@ -1,15 +1,6 @@
+# 🚦 Wires the Python CLI, argument parsing, runtime loop, and version output.
 """
 winload - Windows Network Load Monitor
-仿 Linux nload 的终端网络流量监控工具
-
-用法:
-    python -m winload              # 监控所有活跃网卡
-    python -m winload -t 200       # 设置刷新间隔 200ms
-    python -m winload -d "Wi-Fi"   # 指定默认设备
-
-快捷键:
-    ←/→  或 ↑/↓   切换网卡
-    q              退出
 """
 
 import argparse
@@ -18,6 +9,7 @@ import sys
 import time
 from importlib.metadata import version as get_pkg_version
 
+from .build_info import format_build_info
 from .emoji import decorate
 from .i18n import t, set_lang, get_lang
 
@@ -393,7 +385,11 @@ def parse_args() -> argparse.Namespace:
         "-V",
         "--version",
         action="version",
-        version=f"winload {get_version()} (Python edition)",
+        version=(
+            f"winload {get_version()} (Python edition)\n"
+            f"{format_build_info()}\n"
+            f"{get_system_info()}"
+        ),
         help=help_text("help_version"),
     )
     args = parser.parse_args()

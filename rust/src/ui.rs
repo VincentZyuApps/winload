@@ -1,3 +1,4 @@
+// 🖥️ Draws the ratatui terminal interface, panels, headers, and debug overlay.
 //! 基于 ratatui 的 TUI 界面渲染
 //! 仿 nload 的双面板布局：上半 Incoming / 下半 Outgoing
 

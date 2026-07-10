@@ -1,3 +1,4 @@
+// 🌐 Provides localized UI, help, and debug strings for supported languages.
 //! i18n — Internationalization support
 //! Supported languages: en-us, zh-cn, zh-tw
 

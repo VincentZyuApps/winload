@@ -1,3 +1,4 @@
+// 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
 //! 流量统计引擎
 //! 维护滑动窗口，计算 Cur / Avg / Min / Max / Ttl 五项指标。
 

@@ -1,14 +1,5 @@
+// 🚦 Wires the Rust CLI, argument parsing, runtime loop, and version output.
 //! winload — Network Load Monitor
-//! 仿 Linux nload 的终端网络流量监控工具 (Rust 版)
-//!
-//! 用法:
-//!     winload              # 监控所有活跃网卡
-//!     winload -t 200       # 设置刷新间隔 200ms
-//!     winload -d "Wi-Fi"   # 指定默认设备
-//!
-//! 快捷键:
-//!     ←/→ 或 ↑/↓   切换网卡
-//!     q / Esc       退出
 
 mod collector;
 mod emoji;
@@ -442,6 +433,23 @@ fn print_system_info(extra: &str) {
     eprintln!();
 }
 
+fn formatted_commit_hash() -> String {
+    let hash = env!("WINLOAD_GIT_COMMIT_HASH");
+    if hash != "unknown" && env!("WINLOAD_GIT_DIRTY") == "true" {
+        format!("{hash} (dirty)")
+    } else {
+        hash.to_string()
+    }
+}
+
+fn print_build_info() {
+    println!(
+        "Commit Hash: {} | Commit Time: {}",
+        formatted_commit_hash(),
+        env!("WINLOAD_GIT_COMMIT_TIME")
+    );
+}
+
 fn resolve_title(args: &Args) -> Option<String> {
     match &args.title {
         None => None,
@@ -579,6 +587,7 @@ fn main() -> io::Result<()> {
         let raw_args: Vec<String> = std::env::args().collect();
         if raw_args.iter().any(|a| a == "--version" || a == "-V") {
             println!("\x1b[1mwinload {} (Rust edition)\x1b[0m", env!("CARGO_PKG_VERSION"));
+            print_build_info();
             println!("System: {} | Arch: {} | Target: {}",
                 std::env::consts::OS,
                 std::env::consts::ARCH,

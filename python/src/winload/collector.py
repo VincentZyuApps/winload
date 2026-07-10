@@ -1,3 +1,4 @@
+# 📡 Collects network interface counters with psutil or the optional Netlink backend.
 """
 collector.py - 网络流量数据采集模块
 通过 psutil 采集各网卡的累计收发字节数，供上层统计和绘图使用。

@@ -1,3 +1,4 @@
+# ✨ Decorates CLI-facing labels with optional emoji icons.
 """Emoji decoration helpers for CLI-facing labels."""
 
 from __future__ import annotations

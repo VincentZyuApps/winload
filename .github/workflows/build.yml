@@ -1307,6 +1307,18 @@ jobs:
       - name: Copy readme for PyPI
         run: cp readme.md python/readme.md
 
+      - name: Generate Python build info
+        run: |
+          COMMIT_HASH="$(git rev-parse --short=7 HEAD)"
+          COMMIT_TIME="$(git show -s --format=%cI HEAD)"
+          cat > python/src/winload/_build_info.py << PYBUILDINFO
+          # 🧾 Stores packaged commit metadata for version output when git is unavailable.
+          GIT_COMMIT_HASH = "${COMMIT_HASH}"
+          GIT_COMMIT_TIME = "${COMMIT_TIME}"
+          GIT_DIRTY = False
+          PYBUILDINFO
+          cat python/src/winload/_build_info.py
+
       - name: Build package
         working-directory: python
         run: |

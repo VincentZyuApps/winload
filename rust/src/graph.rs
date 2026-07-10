@@ -1,3 +1,4 @@
+// 📊 Renders incoming and outgoing traffic graphs for terminal display.
 //! 流量图形渲染
 //! 仿 nload 的柱状图效果
 //! - ASCII 模式 (默认): 使用 4 级字符: ' ', '.', '|', '#'

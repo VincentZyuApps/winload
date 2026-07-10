@@ -1,3 +1,4 @@
+# 🖥️ Draws the curses terminal interface, panels, headers, and debug overlay.
 """
 ui.py - 基于 curses 的 TUI 界面渲染
 仿 nload 的双面板布局：上半 Incoming / 下半 Outgoing

@@ -1,3 +1,4 @@
+// 🔗 Reads Linux and Android network counters directly through RTNETLINK.
 //! Linux/Android 网络接口枚举与流量统计模块
 //!
 #![cfg(any(target_os = "android", target_os = "linux"))]

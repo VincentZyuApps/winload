@@ -1,3 +1,4 @@
+# 🔗 Reads Linux and Android network counters directly through RTNETLINK.
 """
 netlink.py - RTNETLINK backend for Linux/Android.
 

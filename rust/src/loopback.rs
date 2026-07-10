@@ -1,3 +1,4 @@
+// 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
 //! Windows 本地回环流量捕获模块
 //!
 //! 通过 Npcap (pcap crate) 捕获 \Device\NPF_Loopback 上的数据包。

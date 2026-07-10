@@ -1,3 +1,4 @@
+// 📡 Collects network interface counters and prepares traffic snapshots for the TUI.
 //! 网络流量数据采集模块
 //! 通过 sysinfo 采集各网卡的累计收发字节数，供上层统计和绘图使用。
 //! 当 sysinfo 返回空（如 Android SELinux 限制）时，回退到 netlink 直接采集。

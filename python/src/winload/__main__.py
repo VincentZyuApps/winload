@@ -1,3 +1,4 @@
+# ▶️ Runs the Python CLI entry point when invoked with python -m winload.
 from .main import main
 
 

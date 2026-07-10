@@ -1,3 +1,4 @@
+// ✨ Decorates CLI-facing labels with optional emoji icons.
 pub fn decorate(enabled: bool, key: &str, text: impl Into<String>) -> String {
     let text = text.into();
     if !enabled {

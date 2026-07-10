@@ -1,6 +1,6 @@
 [package]
 name = "winload"
-version = "0.1.12-rc.2"
+version = "0.1.12-rc.3"
 edition = "2021"
 description = "📊 Winload: A real-time terminal network traffic monitor inspired by nload. Dual implementations in 🦀Rust and 🐍Python, with cross-platform support for Windows, Linux, macOS and Android Termux. 🖥️ "
 license = "MIT"
