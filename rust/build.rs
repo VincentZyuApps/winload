@@ -21,7 +21,6 @@ fn main() {
 
 fn emit_git_build_info() {
     println!("cargo:rerun-if-changed=../.git/HEAD");
-    println!("cargo:rerun-if-changed=../.git/index");
     if let Some(head_ref) = git_output(&["symbolic-ref", "-q", "HEAD"]) {
         if let Some(ref_path) = git_output(&["rev-parse", "--git-path", head_ref.as_str()]) {
             println!("cargo:rerun-if-changed={ref_path}");
@@ -32,13 +31,9 @@ fn emit_git_build_info() {
         .unwrap_or_else(|| "unknown".to_string());
     let commit_time = git_output(&["show", "-s", "--format=%cI", "HEAD"])
         .unwrap_or_else(|| "unknown".to_string());
-    let dirty = git_output(&["status", "--porcelain"])
-        .map(|status| !status.is_empty())
-        .unwrap_or(false);
 
     println!("cargo:rustc-env=WINLOAD_GIT_COMMIT_HASH={commit_hash}");
     println!("cargo:rustc-env=WINLOAD_GIT_COMMIT_TIME={commit_time}");
-    println!("cargo:rustc-env=WINLOAD_GIT_DIRTY={dirty}");
 }
 
 fn git_output(args: &[&str]) -> Option<String> {

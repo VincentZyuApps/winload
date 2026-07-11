@@ -25,6 +25,22 @@ CI/CD 流水线完全由 **commit 信息中的关键词** 驱动。推送到 `ma
 
 > **说明:** Pull Request 始终会触发构建（不会发布或推送包管理器）。PR 中 commit message 的关键词会被**忽略**——工作流会无条件设置 `should_build=true`、`should_release=false`、`should_publish=false`，并跳过关键词解析。
 
+> **发布前检查：** 修改 Rust 包版本或依赖后，请从包含 `winload` 仓库的目录运行以下命令，以更新并验证 `Cargo.lock`。
+
+```bash
+cd winload/rust
+
+cargo metadata --format-version 1 > /dev/null
+cargo check --locked --no-default-features
+
+cd ..
+git status
+git diff HEAD --stat
+git diff HEAD -- rust/Cargo.lock
+```
+
+> **说明：** 请先检查锁文件差异，确认无误后再将 `rust/Cargo.lock` 与其他的变更一起暂存、提交并推送。
+
 ## 🚀 用法示例
 
 ```bash
@@ -141,7 +157,7 @@ check ──→ build ──→ release ──→ publish
   │    提交并推送 docs/benchmark/benchmark.svg
   │
   ├─→ publish-crates-io（构建成功后并行，与 Scoop/AUR/npm 同时）
-  │    cargo publish --allow-dirty
+  │    cargo publish --locked --allow-dirty
   │
   └─→ publish-pypi（独立运行，不需要构建）
        uv build → uv publish
@@ -208,7 +224,7 @@ flowchart TB
     end
     
     subgraph crates["publish-crates-io"]
-        CR1[cargo publish]
+        CR1[cargo publish --locked --allow-dirty]
     end
     
     subgraph pypi["publish-pypi"]
@@ -299,7 +315,7 @@ flowchart TB
 `crates publish` 关键词会触发将 Rust 包发布到 [crates.io](https://crates.io/crates/winload)：
 
 1. 安装 Rust stable 工具链
-2. 运行 `cargo publish --allow-dirty` 发布到 crates.io
+2. 运行 `cargo publish --locked --allow-dirty` 发布到 crates.io
 3. 用户可以通过 `cargo install winload` 安装
 
 ### 前置条件

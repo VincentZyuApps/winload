@@ -433,19 +433,10 @@ fn print_system_info(extra: &str) {
     eprintln!();
 }
 
-fn formatted_commit_hash() -> String {
-    let hash = env!("WINLOAD_GIT_COMMIT_HASH");
-    if hash != "unknown" && env!("WINLOAD_GIT_DIRTY") == "true" {
-        format!("{hash} (dirty)")
-    } else {
-        hash.to_string()
-    }
-}
-
 fn print_build_info() {
     println!(
         "Commit Hash: {} | Commit Time: {}",
-        formatted_commit_hash(),
+        env!("WINLOAD_GIT_COMMIT_HASH"),
         env!("WINLOAD_GIT_COMMIT_TIME")
     );
 }

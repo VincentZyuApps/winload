@@ -25,6 +25,22 @@ The CI/CD pipeline is driven entirely by **commit message keywords**. Push to `m
 
 > **Note:** Pull Requests always trigger a build (no release or publish). Commit message keywords are **ignored** for PRs — the workflow unconditionally sets `should_build=true`, `should_release=false`, `should_publish=false` and skips keyword parsing entirely.
 
+> **Release preparation:** After changing the Rust package version or dependencies, run the following commands from the directory containing the `winload` repository to update and verify `Cargo.lock`.
+
+```bash
+cd winload/rust
+
+cargo metadata --format-version 1 > /dev/null
+cargo check --locked --no-default-features
+
+cd ..
+git status
+git diff HEAD --stat
+git diff HEAD -- rust/Cargo.lock
+```
+
+> **Note:** Review the lockfile diff first, then stage `rust/Cargo.lock` together with the other changes before committing and pushing.
+
 ## 🚀 Usage Examples
 
 ```bash
@@ -141,7 +157,7 @@ check ──→ build ──→ release ──→ publish
   │    Commit & Push docs/benchmark/benchmark.svg
   │
   ├─→ publish-crates-io (after build success, parallel with Scoop/AUR/npm)
-  │    cargo publish --allow-dirty
+  │    cargo publish --locked --allow-dirty
   │
   └─→ publish-pypi (independent, no build needed)
        uv build → uv publish
@@ -208,7 +224,7 @@ flowchart TB
     end
     
     subgraph crates["publish-crates-io"]
-        CR1[cargo publish]
+        CR1[cargo publish --locked --allow-dirty]
     end
     
     subgraph pypi["publish-pypi"]
@@ -299,7 +315,7 @@ A repository secret `PYPI_TOKEN` must be set in **Settings → Secrets → Actio
 The `crates publish` keyword triggers publishing the Rust crate to [crates.io](https://crates.io/crates/winload):
 
 1. Installs Rust stable toolchain
-2. Runs `cargo publish --allow-dirty` to publish to crates.io
+2. Runs `cargo publish --locked --allow-dirty` to publish to crates.io
 3. Users can install via `cargo install winload`
 
 ### Prerequisite

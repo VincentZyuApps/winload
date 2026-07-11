@@ -356,7 +356,7 @@ jobs:
           # 交叉编译时指定链接器 (仅 aarch64-linux-gnu 需要)
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.cross_linker || '' }}
         run: |
-          cargo build --release --target ${{ matrix.target }} \
+          cargo build --release --locked --target ${{ matrix.target }} \
             ${{ matrix.no_default_features && '--no-default-features' || '' }}
 
           # 验证 Linux musl 产物是否真的是静态链接
@@ -1355,7 +1355,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
           cd rust
-          cargo publish --allow-dirty --token "$CARGO_REGISTRY_TOKEN"
+          cargo publish --locked --allow-dirty --token "$CARGO_REGISTRY_TOKEN"
           echo "✅ Published to crates.io!"
 
   # ── 同步 Release 到 Gitee ─────────────────────────────────
