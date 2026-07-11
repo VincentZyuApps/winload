@@ -21,8 +21,7 @@ grep '^version' rust/Cargo.toml
 ### 2. 构建所有平台二进制
 ```bash
 # 方式 A: 本地构建 (WSL)
-cd rust
-python3 build.py
+python3 scripts/build_rust_bin.py
 
 # 方式 B: GitHub Actions 构建
 # commit message 包含 "build action"（仅构建） 或 "build release"（构建+发布Release）

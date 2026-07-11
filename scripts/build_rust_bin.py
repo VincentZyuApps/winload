@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
+# 🛠️ Builds versioned Rust binaries from WSL for local release testing.
 """
-Cross-compile winload for Windows x64 and Linux x64 from WSL.
-Usage: python3 build.py [--clean]
+Build winload Rust binaries from WSL.
+Usage: python3 scripts/build_rust_bin.py [--clean]
 """
 
-import os
-import re
-import sys
-import shutil
 import argparse
+import re
+import shutil
 import subprocess
-from pathlib import Path
+import sys
 from multiprocessing import cpu_count
+from pathlib import Path
 
 # 路径配置
-RUST_DIR = Path(__file__).parent.absolute()
-PROJECT_ROOT = RUST_DIR.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+RUST_DIR = PROJECT_ROOT / "rust"
 OUTPUT_DIR = RUST_DIR / "dist"
 
 TARGETS = [
@@ -131,7 +131,16 @@ def build_target(target, binary_name, output_name, version=None):
     # 编译 - 使用一半的核心数量（向下取整）以避免过度占用系统资源
     parallel_jobs = max(1, cpu_count() // 2)  # 至少 1 个 job
     success = run_command(
-        ["cargo", "build", "--release", "--target", target, "-j", str(parallel_jobs)],
+        [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--target",
+            target,
+            "-j",
+            str(parallel_jobs),
+        ],
         cwd=RUST_DIR,
     )
     
@@ -175,7 +184,7 @@ def main():
     """主构建流程"""
     # 参数解析
     parser = argparse.ArgumentParser(
-        description="Cross-compile winload for multiple platforms"
+        description="Build versioned winload Rust binaries from WSL"
     )
     parser.add_argument(
         "--clean",

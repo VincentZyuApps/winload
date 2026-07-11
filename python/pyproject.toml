@@ -1,6 +1,6 @@
 [project]
 name = "winload"
-version = "0.1.12-rc.4"
+version = "0.1.12-rc.5"
 description = "📊 Winload: A real-time terminal network traffic monitor inspired by nload. Dual implementations in 🦀Rust and 🐍Python, with cross-platform support for Windows, Linux, macOS and Android Termux. 🖥️ "
 readme = "readme.md"
 license = { text = "MIT" }
@@ -40,6 +40,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/winload"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"_build_info.py" = "winload/_build_info.py"
 
 [dependency-groups]
 dev = []

@@ -4,16 +4,53 @@ winload - Windows Network Load Monitor
 """
 
 import argparse
+import importlib.util
 import platform
 import sys
 import time
 from importlib.metadata import version as get_pkg_version
+from pathlib import Path
 
-from .build_info import format_build_info
 from .emoji import decorate
 from .i18n import t, set_lang, get_lang
 
 TITLE_FLAG_ONLY = "__WINLOAD_TITLE_FLAG_ONLY__"
+
+
+def _load_format_build_info():
+    """Load build metadata from the installed package or Python project root."""
+    module_name = f"{__package__}._build_info"
+    try:
+        from ._build_info import format_build_info as formatter
+    except ModuleNotFoundError as exc:
+        if exc.name != module_name:
+            raise
+    else:
+        return formatter
+
+    source_path = Path(__file__).resolve().parents[2] / "_build_info.py"
+    if not source_path.is_file():
+        raise ImportError(f"Build info module not found: {source_path}")
+
+    spec = importlib.util.spec_from_file_location(module_name, source_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load build info module: {source_path}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(module_name, None)
+        raise
+
+    formatter = getattr(module, "format_build_info", None)
+    if not callable(formatter):
+        raise ImportError(f"format_build_info is missing from: {source_path}")
+    return formatter
+
+
+format_build_info = _load_format_build_info()
 
 
 class WinloadArgumentParser(argparse.ArgumentParser):
@@ -46,7 +83,6 @@ def get_version() -> str:
     # Fallback: read version from pyproject.toml (for source runs)
     try:
         import re
-        from pathlib import Path
         toml_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
         text = toml_path.read_text(encoding="utf-8")
         m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)

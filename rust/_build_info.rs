@@ -1,3 +1,4 @@
+// 🧾 Injects Git metadata and configures platform-specific linker behavior.
 use std::process::Command;
 
 fn main() {
@@ -27,8 +28,8 @@ fn emit_git_build_info() {
         }
     }
 
-    let commit_hash = git_output(&["rev-parse", "--short=7", "HEAD"])
-        .unwrap_or_else(|| "unknown".to_string());
+    let commit_hash =
+        git_output(&["rev-parse", "--short=7", "HEAD"]).unwrap_or_else(|| "unknown".to_string());
     let commit_time = git_output(&["show", "-s", "--format=%cI", "HEAD"])
         .unwrap_or_else(|| "unknown".to_string());
 

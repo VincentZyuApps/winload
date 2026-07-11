@@ -1,21 +1,17 @@
-# 🧾 Resolves git or packaged build metadata for Python version output.
-"""Build metadata helpers for version output."""
+# 🧾 Resolves source or packaged Git metadata for Python version output.
+"""Build metadata helpers for source checkouts and packaged distributions."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 
 
-@dataclass(frozen=True)
-class BuildInfo:
-    commit_hash: str
-    commit_time: str
-    dirty: bool = False
+GIT_COMMIT_HASH = "unknown"
+GIT_COMMIT_TIME = "unknown"
+GIT_DIRTY = False
 
-
-UNKNOWN_BUILD_INFO = BuildInfo("unknown", "unknown", False)
+BuildInfo = tuple[str, str, bool]
 
 
 def get_build_info() -> BuildInfo:
@@ -24,26 +20,25 @@ def get_build_info() -> BuildInfo:
 
 
 def format_build_info() -> str:
-    info = get_build_info()
-    commit_hash = info.commit_hash
-    if info.dirty and commit_hash != "unknown":
+    commit_hash, commit_time, dirty = get_build_info()
+    if dirty and commit_hash != "unknown":
         commit_hash = f"{commit_hash} (dirty)"
-    return f"Commit Hash: {commit_hash} | Commit Time: {info.commit_time}"
+    return f"Commit Hash: {commit_hash} | Commit Time: {commit_time}"
 
 
 def _source_git_info() -> BuildInfo | None:
-    package_dir = Path(__file__).resolve().parent
-    repo_root_text = _git_output(["rev-parse", "--show-toplevel"], package_dir)
+    module_path = Path(__file__).resolve()
+    repo_root_text = _git_output(["rev-parse", "--show-toplevel"], module_path.parent)
     if not repo_root_text:
         return None
 
     repo_root = Path(repo_root_text).resolve()
     try:
-        relative_package_dir = package_dir.relative_to(repo_root)
+        relative_module_path = module_path.relative_to(repo_root)
     except ValueError:
         return None
 
-    if relative_package_dir != Path("python/src/winload"):
+    if relative_module_path != Path("python/_build_info.py"):
         return None
 
     commit_hash = _git_output(["rev-parse", "--short=7", "HEAD"], repo_root)
@@ -52,19 +47,11 @@ def _source_git_info() -> BuildInfo | None:
         return None
 
     status = _git_output(["status", "--porcelain"], repo_root)
-    return BuildInfo(commit_hash, commit_time, bool(status))
+    return commit_hash, commit_time, bool(status)
 
 
 def _packaged_build_info() -> BuildInfo:
-    try:
-        from . import _build_info
-    except Exception:
-        return UNKNOWN_BUILD_INFO
-
-    commit_hash = getattr(_build_info, "GIT_COMMIT_HASH", "unknown")
-    commit_time = getattr(_build_info, "GIT_COMMIT_TIME", "unknown")
-    dirty = bool(getattr(_build_info, "GIT_DIRTY", False))
-    return BuildInfo(str(commit_hash), str(commit_time), dirty)
+    return str(GIT_COMMIT_HASH), str(GIT_COMMIT_TIME), bool(GIT_DIRTY)
 
 
 def _git_output(args: list[str], cwd: Path) -> str | None:
