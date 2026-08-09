@@ -63,10 +63,13 @@ pub struct StatisticsEngine {
 }
 
 impl StatisticsEngine {
-    pub fn new(refresh_interval_ms: u64, average_window_sec: u64, smart_max_half_life: Option<f64>) -> Self {
+    pub fn new(
+        refresh_interval_ms: u64,
+        average_window_sec: u64,
+        smart_max_half_life: Option<f64>,
+    ) -> Self {
         let second_window = (1000u64 / refresh_interval_ms).max(1) as usize;
-        let max_samples =
-            ((1000u64 / refresh_interval_ms) * average_window_sec).max(600) as usize;
+        let max_samples = ((1000u64 / refresh_interval_ms) * average_window_sec).max(600) as usize;
 
         let decay_factor = match smart_max_half_life {
             Some(half_life) if half_life > 0.0 => {
@@ -182,7 +185,7 @@ impl StatisticsEngine {
 
 // ─── 格式化工具函数 ───────────────────────────────────────
 
-use crate::Unit;
+use crate::config::Unit;
 
 /// 根据单位选择格式化速率
 pub fn format_speed_unit(bytes_per_sec: f64, unit: Unit) -> String {

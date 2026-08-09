@@ -66,9 +66,11 @@ if ! command -v uv &> /dev/null; then
 fi
 
 if ! uv python find 3.13 &> /dev/null; then
-    echo -e "${RED}Error: Python 3.13 is not available to uv.${NC}"
-    echo -e "${YELLOW}Try: uv python install 3.13${NC}"
-    exit 1
+    echo -e "${YELLOW}Python 3.13 is not available to uv. Installing it...${NC}"
+    if ! uv python install 3.13; then
+        echo -e "${RED}Error: Failed to install Python 3.13 with uv.${NC}"
+        exit 1
+    fi
 fi
 
 TOOLS_TO_INSTALL=""

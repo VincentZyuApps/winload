@@ -22,6 +22,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Test README source tree generator
+        run: python3 -m unittest test/test_update_readme_tree.py -v
+
+      - name: Check README source trees
+        run: python3 scripts/update_readme_tree.py --dry-run
+
+      - name: Check Python and Rust package versions
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import tomllib
+
+          python_version = tomllib.loads(Path("python/pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+          rust_version = tomllib.loads(Path("rust/Cargo.toml").read_text(encoding="utf-8"))["package"]["version"]
+          if python_version != rust_version:
+              raise SystemExit(
+                  f"package version mismatch: Python={python_version}, Rust={rust_version}"
+              )
+          print(f"Package versions match: {rust_version}")
+          PY
       
       - name: Parse commit message
         id: flags

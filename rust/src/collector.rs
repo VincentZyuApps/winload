@@ -3,9 +3,9 @@
 //! 通过 sysinfo 采集各网卡的累计收发字节数，供上层统计和绘图使用。
 //! 当 sysinfo 返回空（如 Android SELinux 限制）时，回退到 netlink 直接采集。
 
-use sysinfo::Networks;
 use std::collections::HashMap;
 use std::time::Instant;
+use sysinfo::Networks;
 
 /// 单次采样快照
 #[derive(Clone, Debug)]
@@ -59,7 +59,9 @@ impl Collector {
     }
 
     #[cfg(any(target_os = "android", target_os = "linux"))]
-    pub fn using_netlink(&self) -> bool { self.use_netlink }
+    pub fn using_netlink(&self) -> bool {
+        self.use_netlink
+    }
 
     /// 打印所有网络接口的调试信息
     pub fn print_debug_info(&self) {
@@ -84,7 +86,10 @@ impl Collector {
         }
 
         println!("\n=== Network Interfaces Debug Info ===");
-        println!("Total interfaces detected by sysinfo: {}\n", self.networks.len());
+        println!(
+            "Total interfaces detected by sysinfo: {}\n",
+            self.networks.len()
+        );
 
         for (name, data) in self.networks.iter() {
             println!("Interface: {}", name);
@@ -92,7 +97,7 @@ impl Collector {
             println!("  Total received: {} bytes", data.total_received());
             println!("  Total transmitted: {} bytes", data.total_transmitted());
             println!("  IP networks:");
-            
+
             let ip_networks = data.ip_networks();
             if ip_networks.is_empty() {
                 println!("    (none)");
@@ -104,7 +109,10 @@ impl Collector {
             println!();
         }
 
-        println!("Filtered devices (IPv4 only, used in UI): {}\n", self.devices().len());
+        println!(
+            "Filtered devices (IPv4 only, used in UI): {}\n",
+            self.devices().len()
+        );
         for dev in self.devices() {
             println!("  - {} [{}]", dev.name, dev.addrs.join(", "));
         }
@@ -141,15 +149,15 @@ impl Collector {
                 }
             })
             .collect();
-        
+
         // Windows 平台手动添加 Loopback 接口（sysinfo 不返回）
         #[cfg(target_os = "windows")]
         {
             let has_loopback = devs.iter().any(|d| {
-                d.name.to_lowercase().contains("loopback") 
-                || d.addrs.iter().any(|a| a.starts_with("127."))
+                d.name.to_lowercase().contains("loopback")
+                    || d.addrs.iter().any(|a| a.starts_with("127."))
             });
-            
+
             if !has_loopback {
                 devs.push(DeviceInfo {
                     name: "Loopback Pseudo-Interface 1".to_string(),
@@ -157,7 +165,7 @@ impl Collector {
                 });
             }
         }
-        
+
         devs.sort_by(|a, b| a.name.cmp(&b.name));
         devs
     }
@@ -175,7 +183,8 @@ impl Collector {
         self.networks.refresh();
 
         #[cfg(target_os = "windows")]
-        let mut snapshots: HashMap<String, Snapshot> = self.networks
+        let mut snapshots: HashMap<String, Snapshot> = self
+            .networks
             .iter()
             .map(|(name, data)| {
                 (
@@ -188,9 +197,10 @@ impl Collector {
                 )
             })
             .collect();
-        
+
         #[cfg(not(target_os = "windows"))]
-        let snapshots: HashMap<String, Snapshot> = self.networks
+        let snapshots: HashMap<String, Snapshot> = self
+            .networks
             .iter()
             .map(|(name, data)| {
                 (
@@ -203,13 +213,13 @@ impl Collector {
                 )
             })
             .collect();
-        
+
         // Windows 平台为 Loopback 添加快照（暂无法获取真实流量）
         #[cfg(target_os = "windows")]
         {
-            let has_loopback_snapshot = snapshots.keys().any(|k| {
-                k.to_lowercase().contains("loopback")
-            });
+            let has_loopback_snapshot = snapshots
+                .keys()
+                .any(|k| k.to_lowercase().contains("loopback"));
 
             if !has_loopback_snapshot {
                 snapshots.insert(
@@ -222,7 +232,7 @@ impl Collector {
                 );
             }
         }
-        
+
         snapshots
     }
 }

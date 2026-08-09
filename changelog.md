@@ -2,9 +2,9 @@
 
 All notable changes to **winload** are collected here.
 
-This changelog is written in English and summarizes the project history from the Git tag timeline, commit log, and the current `v0.1.11..HEAD` diff.
+This changelog is written in English and summarizes the project history from the Git tag timeline, release commits, and working-tree diffs.
 
-The `v0.1.12` entries describe the current `main` branch state at commit `3335833`, even though individual pre-release tags may not all be present yet.
+The `v0.1.12` series is reconstructed from the release commits `03d80cc` through `be4afee`. The local tag timeline currently ends at `v0.1.11`, so the `v0.1.12` release commits are used as the authoritative source for dates and contents.
 
 The project ships two implementations:
 
@@ -17,6 +17,11 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
+- [v0.1.13-alpha.1](#v0113-alpha1---unreleased-) 🧪
+- [v0.1.12](#v0112---2026-08-09-) ✅
+- [v0.1.12-rc.5](#v0112-rc5---2026-07-12-) 🧱
+- [v0.1.12-rc.4](#v0112-rc4---2026-07-11-) 🔒
+- [v0.1.12-rc.3](#v0112-rc3---2026-07-11-) 🧾
 - [v0.1.12-rc.2](#v0112-rc2---2026-07-10-) 🚀
 - [v0.1.12-rc.1](#v0112-rc1---2026-07-09-) 🇨🇳
 - [v0.1.12-beta.2](#v0112-beta2---2026-07-09-) 🎨
@@ -32,6 +37,178 @@ The project ships two implementations:
 - [v0.1.1-beta.1](#v011-beta1---2026-02-10-) 🛠️
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
+
+## [v0.1.13-alpha.1] - Unreleased 🧪
+
+### Release Focus 🎯
+
+- 🧪 Starts the `v0.1.13` alpha series with the Python and Rust package versions synchronized at `0.1.13-alpha.1`.
+- 🧭 Refactors both implementations toward a symmetric module layout while preserving their public command entry points.
+- 🦀 Expands the Rust TUI with multiple graph styles and optional time/traffic axes.
+- 📚 Adds generated source-layout sections to all six project READMEs.
+
+### Symmetric Architecture 🧩
+
+- 🧱 Breaks the oversized Python and Rust entry points into matching configuration, CLI, application-state, runtime, and diagnostics responsibilities.
+- 🌐 Moves translations and UI rendering into parallel module directories, while retaining deliberate platform-specific differences such as Rust Npcap loopback capture.
+- 🔒 Keeps application state independent from rendering to avoid circular dependencies and make runtime behavior easier to test.
+
+### Rust Graphs and Axes 📈
+
+- 📊 Adds Rust-only `classic`, `line`, `scatter`, and `bar` graph styles, with `classic` remaining the default.
+- 🕒 Adds an optional X-axis based on seconds before the current sample and a Y-axis with `none`, `percent`, and traffic-unit modes.
+- ⌨️ Adds `g`, `x`, and `y` runtime controls; an unconfigured X-axis falls back to a `5s` interval when toggled on.
+- 🧮 Shares the same grid, viewport, history order, and Y-axis scaling rules across all four graph styles.
+- 🔣 Limits `--unicode` to the classic character graph, leaving Ratatui styles to use their native markers.
+
+### Documentation and Tooling 🛠️
+
+- 🌳 Adds a standard-library README source-tree generator with localized end-of-file sections, deterministic ordering, source roles, and physical line counts.
+- ✅ Adds `-d`, `--dry-run`, and `--dryrun` validation aliases plus CI enforcement for stale sections and malformed markers.
+- 📏 Warns when a source file exceeds 400 lines and rejects files over the 500-line hard limit.
+
+## [v0.1.12] - 2026-08-09 ✅
+
+### Release Focus 🎯
+
+- ✅ Promotes both the Python and Rust editions from `0.1.12-rc.5` to the stable `0.1.12` release.
+- 🔧 Fixes Python runtime configuration propagation so the requested refresh interval and averaging window actually control traffic statistics.
+- 🧭 Replaces space-separated CI trigger phrases with explicit hyphenated tokens and hardens their matching boundaries.
+- 🔐 Reduces GitHub Actions permissions and pins third-party build dependencies for a more reproducible release pipeline.
+- 📦 Requests the complete `build-publish`, `pypi-publish`, and `crates-publish` release path.
+
+### Runtime Correctness 🐍
+
+- 🔗 Changes Python Netlink imports to package-relative imports so installed wheels can load the backend correctly.
+- ⏱️ Passes `interval` and `average` from the Python CLI through the UI layer into `StatisticsEngine`.
+- 📈 Ensures both the refresh cadence and rolling average window follow the values selected by the user.
+- ✅ Rejects non-positive Python `--interval` and `--average` values before entering the TUI.
+- 🦀 Adds equivalent zero-value validation to the Rust CLI so both editions enforce the same basic timing constraints.
+
+### CI Trigger Contract 🧭
+
+- 🔑 Standardizes the supported tokens as `build-action`, `build-release`, `build-publish`, `publish-from-release`, `pypi-publish`, `crates-publish`, and `run-benchmark`.
+- 🧱 Requires independent token boundaries so prefixes, suffixes, and similar prose do not accidentally start build or publishing jobs.
+- 🔤 Keeps trigger matching case-insensitive while rejecting embedded lookalike strings.
+- 📚 Synchronizes the trigger tables, command examples, ASCII flows, and Mermaid diagrams across the English, Simplified Chinese, and Traditional Chinese workflow guides.
+- 📝 Updates the changelog, Gitee synchronization notes, and Rust binary publishing notes to use the new trigger spellings.
+
+### CI Supply-Chain Hardening 🔐
+
+- 🛡️ Removes workflow-wide write permissions and grants write access only to jobs that create releases or update external package metadata.
+- 📌 Pins checkout, Rust toolchain/cache, artifact, Node.js, uv, and Gitee mirroring actions to immutable commit SHAs.
+- 🧮 Verifies the downloaded Npcap SDK against a fixed SHA256 checksum before Windows builds consume it.
+- 📦 Pins `cargo-deb` and `cargo-generate-rpm` versions to make Linux package generation repeatable.
+- 🐧 Pins the Arch Linux publishing container to an immutable image digest instead of a floating `latest` tag.
+
+### Verification and Release Metadata 🧪
+
+- 🔒 Synchronizes `python/pyproject.toml`, `rust/Cargo.toml`, and the `winload` entry in `rust/Cargo.lock` at `0.1.12`.
+- ✅ Verifies `cargo metadata` lockfile synchronization and `cargo check --locked --no-default-features` under WSL Debian.
+- ✅ Exercises valid trigger tokens, case-insensitive matching, and rejection of prefix/suffix false positives.
+- 📝 Adds an automated-testing plan and CI supply-chain review notes for subsequent hardening work.
+
+### Commit Reference 🔎
+
+- 🔖 Commit: `be4afee`
+- 📅 Date: 2026-08-09
+- 🧾 Subject: `release: 准备 v0.1.12 并修复参数传递与加固 CI 供应链`
+- 📦 Version change: `0.1.12-rc.5` -> `0.1.12`
+- 🚢 Pipeline intent: `build-publish`, `pypi-publish`, `crates-publish`
+
+## [v0.1.12-rc.5] - 2026-07-12 🧱
+
+### Release Focus 🎯
+
+- 🧱 Aligns the Python and Rust build-information layouts before the stable release.
+- 📦 Bumps both editions and the Rust lockfile from `0.1.12-rc.4` to `0.1.12-rc.5`.
+- 🔒 Keeps packaged builds tied to the checked-in lockfile.
+
+### Symmetric Build Metadata 🧾
+
+- 🐍 Consolidates the Python build metadata implementation into `python/_build_info.py`.
+- 🦀 Renames the Rust build script from `rust/build.rs` to `rust/_build_info.rs` and declares it explicitly in `Cargo.toml`.
+- 🪞 Establishes the symmetric project-root pair `python/_build_info.py` and `rust/_build_info.rs`.
+- 📦 Uses Hatchling `force-include` to install the Python metadata file as `winload/_build_info.py` inside wheels.
+- 🔍 Makes Python prefer installed build metadata while retaining source-tree Git hash, commit time, and dirty-state fallback behavior.
+- ⚙️ Updates CI to inject the triggering commit hash and time into the new Python metadata location.
+- 🎯 Preserves Rust `TARGET` injection and the Windows MSVC Npcap delay-load linker configuration.
+
+### Local Build Tooling 🛠️
+
+- 📂 Moves the local Rust release helper from `rust/build.py` to `scripts/build_rust_bin.py`.
+- 🧭 Updates project-root discovery so the relocated script can still find the Rust crate.
+- 🔒 Adds `--locked` to local Rust release builds and updates the related build and publishing documentation.
+- ✅ Verifies Python source, editable, wheel, and sdist metadata fallbacks plus Rust check, run, and package flows.
+
+### Commit Reference 🔎
+
+- 🔖 Commit: `a361241`
+- 📅 Date: 2026-07-12
+- 🧾 Subject: `release: 准备 v0.1.12-rc.5 并对齐构建信息文件结构`
+- 📦 Version change: `0.1.12-rc.4` -> `0.1.12-rc.5`
+- 🚢 Pipeline intent: `build-publish`, `pypi-publish`, `crates-publish`
+
+## [v0.1.12-rc.4] - 2026-07-11 🔒
+
+### Release Focus 🎯
+
+- 🔒 Makes Cargo lockfile consistency a release requirement.
+- 📦 Bumps both editions from `0.1.12-rc.3` to `0.1.12-rc.4` and repairs the stale `winload` lockfile version.
+- 🧾 Simplifies Rust build metadata by removing local dirty-state injection from compiled binaries.
+
+### Locked Rust Builds 📦
+
+- 🔐 Adds `--locked` to every multi-platform Rust release build.
+- 🚢 Adds `--locked` to `cargo publish` while retaining `--allow-dirty` for generated release documentation.
+- 🧪 Documents the pre-release `cargo metadata`, `cargo check --locked`, `git status`, and lockfile-diff checks.
+- 🌐 Keeps the English, Simplified Chinese, and Traditional Chinese workflow documentation structurally synchronized.
+
+### Build Metadata and Planning 🧭
+
+- 🧹 Removes `WINLOAD_GIT_DIRTY`, `.git/index` rebuild tracking, and build-time `git status --porcelain` checks from Rust.
+- 🧾 Retains the seven-character commit hash, commit time, and target information in Rust `--version` output.
+- 🐍 Leaves Python source-tree dirty detection unchanged.
+- 🧩 Adds the initial Python/Rust module-splitting plan for `main`, `ui`, and `i18n` without performing the migration in this release.
+
+### Commit Reference 🔎
+
+- 🔖 Commit: `4e4b17e`
+- 📅 Date: 2026-07-11
+- 🧾 Subject: `release: 准备 v0.1.12-rc.4 并完善 Rust 锁文件与版本信息`
+- 📦 Version change: `0.1.12-rc.3` -> `0.1.12-rc.4`
+- 🚢 Pipeline intent: `build-publish`, `pypi-publish`, `crates-publish`
+
+## [v0.1.12-rc.3] - 2026-07-11 🧾
+
+### Release Focus 🎯
+
+- 🧾 Adds reproducible build and source metadata to both editions' version output.
+- 📦 Bumps Python and Rust from `0.1.12-rc.2` to `0.1.12-rc.3`.
+- 📚 Introduces this changelog and records the earlier release history.
+
+### Build and Version Information 🔎
+
+- 🦀 Adds the short commit hash and commit time to Rust `--version`, injected by the Rust build script.
+- 🐍 Adds commit hash, commit time, system, and architecture to Python `--version`.
+- 🔍 Makes Python source runs prefer live Git metadata when a checkout is available.
+- 📦 Adds generated Python metadata fallback so PyPI wheels and sdists retain release commit information without a `.git` directory.
+- ⚙️ Generates Python build metadata in CI before the PyPI package is built.
+- 🧹 Marks local Python source output dirty when Git reports staged, unstaged, or untracked changes.
+
+### Documentation and Source Metadata 📚
+
+- 🏷️ Changes the six README GitHub and Gitee badges to two-color platform/gray designs.
+- 📝 Adds concise English responsibility comments to Python and Rust source files.
+- 🎨 Keeps Rust `--version` emphasis on the first line while rendering commit and system details as normal text.
+
+### Commit Reference 🔎
+
+- 🔖 Commit: `0438ff4`
+- 📅 Date: 2026-07-11
+- 🧾 Subject: `release: 准备 v0.1.12-rc.3 并补充构建元数据与文档徽章`
+- 📦 Version change: `0.1.12-rc.2` -> `0.1.12-rc.3`
+- 🚢 Pipeline intent: `build-publish`, `pypi-publish`, `crates-publish`
 
 ## [v0.1.12-rc.2] - 2026-07-10 🚀
 
@@ -835,13 +1012,13 @@ The project ships two implementations:
 - 🍎 Fixed macOS runner behavior.
 - 📦 Enabled cargo cache in CI.
 
-## Current `v0.1.11..HEAD` Diff Summary 📊
+## `v0.1.11..v0.1.12` Release Diff Summary 📊
 
 ### Files & Scale 📏
 
-- 📊 43 files changed.
-- ➕ 1044 insertions.
-- ➖ 303 deletions.
+- 📊 59 files changed between `v0.1.11` (`1b630fa`) and the stable release commit `be4afee`.
+- ➕ 3053 insertions.
+- ➖ 500 deletions.
 - 🐍 Python package layout changed significantly.
 - 🦀 Rust CLI/help code changed moderately.
 - 📚 README and docs were synchronized across languages.
@@ -866,14 +1043,18 @@ The project ships two implementations:
 - 📥 `docs/scripts/install/install_gitee.sh`
 - 🧪 `docs/test/test-shield-io-homebrew-logo/`
 - 🐍 `python/pyproject.toml`
+- 🧾 `python/_build_info.py`
 - 🐍 `python/src/winload/main.py`
 - 🐍 `python/src/winload/i18n.py`
 - 🐍 `python/src/winload/emoji.py`
 - 🐍 `python/src/winload/ui.py`
 - 🦀 `rust/Cargo.toml`
+- 🔒 `rust/Cargo.lock`
+- 🧾 `rust/_build_info.rs`
 - 🦀 `rust/src/main.rs`
 - 🦀 `rust/src/i18n.rs`
 - 🦀 `rust/src/emoji.rs`
+- 🛠️ `scripts/build_rust_bin.py`
 - 📚 `readme.md`
 - 📚 `readme.zh-cn.md`
 - 📚 `readme.zh-tw.md`
@@ -1011,18 +1192,15 @@ The project ships two implementations:
 - 🔎 Small CI retry commits are summarized when they only retried the same pipeline.
 - 🔎 Documentation-only sync commits are grouped by affected area.
 - 🔎 Release-trigger commits are listed when they changed packaging behavior or version metadata.
-- 🔎 The `v0.1.12` section is intentionally more detailed because it reflects the current diff under review.
+- 🔎 The `v0.1.12` series is intentionally more detailed because it is reconstructed from its release commits and the complete stable-release diff.
 - 🔎 Earlier releases are summarized by behavior, platform support, packaging impact, and user-visible changes.
 
 ## Unreleased / Next Checklist 📝
 
-- 📝 Confirm the final `v0.1.12` stable tag when it is created.
-- 📝 Re-check Python help output snapshots before stable release.
-- 📝 Re-check Rust help output snapshots before stable release.
-- 📝 Verify README install commands after publishing assets.
-- 📝 Verify Gitee Release sync before updating Gitee bucket/tap manifests.
-- 📝 Verify PyPI metadata renders the Python version classifiers as expected.
-- 📝 Verify crates.io metadata and README rendering.
-- 📝 Verify Homebrew badge rendering after README publication.
-- 📝 Verify `uv run python -m winload --help` from source.
-- 📝 Verify `winload --help --emoji` for both Rust and Python editions.
+- 🧪 Keep the Python and Rust test suites green throughout the `v0.1.13` pre-release cycle.
+- 🌳 Run the README source-tree generator in dry-run mode before publishing each pre-release.
+- 📈 Exercise all Rust graph styles and axis modes in narrow and wide terminals.
+- 📦 Re-check wheel, sdist, Cargo package, and lockfile metadata before the next publish trigger.
+- 📝 Verify README install commands and package-manager metadata after publishing new assets.
+- 🇨🇳 Verify Gitee Release synchronization before updating the Gitee bucket and tap manifests.
+- 🏷️ Fetch or confirm the remote `v0.1.12` tag separately if the local tag timeline needs to be completed.
