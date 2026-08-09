@@ -48,7 +48,7 @@ class Collector:
     def _refresh_devices(self) -> None:
         """刷新可用网卡列表及其 IP 地址"""
         if self._use_netlink:
-            from netlink import netlink_devices
+            from .netlink import netlink_devices
 
             self._devices.clear()
             for dev in netlink_devices():
@@ -88,7 +88,7 @@ class Collector:
         """
         ts = time.time()
         if self._use_netlink:
-            from netlink import netlink_collect
+            from .netlink import netlink_collect
 
             counters = netlink_collect()
             result: Dict[str, Snapshot] = {}

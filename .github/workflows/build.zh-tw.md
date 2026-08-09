@@ -12,16 +12,16 @@ CI/CD 流程完全由 **commit 資訊中的關鍵字** 驅動。推送至 `main`
 
 | Commit 資訊中的關鍵字 | 建置（8 平台） | GitHub Release | Scoop / AUR / npm | PyPI | crates.io | 基準測試 (Benchmark) |
 |----------------------|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `build publish` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish from release` | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `pypi publish` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `build-publish` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `publish-from-release` | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `pypi-publish` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 
-> **說明:** `publish from release` 從現有的 Release 抓取二進位檔發布，不會重新建置。`build publish` 則是完整的流程。
+> **說明:** `publish-from-release` 從現有的 Release 抓取二進位檔發布，不會重新建置。`build-publish` 則是完整的流程。
 
 > **說明:** Pull Request 都會觸發建置（不會發布或推送套件管理工具）。PR 中 commit message 的關鍵字會被**忽略**——工作流程會無條件設定 `should_build=true`、`should_release=false`、`should_publish=false`，並跳過關鍵字解析。
 
@@ -49,45 +49,45 @@ git diff HEAD -- rust/Cargo.lock
 # ============================================================
 
 # 僅建置，驗證所有平台的編譯
-git commit --allow-empty -m "ci: test cross-compile (build action)"
+git commit --allow-empty -m "ci: test cross-compile (build-action)"
 
 # 僅運行基準測試
-git commit --allow-empty -m "test: verify performance (run benchmark)"
+git commit --allow-empty -m "test: verify performance (run-benchmark)"
 
 # 建置 + 建立 GitHub Release（不發佈至套件管理工具）
-git commit -m "release: v0.2.0 (build release)"
+git commit -m "release: v0.2.0 (build-release)"
 
 # 僅更新 Scoop bucket（從現有的最新 Release 抓取二進位檔，不重新建置）
-git commit --allow-empty -m "ci: update scoop (publish from release)"
+git commit --allow-empty -m "ci: update scoop (publish-from-release)"
 
 # 僅發布至 crates.io（不建置，不發布 Release）
-git commit --allow-empty -m "release: v0.2.0 (crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
 
 # 僅發布至 PyPI（不建置，不發布 Release）
-git commit --allow-empty -m "release: v0.2.0 (pypi publish)"
+git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
 
 # 完整流程：建置 + Release + 發布至 Scoop/AUR/npm
-git commit -m "release: v0.2.0 (build publish)"
+git commit -m "release: v0.2.0 (build-publish)"
 
 # ============================================================
 # 兩個關鍵字組合
 # ============================================================
 
 # 建置 + Release + Scoop/AUR/npm + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build publish, crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (build-publish, crates-publish)"
 
 # PyPI + crates.io（不建置，不發布 Release）
-git commit --allow-empty -m "release: v0.2.0 (pypi publish, crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (pypi-publish, crates-publish)"
 
 # 建置 + Release + Scoop/AUR/npm + PyPI
-git commit --allow-empty -m "release: v0.2.0 (build publish, pypi publish)"
+git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish)"
 
 # ============================================================
 # 三個關鍵字組合
 # ============================================================
 
 # 完整流程：建置 + Release + Scoop/AUR/npm + PyPI + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build publish, pypi publish, crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish, crates-publish)"
 
 # ============================================================
 # 常規 commit（不需要建置和發布）
@@ -152,7 +152,7 @@ check ──→ build ──→ release ──→ publish
   ├─→ sync-gitee-code（與 check 並行，每次 push 觸發）
   │    透過 hub-mirror-action 鏡像所有分支/標籤至 Gitee
   │
-  ├─→ benchmark（獨立運行，'run benchmark' 觸發）
+  ├─→ benchmark（獨立運行，'run-benchmark' 觸發）
   │    運行 benchmark/benchmark.sh
   │    提交並推送 docs/benchmark/benchmark.svg
   │
@@ -235,7 +235,7 @@ flowchart TB
     C1 --> C2
     C1 -."每次 push".-> SC1
     C2 --> B1
-    C2 --"run benchmark"--> BM1
+    C2 --"run-benchmark"--> BM1
     C2 --> PY1
     BM1 --> BM2
     PY1 --> PY2
@@ -251,8 +251,8 @@ flowchart TB
     N1 --> N2 --> N3 --> N4
     R4 --> SR1
     SR1 --> SR2 --> SR3
-    SR3 --"build publish"--> G1
-    C2 --"publish from release：使用既有 Gitee Release"--> G1
+    SR3 --"build-publish"--> G1
+    C2 --"publish-from-release：使用既有 Gitee Release"--> G1
     G1 --> G2
 ```
 
@@ -300,7 +300,7 @@ flowchart TB
 
 ## 🐍 PyPI 發佈 (Python)
 
-`pypi publish` 關鍵字會觸發將 Python 套件發佈至 PyPI：
+`pypi-publish` 關鍵字會觸發將 Python 套件發佈至 PyPI：
 
 1. 透過 [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv) 安裝 `uv`
 2. 在 `python/` 目錄下使用 `uv build` 建置套件
@@ -312,7 +312,7 @@ flowchart TB
 
 ## 📦 crates.io 發佈 (Rust)
 
-`crates publish` 關鍵字會觸發將 Rust 套件發佈至 [crates.io](https://crates.io/crates/winload)：
+`crates-publish` 關鍵字會觸發將 Rust 套件發佈至 [crates.io](https://crates.io/crates/winload)：
 
 1. 安裝 Rust stable 工具鏈
 2. 執行 `cargo publish --locked --allow-dirty` 發佈至 crates.io
@@ -341,7 +341,7 @@ flowchart TB
 2. 透過 API 在 Gitee 上建立對應的 Release
 3. 上傳所有二進位附件至 Gitee Release
 
-當 `build publish` 建立全新的 Release 時，Gitee Scoop 和 Gitee Homebrew 會等待此鏡像任務成功後，再將 manifest/formula 指向 Gitee 附件。`publish from release` 會繼續直接使用既有的 Gitee Release，不強制先運行此鏡像任務。
+當 `build-publish` 建立全新的 Release 時，Gitee Scoop 和 Gitee Homebrew 會等待此鏡像任務成功後，再將 manifest/formula 指向 Gitee 附件。`publish-from-release` 會繼續直接使用既有的 Gitee Release，不強制先運行此鏡像任務。
 
 ### 前置條件
 

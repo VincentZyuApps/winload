@@ -431,6 +431,10 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     if args.netlink and sys.platform not in ("linux", "android"):
         parser.error("--netlink is only available on Linux/Android")
+    if args.interval <= 0:
+        parser.error("--interval must be greater than 0")
+    if args.average <= 0:
+        parser.error("--average must be greater than 0")
     if args.max_half_life <= 0:
         parser.error("--max-half-life must be greater than 0")
     if args.max_mode == "fixed":

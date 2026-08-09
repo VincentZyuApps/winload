@@ -19,7 +19,7 @@
 | 事件 | 同步内容 | 说明 |
 |------|----------|------|
 | `push` 到 main | 代码 | 每次 push 代码时自动镜像到 Gitee |
-| `build publish` / `build release` | 代码 + Release | 构建完成后同时同步 Release |
+| `build-publish` / `build-release` | 代码 + Release | 构建完成后同时同步 Release |
 
 ### Job：`sync-gitee-code` — 同步代码
 

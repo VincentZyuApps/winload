@@ -24,7 +24,7 @@ grep '^version' rust/Cargo.toml
 python3 scripts/build_rust_bin.py
 
 # 方式 B: GitHub Actions 构建
-# commit message 包含 "build action"（仅构建） 或 "build release"（构建+发布Release）
+# commit message 包含 "build-action"（仅构建） 或 "build-release"（构建+发布Release）
 ```
 
 ### 3. 验证构建产物
@@ -70,7 +70,7 @@ SHA256          B836262FFDEE8F6930F4A57DE0E9644F174D47D98C78896B145A3FC0010FBE03
 
 ### 1. Scoop ⭐ (最推荐)
 
-> ✅ 已有 GitHub Actions 自动化（commit message 含 `build publish` 即可）。
+> ✅ 已有 GitHub Actions 自动化（commit message 含 `build-publish` 即可）。
 > 以下为手动流程参考。
 
 #### 前期准备（首次）
@@ -1457,7 +1457,7 @@ pkg uninstall winload
 
 ## 📦 npm 发布（winload-rust-bin）
 
-> ✅ 已有 GitHub Actions 自动化（commit message 含 `build publish` 即可）。
+> ✅ 已有 GitHub Actions 自动化（commit message 含 `build-publish` 即可）。
 > 以下为**手动发布**流程参考，用于 CI 失败时手动补发或调试 token 问题。
 
 ### 架构说明
@@ -1908,7 +1908,7 @@ ls -lh target/x86_64-unknown-linux-musl/generate-rpm/*.rpm
 
 ## 🤖 GitHub Actions 自动化
 
-已有的 CI（`build.yml`）已支持 `build publish` 触发 Scoop 自动更新。
+已有的 CI（`build.yml`）已支持 `build-publish` 触发 Scoop 自动更新。
 若要扩展自动化 DEB 构建和 AUR 推送，参见 `build.yml` 中的
 `publish-deb` 和 `publish-aur` job。
 

@@ -12,16 +12,16 @@ The CI/CD pipeline is driven entirely by **commit message keywords**. Push to `m
 
 | Keyword in commit message | Build (8 platforms) | GitHub Release | Scoop / AUR / npm | PyPI | crates.io | Benchmark |
 |---------------------------|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `build publish` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish from release` | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `pypi publish` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `build-publish` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `publish-from-release` | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `pypi-publish` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 
-> **Note:** `publish from release` fetches binaries from an existing Release without rebuilding. `build publish` does the full pipeline.
+> **Note:** `publish-from-release` fetches binaries from an existing Release without rebuilding. `build-publish` does the full pipeline.
 
 > **Note:** Pull Requests always trigger a build (no release or publish). Commit message keywords are **ignored** for PRs — the workflow unconditionally sets `should_build=true`, `should_release=false`, `should_publish=false` and skips keyword parsing entirely.
 
@@ -49,45 +49,45 @@ git diff HEAD -- rust/Cargo.lock
 # ============================================================
 
 # Just build, verify compilation across all platforms
-git commit --allow-empty -m "ci: test cross-compile (build action)"
+git commit --allow-empty -m "ci: test cross-compile (build-action)"
 
 # Run benchmark only
-git commit --allow-empty -m "test: verify performance (run benchmark)"
+git commit --allow-empty -m "test: verify performance (run-benchmark)"
 
 # Build + create GitHub Release (no package manager publish)
-git commit -m "release: v0.2.0 (build release)"
+git commit -m "release: v0.2.0 (build-release)"
 
 # Only update Scoop bucket from the latest existing Release (no rebuild)
-git commit --allow-empty -m "ci: update scoop (publish from release)"
+git commit --allow-empty -m "ci: update scoop (publish-from-release)"
 
 # Publish to crates.io only (no build, no release)
-git commit --allow-empty -m "release: v0.2.0 (crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
 
 # Publish to PyPI only (no build, no release)
-git commit --allow-empty -m "release: v0.2.0 (pypi publish)"
+git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
 
 # Full pipeline: build + release + publish to Scoop/AUR/npm
-git commit -m "release: v0.2.0 (build publish)"
+git commit -m "release: v0.2.0 (build-publish)"
 
 # ============================================================
 # Two keywords
 # ============================================================
 
 # Build + release + Scoop/AUR/npm + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build publish, crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (build-publish, crates-publish)"
 
 # PyPI + crates.io (no build, no release)
-git commit --allow-empty -m "release: v0.2.0 (pypi publish, crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (pypi-publish, crates-publish)"
 
 # Build + release + Scoop/AUR/npm + PyPI
-git commit --allow-empty -m "release: v0.2.0 (build publish, pypi publish)"
+git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish)"
 
 # ============================================================
 # Three keywords
 # ============================================================
 
 # Full pipeline: build + release + Scoop/AUR/npm + PyPI + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build publish, pypi publish, crates publish)"
+git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish, crates-publish)"
 
 # ============================================================
 # Regular commits (no build, no publish)
@@ -152,7 +152,7 @@ check ──→ build ──→ release ──→ publish
   ├─→ sync-gitee-code (parallel with check, every push)
   │    Mirror all branches/tags to Gitee via hub-mirror-action
   │
-  ├─→ benchmark (independent, triggered by 'run benchmark')
+  ├─→ benchmark (independent, triggered by 'run-benchmark')
   │    Run benchmark/benchmark.sh
   │    Commit & Push docs/benchmark/benchmark.svg
   │
@@ -235,7 +235,7 @@ flowchart TB
     C1 --> C2
     C1 -."every push".-> SC1
     C2 --> B1
-    C2 --"run benchmark"--> BM1
+    C2 --"run-benchmark"--> BM1
     C2 --> PY1
     BM1 --> BM2
     PY1 --> PY2
@@ -251,8 +251,8 @@ flowchart TB
     N1 --> N2 --> N3 --> N4
     R4 --> SR1
     SR1 --> SR2 --> SR3
-    SR3 --"build publish"--> G1
-    C2 --"publish from release: existing Gitee Release"--> G1
+    SR3 --"build-publish"--> G1
+    C2 --"publish-from-release: existing Gitee Release"--> G1
     G1 --> G2
 ```
 
@@ -300,7 +300,7 @@ A repository secret `NPM_TOKEN` must be set in **Settings → Secrets → Action
 
 ## 🐍 PyPI Publish (Python)
 
-The `pypi publish` keyword triggers publishing the Python package to PyPI:
+The `pypi-publish` keyword triggers publishing the Python package to PyPI:
 
 1. Installs `uv` via [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv)
 2. Builds the package using `uv build` in the `python/` directory
@@ -312,7 +312,7 @@ A repository secret `PYPI_TOKEN` must be set in **Settings → Secrets → Actio
 
 ## 📦 crates.io Publish (Rust)
 
-The `crates publish` keyword triggers publishing the Rust crate to [crates.io](https://crates.io/crates/winload):
+The `crates-publish` keyword triggers publishing the Rust crate to [crates.io](https://crates.io/crates/winload):
 
 1. Installs Rust stable toolchain
 2. Runs `cargo publish --locked --allow-dirty` to publish to crates.io
@@ -341,7 +341,7 @@ Runs **after `release` job succeeds** (parallel with GitHub-side package publish
 2. Creates a corresponding Release on Gitee via API
 3. Uploads all binary assets to Gitee Release
 
-When `build publish` creates a fresh Release, Gitee Scoop and Gitee Homebrew wait for this mirror job to succeed before pointing manifests/formulae at Gitee assets. `publish from release` keeps using the existing Gitee Release directly and does not force this mirror job first.
+When `build-publish` creates a fresh Release, Gitee Scoop and Gitee Homebrew wait for this mirror job to succeed before pointing manifests/formulae at Gitee assets. `publish-from-release` keeps using the existing Gitee Release directly and does not force this mirror job first.
 
 ### Prerequisites
 

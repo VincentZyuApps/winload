@@ -18,10 +18,15 @@ class DeviceView:
     """单个网卡设备的视图，包含 Incoming 和 Outgoing 两个面板"""
 
     def __init__(self, name: str, info: Optional[DeviceInfo] = None,
-                 smart_max_half_life: Optional[float] = None):
+                 smart_max_half_life: Optional[float] = None,
+                 interval: int = 500, average: int = 300):
         self.name = name
         self.info = info
-        self.engine = StatisticsEngine(smart_max_half_life=smart_max_half_life)
+        self.engine = StatisticsEngine(
+            refresh_interval_ms=interval,
+            average_window_sec=average,
+            smart_max_half_life=smart_max_half_life,
+        )
 
     def get_addr_str(self) -> str:
         if self.info and self.info.addrs:
@@ -137,11 +142,15 @@ class UI:
         for name in self.collector.device_names:
             info = self.collector.get_device_info(name)
             self.views.append(DeviceView(name, info,
-                                         smart_max_half_life=self.smart_max_half_life))
+                                         smart_max_half_life=self.smart_max_half_life,
+                                         interval=self.interval,
+                                         average=self.average))
         if not self.views:
             # fallback: 如果没有设备（不太可能），至少显示一个占位
             self.views.append(DeviceView("(no device)",
-                                         smart_max_half_life=self.smart_max_half_life))
+                                         smart_max_half_life=self.smart_max_half_life,
+                                         interval=self.interval,
+                                         average=self.average))
 
     @property
     def current_view(self) -> DeviceView:

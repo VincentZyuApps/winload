@@ -535,6 +535,12 @@ fn build_translated_command(emoji_enabled: bool) -> clap::Command {
 }
 
 fn validate_args(args: &Args) -> Result<(), String> {
+    if args.interval == 0 {
+        return Err("--interval must be greater than 0".to_string());
+    }
+    if args.average == 0 {
+        return Err("--average must be greater than 0".to_string());
+    }
     if args.max_half_life <= 0.0 {
         return Err("--max-half-life must be greater than 0".to_string());
     }

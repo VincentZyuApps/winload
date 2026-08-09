@@ -44,7 +44,7 @@ The project ships two implementations:
 - ✨ Keeps optional emoji decoration available in help output without forcing emojis into plain mode.
 - 🌐 Improves help text consistency across `en-us`, `zh-cn`, and `zh-tw`.
 - 📚 Updates README examples so the `uv` flow verifies the installed command before running it.
-- 📦 Continues the `build publish, pypi publish, crates publish` release path.
+- 📦 Continues the `build-publish, pypi-publish, crates-publish` release path.
 
 ### Python CLI Help 🐍
 
@@ -146,7 +146,7 @@ The project ships two implementations:
 - 📅 Date: 2026-07-10
 - 🧾 Subject: `release: 准备 v0.1.12-rc.2 并对齐 Python help 输出`
 - 📦 Version change: `0.1.12-rc.1` -> `0.1.12-rc.2`
-- 🚢 Pipeline intent: `build publish, pypi publish, crates publish`
+- 🚢 Pipeline intent: `build-publish, pypi-publish, crates-publish`
 
 ## [v0.1.12-rc.1] - 2026-07-09 🇨🇳
 
@@ -155,17 +155,17 @@ The project ships two implementations:
 - 🇨🇳 Prepared `v0.1.12-rc.1`.
 - 🚢 Adjusted the Gitee publishing chain.
 - 📦 Ensured Gitee package-manager manifests wait for mirrored release assets when needed.
-- 🔁 Preserved the faster `publish from release` path for existing Gitee releases.
+- 🔁 Preserved the faster `publish-from-release` path for existing Gitee releases.
 - 📚 Synchronized workflow documentation across languages.
 - 🏷️ Reduced Homebrew badge payload size.
-- 🧪 Kept `build publish, pypi publish, crates publish` enabled for the release path.
+- 🧪 Kept `build-publish, pypi-publish, crates-publish` enabled for the release path.
 
 ### CI & Gitee Release Flow 🚢
 
 - 🇨🇳 `publish-scoop-gitee` now depends on `sync-gitee-release`.
 - 🇨🇳 `publish-homebrew-gitee` now depends on `sync-gitee-release`.
 - ✅ Fresh release builds wait for Gitee Release sync before Gitee bucket/tap updates.
-- ✅ `publish from release` can continue using an already existing Gitee Release.
+- ✅ `publish-from-release` can continue using an already existing Gitee Release.
 - 🧭 The conditional logic now checks whether the current run is creating a release.
 - 🧭 If a release is being created, the Gitee release sync must succeed first.
 - 🧭 If a release is not being created, the existing mirrored release is treated as the source.
@@ -194,7 +194,7 @@ The project ships two implementations:
 - 📅 Date: 2026-07-09
 - 🧾 Subject: `release: 准备 v0.1.12-rc.1 并调整 Gitee 发布链路`
 - 📦 Version change: `0.1.12-beta.2` -> `0.1.12-rc.1`
-- 🚢 Pipeline intent: `build publish, pypi publish, crates publish`
+- 🚢 Pipeline intent: `build-publish, pypi-publish, crates-publish`
 
 ## [v0.1.12-beta.2] - 2026-07-09 🎨
 
@@ -252,7 +252,7 @@ The project ships two implementations:
 - 📅 Date: 2026-07-09
 - 🧾 Subject: `release: 准备 v0.1.12-beta.2 并更新徽章与默认栏样式`
 - 📦 Version change: `0.1.12-beta.1` -> `0.1.12-beta.2`
-- 🚢 Pipeline intent: `build publish, pypi publish, crates publish`
+- 🚢 Pipeline intent: `build-publish, pypi-publish, crates-publish`
 
 ## [v0.1.12-beta.1] - 2026-07-09 ✨
 
@@ -317,7 +317,7 @@ The project ships two implementations:
 - 📅 Date: 2026-07-09
 - 🧾 Subject: `release: 准备 v0.1.12-beta.1 并完善 help emoji`
 - 📦 Version change: `0.1.11` -> `0.1.12-beta.1`
-- 🚢 Pipeline intent: `build publish, pypi publish, crates publish`
+- 🚢 Pipeline intent: `build-publish, pypi-publish, crates-publish`
 
 ## Documentation Refresh Before v0.1.12 - 2026-06-30 to 2026-07-07 📚
 
