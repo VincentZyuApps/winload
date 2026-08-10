@@ -280,6 +280,7 @@ flowchart TB
 2. 計算 SHA256 雜湊值
 3. 生成 `PKGBUILD` 和 `.SRCINFO`
 4. 透過 SSH 推送至 AUR
+5. AUR 複製和推送失敗時最多按遞增間隔重試 5 次；持續失敗會保留原始 Git/SSH 錯誤並使工作失敗
 
 ### 前置條件
 

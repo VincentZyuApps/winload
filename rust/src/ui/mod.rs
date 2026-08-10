@@ -185,12 +185,7 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
         (_, true) => t("help_bar_emoji"),
         (_, false) => t("help_bar"),
     };
-    let text = format!(
-        "{base} | g {} | x {} | y {}",
-        t("graph_style"),
-        t("x_axis"),
-        t("y_axis")
-    );
+    let text = format!("{base} | {}", graph_shortcut_help(app.emoji));
     let text = if app.bar_style == BarStyle::Fill {
         pad(&text, area.width as usize)
     } else {
@@ -203,6 +198,41 @@ fn draw_help(frame: &mut Frame, area: Rect, app: &App) {
         ))),
         area,
     );
+}
+
+fn graph_shortcut_help(emoji: bool) -> String {
+    let icons = if emoji {
+        ("📈 ", "⏱️ ", "📏 ")
+    } else {
+        ("", "", "")
+    };
+    format!(
+        "{}g {} | {}x {} | {}y {}",
+        icons.0,
+        t("graph_style"),
+        icons.1,
+        t("x_axis"),
+        icons.2,
+        t("y_axis")
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::graph_shortcut_help;
+
+    #[test]
+    fn graph_shortcut_icons_follow_emoji_mode() {
+        let plain = graph_shortcut_help(false);
+        assert!(!plain.contains('📈'));
+        assert!(!plain.contains('⏱'));
+        assert!(!plain.contains('📏'));
+
+        let emoji = graph_shortcut_help(true);
+        assert!(emoji.contains("📈 g "));
+        assert!(emoji.contains("⏱️ x "));
+        assert!(emoji.contains("📏 y "));
+    }
 }
 
 fn draw_too_small(frame: &mut Frame, area: Rect, app: &App) {

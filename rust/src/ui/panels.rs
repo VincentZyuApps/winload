@@ -154,13 +154,7 @@ fn draw_graph(
             "0".into(),
         ],
     };
-    let axes = graph::axes_layout(
-        area,
-        history.len(),
-        app.interval,
-        app.x_axis.interval(),
-        y_labels,
-    );
+    let axes = graph::axes_layout(area, app.interval, app.x_axis.interval(), y_labels);
     if axes.plot.is_empty() {
         return;
     }
@@ -430,7 +424,6 @@ mod tests {
             .draw(|frame| {
                 let axes = graph::axes_layout(
                     frame.area(),
-                    history.len(),
                     500,
                     Some(1),
                     vec!["100%".into(), "50%".into(), "0%".into()],

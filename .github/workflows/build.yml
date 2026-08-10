@@ -1136,12 +1136,35 @@ jobs:
               StrictHostKeyChecking no
           SSHEOF
 
-          # Clone AUR repo
-          git clone ssh://aur@aur.archlinux.org/winload-rust-bin.git aur-repo || {
-            echo "⚠️ AUR repo doesn't exist yet. Please create it manually first."
-            echo "   Run: ssh aur@aur.archlinux.org setup-repo winload-rust-bin"
-            exit 1
+          retry_aur() {
+            local operation="$1"
+            shift
+            local max_attempts=5
+            local delay=15
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 AUR ${operation}: attempt ${attempt}/${max_attempts}"
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -eq "$max_attempts" ]; then
+                echo "::error::AUR ${operation} failed after ${max_attempts} attempts."
+                return 1
+              fi
+              echo "::warning::AUR ${operation} failed; retrying in ${delay}s."
+              sleep "$delay"
+              delay=$((delay * 2))
+            done
           }
+
+          clone_aur() {
+            rm -rf aur-repo
+            git clone ssh://aur@aur.archlinux.org/winload-rust-bin.git aur-repo
+          }
+
+          # AUR occasionally enters maintenance mode, so retry transient clone failures.
+          retry_aur "clone" clone_aur
 
           # Copy files
           cp PKGBUILD aur-repo/
@@ -1152,8 +1175,12 @@ jobs:
           git config user.name "VincentZyu"
           git config user.email "vincentzyu233@gmail.com"
           git add PKGBUILD .SRCINFO
-          git commit -m "ci: 🔼 Update to ${PKGVER}" || echo "No changes to commit"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: 🔼 Update to ${PKGVER}"
+            retry_aur "push" git push
+          fi
 
           echo "✅ winload-rust-bin updated!"
 

@@ -280,6 +280,7 @@ flowchart TB
 2. 计算 SHA256 哈希值
 3. 生成 `PKGBUILD` 和 `.SRCINFO`
 4. 通过 SSH 推送到 AUR
+5. AUR 克隆和推送失败时最多按递增间隔重试 5 次；持续失败会保留原始 Git/SSH 错误并使任务失败
 
 ### 前置条件
 

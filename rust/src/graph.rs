@@ -25,7 +25,6 @@ pub struct AxesLayout {
 
 pub fn axes_layout(
     area: Rect,
-    history_len: usize,
     sample_interval_ms: u64,
     x_interval_seconds: Option<u64>,
     y_labels: Vec<String>,
@@ -47,8 +46,7 @@ pub fn axes_layout(
         area.width.saturating_sub(y_width),
         area.height.saturating_sub(x_height),
     );
-    let visible = history_len.min(plot.width as usize);
-    let duration_ms = (visible.saturating_sub(1) as u64).saturating_mul(sample_interval_ms);
+    let duration_ms = u64::from(plot.width.saturating_sub(1)).saturating_mul(sample_interval_ms);
     let x_ticks = x_interval_seconds
         .map(|seconds| time_ticks(plot.width, duration_ms, seconds))
         .unwrap_or_default();
@@ -226,16 +224,56 @@ mod tests {
     }
 
     #[test]
-    fn time_ticks_use_history_span_and_thin_by_integer_multiples() {
+    fn time_ticks_keep_fixed_positions_and_thin_by_integer_multiples() {
         let regular = time_ticks(61, 30_000, 5);
-        assert_eq!(regular.first().unwrap().label, "0s");
-        assert_eq!(regular.last().unwrap().label, "-30s");
-        assert_eq!(regular.len(), 7);
+        assert_eq!(
+            regular,
+            vec![
+                AxisTick {
+                    position: 60,
+                    label: "0s".into(),
+                },
+                AxisTick {
+                    position: 50,
+                    label: "-5s".into(),
+                },
+                AxisTick {
+                    position: 40,
+                    label: "-10s".into(),
+                },
+                AxisTick {
+                    position: 30,
+                    label: "-15s".into(),
+                },
+                AxisTick {
+                    position: 20,
+                    label: "-20s".into(),
+                },
+                AxisTick {
+                    position: 10,
+                    label: "-25s".into(),
+                },
+                AxisTick {
+                    position: 0,
+                    label: "-30s".into(),
+                },
+            ]
+        );
 
         let dense = time_ticks(20, 9_500, 1);
         assert!(dense.iter().all(|tick| {
             tick.label == "0s"
                 || tick.label[1..tick.label.len() - 1].parse::<u64>().unwrap() % 3 == 0
         }));
+    }
+
+    #[test]
+    fn axes_layout_uses_the_full_viewport_time_span() {
+        let axes = axes_layout(Rect::new(0, 0, 61, 5), 500, Some(5), Vec::new());
+
+        assert_eq!(axes.plot.width, 61);
+        assert_eq!(axes.duration_seconds, 30.0);
+        assert_eq!(axes.x_ticks.first().unwrap().position, 60);
+        assert_eq!(axes.x_ticks.last().unwrap().position, 0);
     }
 }

@@ -280,6 +280,7 @@ Both `build-publish` and `publish-from-release` trigger an update to the [scoop-
 2. Computes SHA256 hashes
 3. Generates `PKGBUILD` and `.SRCINFO`
 4. Pushes to AUR via SSH
+5. Retries AUR clone and push up to 5 times with increasing delays; persistent failures keep the original Git/SSH error and fail the job
 
 ### Prerequisite
 
