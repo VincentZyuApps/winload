@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "update_readme_tree.py"
+SCRIPT_PATH = Path(__file__).resolve().parents[2] / "scripts" / "update_readme_tree.py"
 SPEC = importlib.util.spec_from_file_location("update_readme_tree", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 TREE_TOOL = importlib.util.module_from_spec(SPEC)

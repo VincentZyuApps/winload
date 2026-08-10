@@ -17,7 +17,7 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
-- [v0.1.13-alpha.2](#v0113-alpha2---unreleased-) 🧪
+- [v0.2.0-alpha.3](#v020-alpha3---unreleased-) 🧪
 - [v0.1.12](#v0112---2026-08-09-) ✅
 - [v0.1.12-rc.5](#v0112-rc5---2026-07-12-) 🧱
 - [v0.1.12-rc.4](#v0112-rc4---2026-07-11-) 🔒
@@ -38,11 +38,11 @@ The project ships two implementations:
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
 
-## [v0.1.13-alpha.2] - Unreleased 🧪
+## [v0.2.0-alpha.3] - Unreleased 🧪
 
 ### Release Focus 🎯
 
-- 🧪 Continues the `v0.1.13` alpha series with the Python and Rust package versions synchronized at `0.1.13-alpha.2`.
+- 🧪 Opens the `v0.2.0` development line with the Python and Rust package versions synchronized at `0.2.0-alpha.3`.
 - 🧭 Refactors both implementations toward a symmetric module layout while preserving their public command entry points.
 - 🦀 Expands the Rust TUI with multiple graph styles and optional time/traffic axes.
 - 📚 Adds generated source-layout sections to all six project READMEs.
@@ -1198,7 +1198,7 @@ The project ships two implementations:
 
 ## Unreleased / Next Checklist 📝
 
-- 🧪 Keep the Python and Rust test suites green throughout the `v0.1.13` pre-release cycle.
+- 🧪 Keep the Python and Rust test suites green throughout the `v0.2.0` pre-release cycle.
 - 🌳 Run the README source-tree generator in dry-run mode before publishing each pre-release.
 - 📈 Exercise all Rust graph styles and axis modes in narrow and wide terminals.
 - 📦 Re-check wheel, sdist, Cargo package, and lockfile metadata before the next publish trigger.
