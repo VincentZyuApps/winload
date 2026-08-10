@@ -68,6 +68,13 @@ STRINGS = {
         "[默认: en-us]"
     ),
     "help_help": "打印帮助（使用 '-h' 查看简短摘要）",
+    "help_shortcuts_title": "快捷键：",
+    "shortcut_previous_device": "切换到上一个网络设备",
+    "shortcut_next_device": "切换到下一个网络设备",
+    "shortcut_toggle_debug": "切换调试信息",
+    "shortcut_toggle_separator": "切换分隔线",
+    "shortcut_toggle_color": "切换颜色",
+    "shortcut_quit": "退出",
     "help_system": "系统",
     "help_arch": "架构",
     # ── TUI strings ──

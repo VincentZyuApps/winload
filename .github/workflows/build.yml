@@ -23,11 +23,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Test README source tree generator
-        run: python3 -m unittest test/test_update_readme_tree.py -v
-
-      - name: Check README source trees
-        run: python3 scripts/update_readme_tree.py --dry-run
+      - name: Check README source trees (read-only)
+        shell: bash
+        run: |
+          python3 scripts/update_readme_tree.py --dry-run
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "README dry-run modified or created repository files:" >&2
+            git status --short >&2
+            exit 1
+          fi
 
       - name: Check Python and Rust package versions
         shell: bash

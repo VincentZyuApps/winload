@@ -3,7 +3,13 @@ import contextlib
 import io
 import unittest
 
-from winload.cli import parse_args, parse_hex_color, parse_max_value, resolve_title
+from winload.cli import (
+    build_parser,
+    parse_args,
+    parse_hex_color,
+    parse_max_value,
+    resolve_title,
+)
 from winload.config import BarStyle, MaxMode, TitleAlign, Unit
 
 
@@ -44,6 +50,52 @@ class CliTests(unittest.TestCase):
         self.assertIsNone(resolve_title(None))
         self.assertEqual(resolve_title("custom"), "custom")
         self.assertTrue(resolve_title("__WINLOAD_TITLE_FLAG_ONLY__").startswith("winload "))
+
+    def test_help_lists_localized_keyboard_shortcuts_before_system_info(self):
+        languages = {
+            "en-us": (
+                "Keyboard Shortcuts:",
+                "System:",
+                ("Previous network device", "Next network device",
+                 "Toggle debug information", "Toggle separator line",
+                 "Toggle colors", "Quit"),
+            ),
+            "zh-cn": (
+                "快捷键：",
+                "系统:",
+                ("切换到上一个网络设备", "切换到下一个网络设备",
+                 "切换调试信息", "切换分隔线", "切换颜色", "退出"),
+            ),
+            "zh-tw": (
+                "快捷鍵：",
+                "系統:",
+                ("切換到上一個網路裝置", "切換到下一個網路裝置",
+                 "切換除錯資訊", "切換分隔線", "切換顏色", "退出"),
+            ),
+        }
+        expected_keys = (
+            "Left / Up",
+            "Right / Down",
+            "Tab / Enter",
+            "F3",
+            "=",
+            "c",
+            "q / Q / Ctrl+C",
+            "PageUp",
+            "PageDown",
+            "C",
+        )
+
+        for lang, (title, system_label, actions) in languages.items():
+            with self.subTest(lang=lang):
+                help_text = build_parser(["--lang", lang]).format_help()
+                for keys in expected_keys:
+                    self.assertIn(keys, help_text)
+                for action in actions:
+                    self.assertIn(action, help_text)
+                self.assertNotIn("Esc", help_text)
+                self.assertLess(help_text.index("Options:"), help_text.index(title))
+                self.assertLess(help_text.index(title), help_text.index(system_label))
 
 
 if __name__ == "__main__":

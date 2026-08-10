@@ -97,26 +97,46 @@ fn help(key: &str, emoji_enabled: bool) -> String {
     emoji::decorate(emoji_enabled, key, t(key))
 }
 
+fn keyboard_shortcuts() -> String {
+    let rows = [
+        ("Left / Up", "shortcut_previous_device"),
+        ("Right / Down", "shortcut_next_device"),
+        ("Tab / Enter", "shortcut_next_device"),
+        ("F3", "shortcut_toggle_debug"),
+        ("=", "shortcut_toggle_separator"),
+        ("c", "shortcut_toggle_color"),
+        ("q / Q / Ctrl+C", "shortcut_quit"),
+        ("Esc", "shortcut_quit"),
+        ("g / G", "shortcut_cycle_graph_style"),
+        ("x / X", "shortcut_toggle_x_axis"),
+        ("y / Y", "shortcut_cycle_y_axis"),
+    ];
+    let mut output = format!("{}\n", t("help_shortcuts_title"));
+    for (keys, action) in rows {
+        output.push_str(&format!("  {keys:<28}{}\n", t(action)));
+    }
+    output.pop();
+    output
+}
+
 fn translated_command(emoji_enabled: bool) -> clap::Command {
-    let system = format!(
-        "\n{}",
-        emoji::decorate(
-            emoji_enabled,
-            "help_system_info",
-            format!(
-                "{}: {} | {}: {} | {}: {}",
-                t("help_system"),
-                std::env::consts::OS,
-                t("help_arch"),
-                std::env::consts::ARCH,
-                t("help_target"),
-                env!("TARGET")
-            )
-        )
+    let system = emoji::decorate(
+        emoji_enabled,
+        "help_system_info",
+        format!(
+            "{}: {} | {}: {} | {}: {}",
+            t("help_system"),
+            std::env::consts::OS,
+            t("help_arch"),
+            std::env::consts::ARCH,
+            t("help_target"),
+            env!("TARGET")
+        ),
     );
+    let footer = format!("{}\n\n{}", keyboard_shortcuts(), system);
     let mut command = Args::command()
         .about(help("description", emoji_enabled))
-        .after_help(system);
+        .after_help(footer);
     for (id, key) in [
         ("interval", "help_interval"),
         ("average", "help_average"),
@@ -292,5 +312,64 @@ mod tests {
                 .validate()
                 .is_ok()
         );
+    }
+
+    #[test]
+    fn long_help_localizes_shortcuts_between_options_and_system_info() {
+        for (lang, title, previous, graph, system) in [
+            (
+                Lang::EnUs,
+                "Keyboard Shortcuts:",
+                "Previous network device",
+                "Cycle graph style",
+                "System:",
+            ),
+            (
+                Lang::ZhCn,
+                "快捷键：",
+                "切换到上一个网络设备",
+                "循环切换图形风格",
+                "系统:",
+            ),
+            (
+                Lang::ZhTw,
+                "快捷鍵：",
+                "切換到上一個網路裝置",
+                "循環切換圖形風格",
+                "系統:",
+            ),
+        ] {
+            set_lang(lang);
+            let rendered = translated_command(false).render_long_help().to_string();
+
+            for expected in [
+                title,
+                previous,
+                graph,
+                "Left / Up",
+                "Right / Down",
+                "Tab / Enter",
+                "F3",
+                "=",
+                "c",
+                "g / G",
+                "x / X",
+                "y / Y",
+                "q / Q / Ctrl+C",
+                "Esc",
+            ] {
+                assert!(
+                    rendered.contains(expected),
+                    "missing {expected:?} in:\n{rendered}"
+                );
+            }
+
+            let options_index = rendered.find("Options:").unwrap();
+            let shortcuts_index = rendered.find(title).unwrap();
+            let system_index = rendered.find(system).unwrap();
+            assert!(options_index < shortcuts_index);
+            assert!(shortcuts_index < system_index);
+        }
+        set_lang(Lang::EnUs);
     }
 }

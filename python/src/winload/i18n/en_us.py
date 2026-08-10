@@ -68,6 +68,13 @@ STRINGS = {
         "[default: en-us]"
     ),
     "help_help": "Print help (see a summary with '-h')",
+    "help_shortcuts_title": "Keyboard Shortcuts:",
+    "shortcut_previous_device": "Previous network device",
+    "shortcut_next_device": "Next network device",
+    "shortcut_toggle_debug": "Toggle debug information",
+    "shortcut_toggle_separator": "Toggle separator line",
+    "shortcut_toggle_color": "Toggle colors",
+    "shortcut_quit": "Quit",
     "help_system": "System",
     "help_arch": "Arch",
     # ── TUI strings ──

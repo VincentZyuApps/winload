@@ -17,7 +17,7 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
-- [v0.1.13-alpha.1](#v0113-alpha1---unreleased-) 🧪
+- [v0.1.13-alpha.2](#v0113-alpha2---unreleased-) 🧪
 - [v0.1.12](#v0112---2026-08-09-) ✅
 - [v0.1.12-rc.5](#v0112-rc5---2026-07-12-) 🧱
 - [v0.1.12-rc.4](#v0112-rc4---2026-07-11-) 🔒
@@ -38,11 +38,11 @@ The project ships two implementations:
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
 
-## [v0.1.13-alpha.1] - Unreleased 🧪
+## [v0.1.13-alpha.2] - Unreleased 🧪
 
 ### Release Focus 🎯
 
-- 🧪 Starts the `v0.1.13` alpha series with the Python and Rust package versions synchronized at `0.1.13-alpha.1`.
+- 🧪 Continues the `v0.1.13` alpha series with the Python and Rust package versions synchronized at `0.1.13-alpha.2`.
 - 🧭 Refactors both implementations toward a symmetric module layout while preserving their public command entry points.
 - 🦀 Expands the Rust TUI with multiple graph styles and optional time/traffic axes.
 - 📚 Adds generated source-layout sections to all six project READMEs.
@@ -66,6 +66,7 @@ The project ships two implementations:
 - 🌳 Adds a standard-library README source-tree generator with localized end-of-file sections, deterministic ordering, source roles, and physical line counts.
 - ✅ Adds `-d`, `--dry-run`, and `--dryrun` validation aliases plus CI enforcement for stale sections and malformed markers.
 - 📏 Warns when a source file exceeds 400 lines and rejects files over the 500-line hard limit.
+- ⌨️ Adds localized keyboard-shortcut sections to both CLI help screens and synchronizes all six READMEs with shared, Python-only, and Rust-only controls.
 
 ## [v0.1.12] - 2026-08-09 ✅
 

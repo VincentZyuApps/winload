@@ -258,16 +258,21 @@ winload --netlink    # 手啟 RTNETLINK（Linux/Android，默關）
 
 | 鍵 | 功 |
 |----|----|
-| `←` / `→` 或 `↑` / `↓` | 切網口 |
+| `←` / `↑` | 切前一網口 |
+| `→` / `↓` | 切後一網口 |
+| `Tab` / `Enter` | 切後一網口 |
+| `PageUp` / `PageDown` | **[惟 Python]** 切前一/後一網口 |
 | `F3` | 切除錯信息層（Minecraft 風） |
 | `=` | 切分隔線顯隱 |
 | `c` | 切色開關 |
-| `g` | **[惟 Rust]** 循 `classic` → `line` → `scatter` → `bar` |
-| `x` | **[惟 Rust]** 切時軸；未定其間則用 `5s` |
-| `y` | **[惟 Rust]** 循 Y 軸：`none` → `percent` → `unit` |
-| `q` / `Esc` | 退 |
+| `C` | **[惟 Python]** 切色開關 |
+| `g` / `G` | **[惟 Rust]** 循 `classic` → `line` → `scatter` → `bar` |
+| `x` / `X` | **[惟 Rust]** 切時軸；未定其間則用 `5s` |
+| `y` / `Y` | **[惟 Rust]** 循 Y 軸：`none` → `percent` → `unit` |
+| `q` / `Q` 或 `Ctrl+C` | 退 |
+| `Esc` | **[惟 Rust]** 退 |
 
-> **Rust 圖控：** `classic` 為默。`g`、`x`、`y` 惟改當次運行；四圖式共用 X/Y 網格與縮放視域。`--unicode` 惟效於 `classic`，Ratatui 諸式用其原生標記。
+> **實作注：** `PageUp`、`PageDown`、大寫 `C` 惟 Python 可用；`Esc` 與 `g`/`x`/`y` 圖控惟 Rust 可用。Rust 圖式仍以 `classic` 為默，運行時切換惟改當次。四種 Rust 圖式共用 X/Y 網格與縮放視域；`--unicode` 惟效於 `classic`，Ratatui 諸式用其原生標記。
 
 ## 🪟 Windows 回環流（127.0.0.1）
 
@@ -349,9 +354,9 @@ python/
 │   └── winload/
 │       ├── i18n/
 │       │   ├── __init__.py // 32 lines | Selects the active language and exposes stable translation helpers.
-│       │   ├── en_us.py // 147 lines | Stores the English localization catalog.
-│       │   ├── zh_cn.py // 147 lines | Stores the Simplified Chinese localization catalog.
-│       │   └── zh_tw.py // 147 lines | Stores the Traditional Chinese localization catalog.
+│       │   ├── en_us.py // 154 lines | Stores the English localization catalog.
+│       │   ├── zh_cn.py // 154 lines | Stores the Simplified Chinese localization catalog.
+│       │   └── zh_tw.py // 154 lines | Stores the Traditional Chinese localization catalog.
 │       ├── ui/
 │       │   ├── __init__.py // 266 lines | Coordinates curses layout, colors, application state, and public UI access.
 │       │   ├── debug.py // 111 lines | Draws the interactive F3 diagnostics overlay.
@@ -359,7 +364,7 @@ python/
 │       ├── __init__.py // 2 lines | 📦 Marks the Python package and exposes package-level metadata.
 │       ├── __main__.py // 6 lines | ▶️ Runs the Python CLI entry point when invoked with python -m winload.
 │       ├── app.py // 135 lines | Owns mutable application state, traffic updates, and device navigation.
-│       ├── cli.py // 179 lines | Builds, localizes, parses, and validates the Python command-line interface.
+│       ├── cli.py // 205 lines | Builds, localizes, parses, and validates the Python command-line interface.
 │       ├── collector.py // 121 lines | 📡 Collects network interface counters with psutil or the optional Netlink backend.
 │       ├── config.py // 65 lines | Defines immutable, strongly typed runtime configuration for the Python application.
 │       ├── diagnostics.py // 162 lines | Reports version, build, system, and network-interface diagnostic information.
@@ -374,16 +379,16 @@ python/
 rust/
 ├── src/
 │   ├── i18n/
-│   │   ├── en_us.rs // 120 lines | Provides the complete English localization catalog.
+│   │   ├── en_us.rs // 130 lines | Provides the complete English localization catalog.
 │   │   ├── mod.rs // 54 lines | 🌐 Provides localized UI, help, and debug strings for supported languages.
-│   │   ├── zh_cn.rs // 120 lines | Provides the complete Simplified Chinese localization catalog.
-│   │   └── zh_tw.rs // 120 lines | Provides the complete Traditional Chinese localization catalog.
+│   │   ├── zh_cn.rs // 130 lines | Provides the complete Simplified Chinese localization catalog.
+│   │   └── zh_tw.rs // 130 lines | Provides the complete Traditional Chinese localization catalog.
 │   ├── ui/
 │   │   ├── debug.rs // 105 lines | Draws the F3 runtime diagnostics overlay.
 │   │   ├── mod.rs // 231 lines | Coordinates the ratatui layout, header, help bar, panels, and debug overlay.
 │   │   └── panels.rs // 495 lines | Draws traffic histories in classic, line, scatter, and bar styles with optional axes.
 │   ├── app.rs // 190 lines | Owns mutable application state, traffic collection, and device navigation.
-│   ├── cli.rs // 296 lines | Parses localized command-line arguments and produces a validated RunConfig.
+│   ├── cli.rs // 375 lines | Parses localized command-line arguments and produces a validated RunConfig.
 │   ├── collector.rs // 238 lines | 📡 Collects network interface counters and prepares traffic snapshots for the TUI.
 │   ├── config.rs // 183 lines | Defines validated, strongly typed runtime configuration shared by the Rust modules.
 │   ├── diagnostics.rs // 45 lines | Prints build, platform, and network-interface diagnostics outside the TUI.

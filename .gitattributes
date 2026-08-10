@@ -1,11 +1,29 @@
-# Keep shell scripts executable on Linux/WSL.
+# 🐚 统一仓库内所有 Shell 脚本的换行符：`**/*.sh`
 *.sh text eol=lf
 
-# Keep GitHub Actions YAML stable across Windows edits.
+# ⚙️ 统一 GitHub Actions 工作流配置的换行符：`.github/workflows/*.yml`
 .github/workflows/*.yml text eol=lf
 
-# Count Markdown files in GitHub Linguist language statistics.
-*.md linguist-detectable=true
+# 🙈 默认不将仓库内任何 Markdown 文件计入语言统计：`**/*.md`
+*.md linguist-detectable=false
 
-# Exclude generated/test assets from GitHub Linguist statistics.
+# 📘 计入根目录英文项目说明：`readme.md`
+/readme.md linguist-language=Markdown linguist-detectable=true linguist-documentation=false
+
+# 🛠️ 计入英文构建与发布说明：`.github/workflows/build.md`
+.github/workflows/build.md linguist-language=Markdown linguist-detectable=true linguist-documentation=false
+
+# 🐧 计入 Linux 与 Android Netlink 说明：`docs/linux_android_netlink.md`
+docs/linux_android_netlink.md linguist-language=Markdown linguist-detectable=true linguist-documentation=false
+
+# 🪟 计入 Windows 回环流量说明：`docs/win_loopback.md`
+docs/win_loopback.md linguist-language=Markdown linguist-detectable=true linguist-documentation=false
+
+# 🧪 将文档测试产物标记为生成内容并排除统计：`docs/test/**`
 docs/test/** linguist-generated=true
+
+# 🔧 不将项目维护脚本计入语言统计：`scripts/**`
+scripts/** linguist-detectable=false
+
+# ✅ 不将独立检查脚本计入语言统计：`test/**`
+test/** linguist-detectable=false

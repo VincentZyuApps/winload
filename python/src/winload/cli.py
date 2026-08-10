@@ -11,6 +11,7 @@ from .emoji import decorate
 from .i18n import set_lang, t
 
 TITLE_FLAG_ONLY = "__WINLOAD_TITLE_FLAG_ONLY__"
+SHORTCUT_KEY_WIDTH = 28
 
 
 class WinloadArgumentParser(argparse.ArgumentParser):
@@ -70,6 +71,28 @@ def resolve_title(raw_title: Optional[str]) -> Optional[str]:
     return raw_title
 
 
+def format_keyboard_shortcuts() -> str:
+    """Format the localized runtime controls as an aligned plain-text list."""
+    shortcuts = (
+        ("Left / Up", "shortcut_previous_device"),
+        ("Right / Down", "shortcut_next_device"),
+        ("Tab / Enter", "shortcut_next_device"),
+        ("F3", "shortcut_toggle_debug"),
+        ("=", "shortcut_toggle_separator"),
+        ("c", "shortcut_toggle_color"),
+        ("q / Q / Ctrl+C", "shortcut_quit"),
+        ("PageUp", "shortcut_previous_device"),
+        ("PageDown", "shortcut_next_device"),
+        ("C", "shortcut_toggle_color"),
+    )
+    lines = [t("help_shortcuts_title")]
+    lines.extend(
+        f"  {keys:<{SHORTCUT_KEY_WIDTH}}{t(action_key)}"
+        for keys, action_key in shortcuts
+    )
+    return "\n".join(lines)
+
+
 def build_parser(argv: Optional[Sequence[str]] = None) -> WinloadArgumentParser:
     """Build a parser after pre-reading options that affect localized help."""
     pre_parser = argparse.ArgumentParser(add_help=False)
@@ -85,7 +108,10 @@ def build_parser(argv: Optional[Sequence[str]] = None) -> WinloadArgumentParser:
         prog="winload",
         usage="%(prog)s [OPTIONS]",
         description=help_text("description"),
-        epilog=f"\n{get_help_system_info(pre_args.emoji)}",
+        epilog=(
+            f"\n{format_keyboard_shortcuts()}\n\n"
+            f"{get_help_system_info(pre_args.emoji)}"
+        ),
         add_help=False,
         formatter_class=argparse.RawTextHelpFormatter,
     )
