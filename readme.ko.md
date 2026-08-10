@@ -385,15 +385,15 @@ rust/
 │   │   └── zh_tw.rs // 130 lines | Provides the complete Traditional Chinese localization catalog.
 │   ├── ui/
 │   │   ├── debug.rs // 105 lines | Draws the F3 runtime diagnostics overlay.
-│   │   ├── mod.rs // 231 lines | Coordinates the ratatui layout, header, help bar, panels, and debug overlay.
-│   │   └── panels.rs // 495 lines | Draws traffic histories in classic, line, scatter, and bar styles with optional axes.
+│   │   ├── mod.rs // 261 lines | Coordinates the ratatui layout, header, help bar, panels, and debug overlay.
+│   │   └── panels.rs // 488 lines | Draws traffic histories in classic, line, scatter, and bar styles with optional axes.
 │   ├── app.rs // 190 lines | Owns mutable application state, traffic collection, and device navigation.
 │   ├── cli.rs // 375 lines | Parses localized command-line arguments and produces a validated RunConfig.
 │   ├── collector.rs // 238 lines | 📡 Collects network interface counters and prepares traffic snapshots for the TUI.
 │   ├── config.rs // 183 lines | Defines validated, strongly typed runtime configuration shared by the Rust modules.
 │   ├── diagnostics.rs // 45 lines | Prints build, platform, and network-interface diagnostics outside the TUI.
 │   ├── emoji.rs // 40 lines | ✨ Decorates CLI-facing labels with optional emoji icons.
-│   ├── graph.rs // 241 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
+│   ├── graph.rs // 279 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
 │   ├── loopback.rs // 227 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
 │   ├── main.rs // 42 lines | Boots the Rust application and dispatches CLI actions to focused modules.
 │   ├── netlink.rs // 175 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
