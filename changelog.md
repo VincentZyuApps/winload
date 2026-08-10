@@ -17,7 +17,8 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
-- [v0.2.0-alpha.3](#v020-alpha3---unreleased-) 🧪
+- [v0.2.0-alpha.4](#v020-alpha4---unreleased-) 🧪
+- [v0.2.0-alpha.3](#v020-alpha3---2026-08-10-) 🧩
 - [v0.1.12](#v0112---2026-08-09-) ✅
 - [v0.1.12-rc.5](#v0112-rc5---2026-07-12-) 🧱
 - [v0.1.12-rc.4](#v0112-rc4---2026-07-11-) 🔒
@@ -38,7 +39,25 @@ The project ships two implementations:
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
 
-## [v0.2.0-alpha.3] - Unreleased 🧪
+## [v0.2.0-alpha.4] - Unreleased 🧪
+
+### Release Focus 🎯
+
+- 🐧 Repairs AUR publishing by replacing the malformed Arch Linux container digest with a verified immutable OCI index digest.
+- 🔁 Adds the independent `aur-publish` trigger for retrying only the AUR package from an existing GitHub Release.
+- 📦 Keeps `build-publish` and `publish-from-release` connected to AUR so full package-manager publishing remains unchanged.
+- 🔖 Synchronizes the Python package, Rust crate, Cargo lockfile, and version tests at `0.2.0-alpha.4`.
+
+### CI and Documentation 🛠️
+
+- 🧮 Replaces the invalid 65-character SHA256 value with the verified 64-character `archlinux:latest` OCI index digest.
+- 🧱 Replaces the ambiguous package-manager flag with independent Scoop, Homebrew, AUR, npm, PyPI, and crates.io outputs.
+- 🔒 Preserves the Release success/skipped gate, preventing AUR publication when a requested GitHub Release fails.
+- 🏷️ Marks only alpha versions as GitHub/Gitee prereleases and publishes their npm packages with the `alpha` dist-tag; beta, RC, and stable versions remain regular/latest releases.
+- 🦀 Lets `crates-publish` run independently instead of waiting for an unrelated multi-platform build job.
+- 📚 Documents the six release targets, trigger fan-out, and alpha-channel policy consistently across all three workflow guides.
+
+## [v0.2.0-alpha.3] - 2026-08-10 🧩
 
 ### Release Focus 🎯
 

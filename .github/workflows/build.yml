@@ -14,7 +14,10 @@ jobs:
     outputs:
       should_build: ${{ steps.flags.outputs.should_build }}
       should_release: ${{ steps.flags.outputs.should_release }}
-      should_publish: ${{ steps.flags.outputs.should_publish }}
+      should_publish_scoop: ${{ steps.flags.outputs.should_publish_scoop }}
+      should_publish_homebrew: ${{ steps.flags.outputs.should_publish_homebrew }}
+      should_publish_aur: ${{ steps.flags.outputs.should_publish_aur }}
+      should_publish_npm: ${{ steps.flags.outputs.should_publish_npm }}
       should_publish_pypi: ${{ steps.flags.outputs.should_publish_pypi }}
       should_publish_crates: ${{ steps.flags.outputs.should_publish_crates }}
       should_benchmark: ${{ steps.flags.outputs.should_benchmark }}
@@ -65,7 +68,12 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "should_build=true"    >> "$GITHUB_OUTPUT"
             echo "should_release=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish_scoop=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish_homebrew=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish_aur=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish_npm=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish_pypi=false" >> "$GITHUB_OUTPUT"
+            echo "should_publish_crates=false" >> "$GITHUB_OUTPUT"
             echo "should_benchmark=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -73,7 +81,10 @@ jobs:
           # 初始化标志
           BUILD=false
           RELEASE=false
-          PUBLISH=false
+          PUBLISH_SCOOP=false
+          PUBLISH_HOMEBREW=false
+          PUBLISH_AUR=false
+          PUBLISH_NPM=false
           PUBLISH_PYPI=false
           PUBLISH_CRATES=false
           BENCHMARK=false
@@ -87,7 +98,10 @@ jobs:
           if has_trigger "build-publish"; then
             BUILD=true
             RELEASE=true
-            PUBLISH=true
+            PUBLISH_SCOOP=true
+            PUBLISH_HOMEBREW=true
+            PUBLISH_AUR=true
+            PUBLISH_NPM=true
           # "build-release" = 构建 + GitHub Release
           elif has_trigger "build-release"; then
             BUILD=true
@@ -99,7 +113,15 @@ jobs:
           
           # "publish-from-release" = 从已有 Release 发布到包管理器 (不构建)
           if has_trigger "publish-from-release"; then
-            PUBLISH=true
+            PUBLISH_SCOOP=true
+            PUBLISH_HOMEBREW=true
+            PUBLISH_AUR=true
+            PUBLISH_NPM=true
+          fi
+
+          # "aur-publish" = 从已有 Release 仅发布到 AUR
+          if has_trigger "aur-publish"; then
+            PUBLISH_AUR=true
           fi
           
           # "pypi-publish" = 发布到 PyPI
@@ -119,12 +141,15 @@ jobs:
           
           echo "should_build=$BUILD"     >> "$GITHUB_OUTPUT"
           echo "should_release=$RELEASE" >> "$GITHUB_OUTPUT"
-          echo "should_publish=$PUBLISH" >> "$GITHUB_OUTPUT"
+          echo "should_publish_scoop=$PUBLISH_SCOOP" >> "$GITHUB_OUTPUT"
+          echo "should_publish_homebrew=$PUBLISH_HOMEBREW" >> "$GITHUB_OUTPUT"
+          echo "should_publish_aur=$PUBLISH_AUR" >> "$GITHUB_OUTPUT"
+          echo "should_publish_npm=$PUBLISH_NPM" >> "$GITHUB_OUTPUT"
           echo "should_publish_pypi=$PUBLISH_PYPI" >> "$GITHUB_OUTPUT"
           echo "should_publish_crates=$PUBLISH_CRATES" >> "$GITHUB_OUTPUT"
           echo "should_benchmark=$BENCHMARK" >> "$GITHUB_OUTPUT"
           
-          echo "📋 Flags: build=$BUILD release=$RELEASE publish=$PUBLISH publish_pypi=$PUBLISH_PYPI publish_crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
+          echo "📋 Flags: build=$BUILD release=$RELEASE scoop=$PUBLISH_SCOOP homebrew=$PUBLISH_HOMEBREW aur=$PUBLISH_AUR npm=$PUBLISH_NPM pypi=$PUBLISH_PYPI crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
 
   # ── 同步代码到 Gitee ─────────────────────────────────────
   # 每次 push 都同步，与 check 并行运行
@@ -590,10 +615,17 @@ jobs:
           FILES=(winload-*-${VERSION}*)
           echo "📤 Uploading ${#FILES[@]} files:"
           printf '  - %s\n' "${FILES[@]}"
+
+          RELEASE_FLAGS=(--latest)
+          if [[ "$VERSION" == *-alpha.* ]]; then
+            RELEASE_FLAGS=(--prerelease)
+          fi
+          echo "🏷️ Release mode: ${RELEASE_FLAGS[*]}"
+
           gh release create "$VERSION" \
             --title "winload ${VERSION}" \
             --notes-file release_notes.md \
-            --latest \
+            "${RELEASE_FLAGS[@]}" \
             "${FILES[@]}"
 
   # ── 更新 Scoop Bucket (GitHub) ─────────────────────────────
@@ -604,7 +636,7 @@ jobs:
     name: Update Scoop Bucket
     needs: [check, release]
     # always() 让此 job 即使 release 被跳过也能运行
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_scoop == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Fetch latest release info
@@ -707,7 +739,7 @@ jobs:
   publish-scoop-gitee:
     name: 【Gitee码云】Update Scoop Bucket
     needs: [check, release, sync-gitee-release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') && (needs.check.outputs.should_release != 'true' || needs['sync-gitee-release'].result == 'success')
+    if: always() && needs.check.outputs.should_publish_scoop == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') && (needs.check.outputs.should_release != 'true' || needs['sync-gitee-release'].result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows binaries from GitHub Releases (for hash)
@@ -804,7 +836,7 @@ jobs:
   publish-homebrew-github:
     name: Update Homebrew Tap
     needs: [check, release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_homebrew == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Fetch latest release info
@@ -911,7 +943,7 @@ jobs:
   publish-homebrew-gitee:
     name: 【Gitee码云】Update Homebrew Tap
     needs: [check, release, sync-gitee-release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') && (needs.check.outputs.should_release != 'true' || needs['sync-gitee-release'].result == 'success')
+    if: always() && needs.check.outputs.should_publish_homebrew == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped') && (needs.check.outputs.should_release != 'true' || needs['sync-gitee-release'].result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Fetch latest release info from Gitee
@@ -1014,7 +1046,7 @@ jobs:
   publish-aur-bin:
     name: Update AUR Package (winload-rust-bin)
     needs: [check, release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_aur == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -1081,7 +1113,7 @@ jobs:
           cat PKGBUILD
 
       - name: Generate .SRCINFO
-        uses: docker://archlinux@sha256:681569955d1d17313ef7134acc8b5cd8adc5da2fc24709bed472d95e1cf3d71a1
+        uses: docker://archlinux@sha256:345a872f6c95e082d4b8c050af637eebb57402c6e2177b411c3acf7df84eb33b
         with:
           args: bash -c "pacman -Sy --noconfirm pacman-contrib base-devel && useradd -m builder && cp PKGBUILD /home/builder/ && cd /home/builder && sudo -u builder makepkg --printsrcinfo > .SRCINFO && cp .SRCINFO /github/workspace/"
 
@@ -1133,7 +1165,7 @@ jobs:
   publish-npm-scope:
     name: Publish to npm (scoped)
     needs: [check, release]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       id-token: write
       packages: write
@@ -1177,6 +1209,9 @@ jobs:
           VERSION="${{ needs.check.outputs.version }}"
           NPM_VERSION="${VERSION#v}"
           NPM_TAG="latest"
+          if [[ "$NPM_VERSION" == *-alpha.* ]]; then
+            NPM_TAG="alpha"
+          fi
           echo "📦 npm version: ${NPM_VERSION} (tag: ${NPM_TAG})"
 
           PLATFORMS=(
@@ -1227,6 +1262,9 @@ jobs:
           VERSION="${{ needs.check.outputs.version }}"
           NPM_VERSION="${VERSION#v}"
           NPM_TAG="latest"
+          if [[ "$NPM_VERSION" == *-alpha.* ]]; then
+            NPM_TAG="alpha"
+          fi
 
           cp readme.md npm/winload-rust-bin/readme.md
 
@@ -1261,7 +1299,7 @@ jobs:
   publish-npm-unscope:
     name: Publish to npm (unscoped)
     needs: [check, release, publish-npm-scope]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       id-token: write
       contents: read
@@ -1278,13 +1316,21 @@ jobs:
 
       - name: Publish winload-rust-bin (unscoped) to npm
         run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          NPM_VERSION="${VERSION#v}"
+          NPM_TAG="latest"
+          if [[ "$NPM_VERSION" == *-alpha.* ]]; then
+            NPM_TAG="alpha"
+          fi
+
           cd npm/winload-rust-bin
           node -e "
             const p = require('./package.json');
             p.name = 'winload-rust-bin';
             require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2) + '\n');
           "
-          npm publish --provenance --access public --tag latest
+          echo "📦 Publishing winload-rust-bin@${NPM_VERSION} (tag: ${NPM_TAG})..."
+          npm publish --provenance --access public --tag "${NPM_TAG}"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -1292,7 +1338,7 @@ jobs:
   publish-npm-github-packages:
     name: Publish to GitHub Packages for npm
     needs: [check, release, publish-npm-scope]
-    if: always() && needs.check.outputs.should_publish == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       contents: read
       packages: write
@@ -1310,12 +1356,19 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          NPM_VERSION="${VERSION#v}"
+          NPM_TAG="latest"
+          if [[ "$NPM_VERSION" == *-alpha.* ]]; then
+            NPM_TAG="alpha"
+          fi
+
           for dir in npm-platforms/@vincentzyuapps/*/; do
             [ -d "$dir" ] || continue
             echo "📦 Publishing $(basename $dir) to GitHub Packages..."
             cd "$dir"
             echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-            npm publish --registry https://npm.pkg.github.com 2>&1 || echo "⚠️ Failed to publish $(basename $dir) to GitHub Packages (may already exist)"
+            npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}" 2>&1 || echo "⚠️ Failed to publish $(basename $dir) to GitHub Packages (may already exist)"
             cd "$GITHUB_WORKSPACE"
           done
 
@@ -1323,9 +1376,17 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          NPM_VERSION="${VERSION#v}"
+          NPM_TAG="latest"
+          if [[ "$NPM_VERSION" == *-alpha.* ]]; then
+            NPM_TAG="alpha"
+          fi
+
           cd npm/winload-rust-bin
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          npm publish --registry https://npm.pkg.github.com
+          echo "📦 Publishing @vincentzyuapps/winload@${NPM_VERSION} to GitHub Packages (tag: ${NPM_TAG})..."
+          npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}"
 
           echo "✅ GitHub Packages published!"
 
@@ -1371,8 +1432,8 @@ jobs:
   # ── 发布到 crates.io (Rust 包) ───────────────────────────────
   publish-crates-io:
     name: Publish to crates.io
-    needs: [check, build]
-    if: needs.check.outputs.should_publish_crates == 'true' && needs.build.result == 'success'
+    needs: check
+    if: needs.check.outputs.should_publish_crates == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -1444,6 +1505,11 @@ jobs:
         run: |
           TAG="${{ steps.release_info.outputs.tag }}"
           NAME="${{ steps.release_info.outputs.release_name }}"
+          IS_PRERELEASE=false
+          if [[ "$TAG" == *-alpha.* ]]; then
+            IS_PRERELEASE=true
+          fi
+          echo "🏷️ Gitee prerelease: $IS_PRERELEASE"
           
           # JSON 安全转义 release body（处理换行、引号、反斜杠等）
           JSON_BODY=$(jq -R -s '.' < release_body.md)
@@ -1476,13 +1542,14 @@ jobs:
               --arg tag "$TAG" \
               --arg name "$NAME" \
               --argjson body "$JSON_BODY" \
+              --argjson prerelease "$IS_PRERELEASE" \
               '{
                 access_token: $token,
                 tag_name: $tag,
                 name: $name,
                 body: $body,
                 target_commitish: "main",
-                prerelease: false
+                prerelease: $prerelease
               }')
             
             CREATE_RESPONSE=$($CURL -X POST --header 'Content-Type: application/json;charset=UTF-8' \

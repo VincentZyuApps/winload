@@ -10,20 +10,21 @@ The CI/CD pipeline is driven entirely by **commit message keywords**. Push to `m
 
 ## 🔑 Keywords
 
-| Keyword in commit message | Build (8 platforms) | GitHub Release | Scoop / AUR / npm | PyPI | crates.io | Benchmark |
-|---------------------------|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `build-publish` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish-from-release` | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `pypi-publish` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Keyword in commit message | Build (8 platforms) | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | Benchmark |
+|---------------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `publish-from-release` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 
-> **Note:** `publish-from-release` fetches binaries from an existing Release without rebuilding. `build-publish` does the full pipeline.
+> **Note:** `publish-from-release` publishes to Scoop, Homebrew, AUR, and npm from an existing GitHub Release without rebuilding, while `aur-publish` only republishes AUR. `build-publish` runs the full build, Release, Scoop, Homebrew, AUR, and npm pipeline.
 
-> **Note:** Pull Requests always trigger a build (no release or publish). Commit message keywords are **ignored** for PRs — the workflow unconditionally sets `should_build=true`, `should_release=false`, `should_publish=false` and skips keyword parsing entirely.
+> **Note:** Pull Requests always trigger a build (no release or publish). Commit message keywords are **ignored** for PRs — the workflow sets `should_build=true`, while `should_release` and all six publishing outputs (`should_publish_scoop`, `should_publish_homebrew`, `should_publish_aur`, `should_publish_npm`, `should_publish_pypi`, and `should_publish_crates`) are `false`.
 
 > **Release preparation:** After changing the Rust package version or dependencies, run the following commands from the directory containing the `winload` repository to update and verify `Cargo.lock`.
 
@@ -57,8 +58,11 @@ git commit --allow-empty -m "test: verify performance (run-benchmark)"
 # Build + create GitHub Release (no package manager publish)
 git commit -m "release: v0.2.0 (build-release)"
 
-# Only update Scoop bucket from the latest existing Release (no rebuild)
-git commit --allow-empty -m "ci: update scoop (publish-from-release)"
+# Publish to Scoop/Homebrew/AUR/npm from the latest existing GitHub Release (no rebuild)
+git commit --allow-empty -m "ci: publish existing release (publish-from-release)"
+
+# Publish to AUR only from the latest existing GitHub Release (no rebuild)
+git commit --allow-empty -m "ci: update aur (aur-publish)"
 
 # Publish to crates.io only (no build, no release)
 git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
@@ -66,27 +70,27 @@ git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
 # Publish to PyPI only (no build, no release)
 git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
 
-# Full pipeline: build + release + publish to Scoop/AUR/npm
+# Full pipeline: build + release + publish to Scoop/Homebrew/AUR/npm
 git commit -m "release: v0.2.0 (build-publish)"
 
 # ============================================================
 # Two keywords
 # ============================================================
 
-# Build + release + Scoop/AUR/npm + crates.io
+# Build + release + Scoop/Homebrew/AUR/npm + crates.io
 git commit --allow-empty -m "release: v0.2.0 (build-publish, crates-publish)"
 
 # PyPI + crates.io (no build, no release)
 git commit --allow-empty -m "release: v0.2.0 (pypi-publish, crates-publish)"
 
-# Build + release + Scoop/AUR/npm + PyPI
+# Build + release + Scoop/Homebrew/AUR/npm + PyPI
 git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish)"
 
 # ============================================================
 # Three keywords
 # ============================================================
 
-# Full pipeline: build + release + Scoop/AUR/npm + PyPI + crates.io
+# Full pipeline: build + release + Scoop/Homebrew/AUR/npm + PyPI + crates.io
 git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish, crates-publish)"
 
 # ============================================================
@@ -156,7 +160,7 @@ check ──→ build ──→ release ──→ publish
   │    Run benchmark/benchmark.sh
   │    Commit & Push docs/benchmark/benchmark.svg
   │
-  ├─→ publish-crates-io (after build success, parallel with Scoop/AUR/npm)
+  ├─→ publish-crates-io (triggered independently from check by 'crates-publish'; no multi-platform build)
   │    cargo publish --locked --allow-dirty
   │
   └─→ publish-pypi (independent, no build needed)
@@ -164,6 +168,8 @@ check ──→ build ──→ release ──→ publish
 ```
 
 > **Note:** Release notes are auto-generated and include a download table (all platforms), quick install commands (pip/npm/cargo/scoop/AUR), and a changelog from git commits.
+
+> **Release channels:** Only `alpha` versions are marked as pre-releases on GitHub and Gitee and published to npm with the `alpha` dist-tag. `beta`, `rc`, and stable versions are normal GitHub/Gitee Releases and use npm's `latest` dist-tag.
 
 ```mermaid
 flowchart TB
@@ -187,7 +193,7 @@ flowchart TB
         R3[Generate release notes]
         R4[Create GitHub Release]
     end
-    
+
     subgraph scoop["publish-scoop"]
         S1[Download Win binaries]
         S2[Generate winload.json]
@@ -241,11 +247,12 @@ flowchart TB
     PY1 --> PY2
     B1 --> B2
     B2 --> R1
-    B2 --> CR1
+    C2 --"crates-publish"--> CR1
     R1 --> R2 --> R3 --> R4
     R4 --> S1
     S1 --> S2 --> S3
-    R4 --> A1
+    R4 --"build-publish"--> A1
+    C2 --"aur-publish / publish-from-release: existing GitHub Release"--> A1
     A1 --> A2 --> A3
     R4 --> N1
     N1 --> N2 --> N3 --> N4
@@ -258,7 +265,7 @@ flowchart TB
 
 ## 🍨 Scoop Publish (Rust)
 
-The `publish` keyword triggers an update to the [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) repository:
+Both `build-publish` and `publish-from-release` trigger an update to the [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) repository:
 
 1. Downloads Windows x64 and ARM64 binaries from the latest GitHub Release
 2. Computes SHA256 hashes
@@ -267,7 +274,7 @@ The `publish` keyword triggers an update to the [scoop-bucket](https://github.co
 
 ## 🐧 AUR Publish (Rust)
 
-The `publish` keyword also triggers an update to the AUR package [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin):
+`build-publish` updates the AUR package [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin) after building and creating a new GitHub Release. Both `publish-from-release` and `aur-publish` can update AUR from an existing GitHub Release without rebuilding; `aur-publish` is the AUR-only trigger.
 
 1. Downloads Linux x64 and ARM64 binaries from the latest GitHub Release
 2. Computes SHA256 hashes
@@ -280,12 +287,12 @@ A repository secret `AUR_SSH_KEY` must be set in **Settings → Secrets → Acti
 
 ## 📦 npm Publish (Rust)
 
-The `publish` keyword also triggers publishing to npm as [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload):
+Both `build-publish` and `publish-from-release` trigger publishing to npm as [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload):
 
 1. Downloads 6 platform binaries (Win/Linux/macOS × x64/ARM64) from the latest GitHub Release
 2. Publishes 6 platform-specific packages with `os`/`cpu` fields (npm auto-selects the matching one)
 3. Publishes the main `@vincentzyuapps/winload` package with `optionalDependencies`
-4. All versions (including pre-release like `0.1.6-beta.4`) are published as `latest`
+4. `alpha` versions use the npm `alpha` dist-tag; `beta`, `rc`, and stable versions use `latest`
 5. Syncs all packages to [GitHub Packages](https://github.com/features/packages) (`npm.pkg.github.com`)
 
 > Uses the [esbuild](https://github.com/evanw/esbuild) / [Biome](https://github.com/biomejs/biome) pattern: each platform has its own scoped package, `optionalDependencies` ensures only the matching binary is downloaded.
@@ -322,7 +329,7 @@ The `crates-publish` keyword triggers publishing the Rust crate to [crates.io](h
 
 A repository secret `CARGO_REGISTRY_TOKEN` must be set in **Settings → Secrets → Actions**, containing a crates.io API token.
 
-> **Note:** This job runs in parallel with Scoop/AUR/npm after the build completes, ensuring the compiled binary is ready before publishing.
+> **Note:** This job is independently triggered from `check` by `crates-publish`; it does not wait for the multi-platform build or binary Release jobs.
 
 ## 🔄 Gitee Sync
 

@@ -10,20 +10,21 @@ CI/CD 流程完全由 **commit 資訊中的關鍵字** 驅動。推送至 `main`
 
 ## 🔑 關鍵字
 
-| Commit 資訊中的關鍵字 | 建置（8 平台） | GitHub Release | Scoop / AUR / npm | PyPI | crates.io | 基準測試 (Benchmark) |
-|----------------------|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `build-publish` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish-from-release` | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| `pypi-publish` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Commit 資訊中的關鍵字 | 建置（8 平台） | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | 基準測試 (Benchmark) |
+|----------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `publish-from-release` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 
-> **說明:** `publish-from-release` 從現有的 Release 抓取二進位檔發布，不會重新建置。`build-publish` 則是完整的流程。
+> **說明:** `publish-from-release` 從既有的 GitHub Release 發佈至 Scoop、Homebrew、AUR 和 npm，不會重新建置；`aur-publish` 則只補發 AUR。`build-publish` 會執行建置、Release、Scoop、Homebrew、AUR 和 npm 的完整流程。
 
-> **說明:** Pull Request 都會觸發建置（不會發布或推送套件管理工具）。PR 中 commit message 的關鍵字會被**忽略**——工作流程會無條件設定 `should_build=true`、`should_release=false`、`should_publish=false`，並跳過關鍵字解析。
+> **說明:** Pull Request 都會觸發建置（不會發布或推送套件管理工具）。PR 中 commit message 的關鍵字會被**忽略**——工作流程設定 `should_build=true`，而 `should_release` 和六個發佈輸出（`should_publish_scoop`、`should_publish_homebrew`、`should_publish_aur`、`should_publish_npm`、`should_publish_pypi`、`should_publish_crates`）均為 `false`。
 
 > **發佈前檢查：** 修改 Rust 套件版本或相依套件後，請從包含 `winload` 儲存庫的目錄執行以下命令，以更新並驗證 `Cargo.lock`。
 
@@ -57,8 +58,11 @@ git commit --allow-empty -m "test: verify performance (run-benchmark)"
 # 建置 + 建立 GitHub Release（不發佈至套件管理工具）
 git commit -m "release: v0.2.0 (build-release)"
 
-# 僅更新 Scoop bucket（從現有的最新 Release 抓取二進位檔，不重新建置）
-git commit --allow-empty -m "ci: update scoop (publish-from-release)"
+# 從既有的最新 GitHub Release 發佈至 Scoop/Homebrew/AUR/npm（不重新建置）
+git commit --allow-empty -m "ci: publish existing release (publish-from-release)"
+
+# 僅從既有的最新 GitHub Release 發佈至 AUR（不重新建置）
+git commit --allow-empty -m "ci: update aur (aur-publish)"
 
 # 僅發布至 crates.io（不建置，不發布 Release）
 git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
@@ -66,27 +70,27 @@ git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
 # 僅發布至 PyPI（不建置，不發布 Release）
 git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
 
-# 完整流程：建置 + Release + 發布至 Scoop/AUR/npm
+# 完整流程：建置 + Release + 發布至 Scoop/Homebrew/AUR/npm
 git commit -m "release: v0.2.0 (build-publish)"
 
 # ============================================================
 # 兩個關鍵字組合
 # ============================================================
 
-# 建置 + Release + Scoop/AUR/npm + crates.io
+# 建置 + Release + Scoop/Homebrew/AUR/npm + crates.io
 git commit --allow-empty -m "release: v0.2.0 (build-publish, crates-publish)"
 
 # PyPI + crates.io（不建置，不發布 Release）
 git commit --allow-empty -m "release: v0.2.0 (pypi-publish, crates-publish)"
 
-# 建置 + Release + Scoop/AUR/npm + PyPI
+# 建置 + Release + Scoop/Homebrew/AUR/npm + PyPI
 git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish)"
 
 # ============================================================
 # 三個關鍵字組合
 # ============================================================
 
-# 完整流程：建置 + Release + Scoop/AUR/npm + PyPI + crates.io
+# 完整流程：建置 + Release + Scoop/Homebrew/AUR/npm + PyPI + crates.io
 git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish, crates-publish)"
 
 # ============================================================
@@ -156,7 +160,7 @@ check ──→ build ──→ release ──→ publish
   │    運行 benchmark/benchmark.sh
   │    提交並推送 docs/benchmark/benchmark.svg
   │
-  ├─→ publish-crates-io（建置成功後並行，與 Scoop/AUR/npm 同時）
+  ├─→ publish-crates-io（從 check 獨立觸發，'crates-publish'；無需多平台建置）
   │    cargo publish --locked --allow-dirty
   │
   └─→ publish-pypi（獨立運行，不需要建置）
@@ -164,6 +168,8 @@ check ──→ build ──→ release ──→ publish
 ```
 
 > **說明：** Release Notes 自動生成，包含下載表格（所有平台）、快速安裝指令（pip/npm/cargo/scoop/AUR）以及來自 git commits 的變更日誌。
+
+> **發佈渠道：** 只有 `alpha` 版本會在 GitHub 和 Gitee 標記為預發佈，並使用 npm 的 `alpha` dist-tag。`beta`、`rc` 和穩定版均為普通 GitHub/Gitee Release，並使用 npm 的 `latest` dist-tag。
 
 ```mermaid
 flowchart TB
@@ -241,11 +247,12 @@ flowchart TB
     PY1 --> PY2
     B1 --> B2
     B2 --> R1
-    B2 --> CR1
+    C2 --"crates-publish"--> CR1
     R1 --> R2 --> R3 --> R4
     R4 --> S1
     S1 --> S2 --> S3
-    R4 --> A1
+    R4 --"build-publish"--> A1
+    C2 --"aur-publish / publish-from-release：使用既有 GitHub Release"--> A1
     A1 --> A2 --> A3
     R4 --> N1
     N1 --> N2 --> N3 --> N4
@@ -258,7 +265,7 @@ flowchart TB
 
 ## 🍨 Scoop 發佈 (Rust)
 
-`publish` 關鍵字會觸發 [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) 儲存庫的更新：
+`build-publish` 和 `publish-from-release` 都會觸發 [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) 儲存庫的更新：
 
 1. 從最新的 GitHub Release 下載 Windows x64 和 ARM64 二進位檔案
 2. 計算 SHA256 雜湊值
@@ -267,7 +274,7 @@ flowchart TB
 
 ## 🐧 AUR 發佈 (Rust)
 
-`publish` 關鍵字也會觸發 AUR 套件 [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin) 的更新：
+`build-publish` 會在建置並建立新的 GitHub Release 後更新 AUR 套件 [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin)。`publish-from-release` 和 `aur-publish` 都可以從既有的 GitHub Release 更新 AUR 且不會重新建置；`aur-publish` 是僅發佈 AUR 的觸發詞。
 
 1. 從最新的 GitHub Release 下載 Linux x64 和 ARM64 二進位檔案
 2. 計算 SHA256 雜湊值
@@ -280,12 +287,12 @@ flowchart TB
 
 ## 📦 npm 發佈 (Rust)
 
-`publish` 關鍵字也會觸發將 Rust 預編譯二進位檔發佈至 npm，套件名為 [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload)：
+`build-publish` 和 `publish-from-release` 都會觸發將 Rust 預編譯二進位檔發佈至 npm，套件名為 [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload)：
 
 1. 從最新的 GitHub Release 下載 6 個平台的二進位檔案（Win/Linux/macOS × x64/ARM64）
 2. 發佈 6 個平台專屬套件，每個套件帶有 `os`/`cpu` 欄位（npm 自動選擇匹配的套件）
 3. 發佈主套件 `@vincentzyuapps/winload`，透過 `optionalDependencies` 引用各平台套件
-4. 所有版本（包括預發佈如 `0.1.6-beta.4`）均以 `latest` 標籤發佈
+4. `alpha` 版本使用 npm 的 `alpha` dist-tag；`beta`、`rc` 和穩定版使用 `latest`
 5. 同步發佈至 [GitHub Packages](https://github.com/features/packages)（`npm.pkg.github.com`）
 
 > 採用 [esbuild](https://github.com/evanw/esbuild) / [Biome](https://github.com/biomejs/biome) 模式：每個平台一個獨立套件，`optionalDependencies` 確保只下載匹配當前平台的二進位檔。
@@ -322,7 +329,7 @@ flowchart TB
 
 需在儲存庫的 **Settings → Secrets → Actions** 中設定 `CARGO_REGISTRY_TOKEN` 金鑰，值為 crates.io API Token。
 
-> **注意：** 此任務在建置成功後與 Scoop/AUR/npm 並行運行，確保編譯產物準備好後再發佈。
+> **注意：** 此任務由 `crates-publish` 從 `check` 獨立觸發，不會等待多平台建置或二進位 Release 任務。
 
 ## 🔄 Gitee 同步
 
