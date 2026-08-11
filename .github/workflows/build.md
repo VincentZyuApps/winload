@@ -33,6 +33,8 @@ cd winload/rust
 
 cargo metadata --format-version 1 > /dev/null
 cargo check --locked --no-default-features
+python ../scripts/update_readme_tree.py --dry-run
+python ../scripts/update_readme_tree.py
 
 cd ..
 git status
@@ -41,6 +43,8 @@ git diff HEAD -- rust/Cargo.lock
 ```
 
 > **Note:** Review the lockfile diff first, then stage `rust/Cargo.lock` together with the other changes before committing and pushing.
+
+> **CI behavior:** README source-tree drift creates a warning but does not block build or publish jobs; generator validation errors and unintended file changes still fail CI.
 
 ## 🚀 Usage Examples
 

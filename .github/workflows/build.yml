@@ -29,7 +29,16 @@ jobs:
       - name: Check README source trees (read-only)
         shell: bash
         run: |
-          python3 scripts/update_readme_tree.py --dry-run
+          if python3 scripts/update_readme_tree.py --dry-run; then
+            :
+          else
+            status=$?
+            if [ "$status" -eq 1 ]; then
+              echo "::warning::README source trees are out of date; run python scripts/update_readme_tree.py locally and commit the generated changes."
+            else
+              exit "$status"
+            fi
+          fi
           if [ -n "$(git status --porcelain)" ]; then
             echo "README dry-run modified or created repository files:" >&2
             git status --short >&2

@@ -33,6 +33,8 @@ cd winload/rust
 
 cargo metadata --format-version 1 > /dev/null
 cargo check --locked --no-default-features
+python ../scripts/update_readme_tree.py --dry-run
+python ../scripts/update_readme_tree.py
 
 cd ..
 git status
@@ -41,6 +43,8 @@ git diff HEAD -- rust/Cargo.lock
 ```
 
 > **说明：** 请先检查锁文件差异，确认无误后再将 `rust/Cargo.lock` 与其他的变更一起暂存、提交并推送。
+
+> **CI 行为：** README 源码目录树过期只会产生警告，不会阻断构建或发布任务；生成器校验错误和意外修改文件仍会使 CI 失败。
 
 ## 🚀 用法示例
 
