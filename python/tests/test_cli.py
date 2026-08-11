@@ -97,6 +97,20 @@ class CliTests(unittest.TestCase):
                 self.assertLess(help_text.index("Options:"), help_text.index(title))
                 self.assertLess(help_text.index(title), help_text.index(system_label))
 
+    def test_help_decorates_keyboard_shortcuts_with_emoji(self):
+        plain_help = build_parser([]).format_help()
+        emoji_help = build_parser(["--emoji"]).format_help()
+
+        self.assertNotIn("⌨️ Keyboard Shortcuts:", plain_help)
+        self.assertNotIn("⬅️ Previous network device", plain_help)
+        self.assertIn("⌨️ Keyboard Shortcuts:", emoji_help)
+        self.assertIn("⬅️ Previous network device", emoji_help)
+        self.assertIn("➡️ Next network device", emoji_help)
+        self.assertIn("🔧 Toggle debug information", emoji_help)
+        self.assertIn("➖ Toggle separator line", emoji_help)
+        self.assertIn("🎨 Toggle colors", emoji_help)
+        self.assertIn("🚪 Quit", emoji_help)
+
 
 if __name__ == "__main__":
     unittest.main()

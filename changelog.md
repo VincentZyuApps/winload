@@ -17,7 +17,8 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
-- [v0.2.0-alpha.5](#v020-alpha5---unreleased-) 🧪
+- [v0.2.0-beta.1](#v020-beta1---unreleased-) 🧪
+- [v0.2.0-alpha.5](#v020-alpha5---2026-08-10-) 🧪
 - [v0.2.0-alpha.4](#v020-alpha4---2026-08-10-) 🐧
 - [v0.2.0-alpha.3](#v020-alpha3---2026-08-10-) 🧩
 - [v0.1.12](#v0112---2026-08-09-) ✅
@@ -40,7 +41,18 @@ The project ships two implementations:
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
 
-## [v0.2.0-alpha.5] - Unreleased 🧪
+## [v0.2.0-beta.1] - Unreleased 🧪
+
+### Release Focus 🎯
+
+- ⌨️ Decorates the Python and Rust command-line keyboard-shortcut sections when `--emoji` is enabled.
+- 🔖 Synchronizes the Python package, Rust crate, Cargo lockfile, and version tests at `0.2.0-beta.1`.
+
+### Testing 🛠️
+
+- 🧪 Verifies both emoji and plain keyboard-shortcut help in the Python and Rust CLI test suites.
+
+## [v0.2.0-alpha.5] - 2026-08-10 🧪
 
 ### Release Focus 🎯
 

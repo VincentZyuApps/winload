@@ -27,6 +27,13 @@ _ICONS = {
     "help_npcap": "🪟",
     "help_netlink": "🔗",
     "help_lang": "🌐",
+    "help_shortcuts_title": "⌨️",
+    "shortcut_previous_device": "⬅️",
+    "shortcut_next_device": "➡️",
+    "shortcut_toggle_debug": "🔧",
+    "shortcut_toggle_separator": "➖",
+    "shortcut_toggle_color": "🎨",
+    "shortcut_quit": "🚪",
     "help_system_info": "🖥️",
 }
 

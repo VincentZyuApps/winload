@@ -97,7 +97,7 @@ fn help(key: &str, emoji_enabled: bool) -> String {
     emoji::decorate(emoji_enabled, key, t(key))
 }
 
-fn keyboard_shortcuts() -> String {
+fn keyboard_shortcuts(emoji_enabled: bool) -> String {
     let rows = [
         ("Left / Up", "shortcut_previous_device"),
         ("Right / Down", "shortcut_next_device"),
@@ -111,9 +111,9 @@ fn keyboard_shortcuts() -> String {
         ("x / X", "shortcut_toggle_x_axis"),
         ("y / Y", "shortcut_cycle_y_axis"),
     ];
-    let mut output = format!("{}\n", t("help_shortcuts_title"));
+    let mut output = format!("{}\n", help("help_shortcuts_title", emoji_enabled));
     for (keys, action) in rows {
-        output.push_str(&format!("  {keys:<28}{}\n", t(action)));
+        output.push_str(&format!("  {keys:<28}{}\n", help(action, emoji_enabled)));
     }
     output.pop();
     output
@@ -133,7 +133,7 @@ fn translated_command(emoji_enabled: bool) -> clap::Command {
             env!("TARGET")
         ),
     );
-    let footer = format!("{}\n\n{}", keyboard_shortcuts(), system);
+    let footer = format!("{}\n\n{}", keyboard_shortcuts(emoji_enabled), system);
     let mut command = Args::command()
         .about(help("description", emoji_enabled))
         .after_help(footer);
@@ -371,5 +371,31 @@ mod tests {
             assert!(shortcuts_index < system_index);
         }
         set_lang(Lang::EnUs);
+    }
+
+    #[test]
+    fn long_help_decorates_keyboard_shortcuts_with_emoji() {
+        let plain = translated_command(false).render_long_help().to_string();
+        let emoji = translated_command(true).render_long_help().to_string();
+
+        assert!(!plain.contains("⌨️ Keyboard Shortcuts:"));
+        assert!(!plain.contains("⬅️ Previous network device"));
+        for expected in [
+            "⌨️ Keyboard Shortcuts:",
+            "⬅️ Previous network device",
+            "➡️ Next network device",
+            "🔧 Toggle debug information",
+            "➖ Toggle separator line",
+            "🎨 Toggle colors",
+            "🚪 Quit",
+            "📈 Cycle graph style",
+            "⏱️ Toggle X-axis grid",
+            "📏 Cycle Y-axis labels",
+        ] {
+            assert!(
+                emoji.contains(expected),
+                "missing {expected:?} in:\n{emoji}"
+            );
+        }
     }
 }

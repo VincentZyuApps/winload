@@ -71,8 +71,8 @@ def resolve_title(raw_title: Optional[str]) -> Optional[str]:
     return raw_title
 
 
-def format_keyboard_shortcuts() -> str:
-    """Format the localized runtime controls as an aligned plain-text list."""
+def format_keyboard_shortcuts(emoji_enabled: bool) -> str:
+    """Format localized runtime controls with optional emoji decorations."""
     shortcuts = (
         ("Left / Up", "shortcut_previous_device"),
         ("Right / Down", "shortcut_next_device"),
@@ -85,9 +85,9 @@ def format_keyboard_shortcuts() -> str:
         ("PageDown", "shortcut_next_device"),
         ("C", "shortcut_toggle_color"),
     )
-    lines = [t("help_shortcuts_title")]
+    lines = [decorate(emoji_enabled, "help_shortcuts_title", t("help_shortcuts_title"))]
     lines.extend(
-        f"  {keys:<{SHORTCUT_KEY_WIDTH}}{t(action_key)}"
+        f"  {keys:<{SHORTCUT_KEY_WIDTH}}{decorate(emoji_enabled, action_key, t(action_key))}"
         for keys, action_key in shortcuts
     )
     return "\n".join(lines)
@@ -109,7 +109,7 @@ def build_parser(argv: Optional[Sequence[str]] = None) -> WinloadArgumentParser:
         usage="%(prog)s [OPTIONS]",
         description=help_text("description"),
         epilog=(
-            f"\n{format_keyboard_shortcuts()}\n\n"
+            f"\n{format_keyboard_shortcuts(pre_args.emoji)}\n\n"
             f"{get_help_system_info(pre_args.emoji)}"
         ),
         add_help=False,
