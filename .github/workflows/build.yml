@@ -1704,3 +1704,7 @@ jobs:
           echo "$(ts) ════════════════════════════════════════"
           
           echo "📊 Upload complete: $SUCCESS succeeded, $FAIL failed"
+          if [ "$FAIL" -ne 0 ]; then
+            echo "::error::Gitee release asset upload failed for $FAIL file(s)."
+            exit 1
+          fi
