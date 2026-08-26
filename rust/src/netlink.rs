@@ -57,8 +57,9 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
             return result;
         }
 
+        let request_len = (NLMSG_HDR_LEN + IFINFOMSG_LEN) as u32;
         let mut req = [0u8; NLMSG_HDR_LEN + IFINFOMSG_LEN];
-        req[0..4].copy_from_slice(&(req.len() as u32).to_ne_bytes());
+        req[0..4].copy_from_slice(&request_len.to_ne_bytes());
         req[4..6].copy_from_slice(&RTM_GETLINK.to_ne_bytes());
         req[6..8].copy_from_slice(&(NLM_F_REQUEST | NLM_F_DUMP).to_ne_bytes());
         req[8..12].copy_from_slice(&REQUEST_SEQUENCE.to_ne_bytes());
