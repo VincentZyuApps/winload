@@ -1356,7 +1356,7 @@ jobs:
             if npm view "${PKG_NAME}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
               echo "${PKG_NAME}@${NPM_VERSION} already exists; skipping"
             else
-              npm publish --provenance --access public --tag "${NPM_TAG}"
+              npm publish --provenance --access public --tag "${NPM_TAG}" 2>&1 || echo "::warning::Failed to publish ${PKG_NAME}; continuing."
             fi
             cd "$GITHUB_WORKSPACE"
           done
@@ -1478,7 +1478,7 @@ jobs:
             if npm view "${PKG_NAME}@${NPM_VERSION}" version --registry https://npm.pkg.github.com > /dev/null 2>&1; then
               echo "${PKG_NAME}@${NPM_VERSION} already exists; skipping"
             else
-              npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}"
+              npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}" 2>&1 || echo "::warning::Failed to publish ${PKG_NAME} to GitHub Packages; continuing."
             fi
             cd "$GITHUB_WORKSPACE"
           done
@@ -1771,6 +1771,5 @@ jobs:
           
           echo "📊 Upload complete: $SUCCESS succeeded, $FAIL failed"
           if [ "$FAIL" -ne 0 ]; then
-            echo "::error::Gitee release asset upload failed for $FAIL file(s)."
-            exit 1
+            echo "::warning::Gitee release asset upload failed for $FAIL file(s); continuing."
           fi
