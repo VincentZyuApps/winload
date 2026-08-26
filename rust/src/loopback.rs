@@ -235,6 +235,7 @@ pub mod platform {
                 }
             }
         }
+        Ok(())
     }
 
     #[cfg(not(feature = "npcap"))]

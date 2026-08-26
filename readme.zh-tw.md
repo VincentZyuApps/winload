@@ -394,7 +394,7 @@ rust/
 │   ├── diagnostics.rs // 45 lines | Prints build, platform, and network-interface diagnostics outside the TUI.
 │   ├── emoji.rs // 50 lines | ✨ Decorates CLI-facing labels with optional emoji icons.
 │   ├── graph.rs // 279 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
-│   ├── loopback.rs // 264 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
+│   ├── loopback.rs // 265 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
 │   ├── main.rs // 42 lines | Boots the Rust application and dispatches CLI actions to focused modules.
 │   ├── netlink.rs // 175 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
 │   ├── runtime.rs // 100 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
