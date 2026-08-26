@@ -160,6 +160,36 @@ jobs:
           
           echo "📋 Flags: build=$BUILD release=$RELEASE scoop=$PUBLISH_SCOOP homebrew=$PUBLISH_HOMEBREW aur=$PUBLISH_AUR npm=$PUBLISH_NPM pypi=$PUBLISH_PYPI crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
 
+  # ── 基础测试 ───────────────────────────────────────────
+  quality:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Python package
+        run: python3 -m pip install --disable-pip-version-check -e ./python
+
+      - name: Test Python implementation
+        env:
+          PYTHONPATH: python/src
+        run: python3 -m unittest discover -s python/tests
+
+      - name: Test repository scripts
+        env:
+          PYTHONPATH: python/src
+        run: python3 -m unittest discover -s test
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
+
+      - name: Test Rust implementation
+        working-directory: rust
+        run: cargo test --locked --no-default-features
+
   # ── 同步代码到 Gitee ─────────────────────────────────────
   # 每次 push 都同步，与 check 并行运行
   sync-gitee-code:
