@@ -1287,7 +1287,11 @@ jobs:
           PKGJSON
 
             cd "${PKG_DIR}"
-            npm publish --provenance --access public --tag "${NPM_TAG}" 2>&1 || echo "⚠️ Failed to publish ${PKG_NAME} (may already exist)"
+            if npm view "${PKG_NAME}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
+              echo "${PKG_NAME}@${NPM_VERSION} already exists; skipping"
+            else
+              npm publish --provenance --access public --tag "${NPM_TAG}"
+            fi
             cd "$GITHUB_WORKSPACE"
           done
 
@@ -1335,7 +1339,7 @@ jobs:
   publish-npm-unscope:
     name: Publish to npm (unscoped)
     needs: [check, release, publish-npm-scope]
-    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && needs.publish-npm-scope.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       id-token: write
       contents: read
@@ -1374,7 +1378,7 @@ jobs:
   publish-npm-github-packages:
     name: Publish to GitHub Packages for npm
     needs: [check, release, publish-npm-scope]
-    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && needs.publish-npm-scope.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       contents: read
       packages: write
@@ -1404,7 +1408,12 @@ jobs:
             echo "📦 Publishing $(basename $dir) to GitHub Packages..."
             cd "$dir"
             echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-            npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}" 2>&1 || echo "⚠️ Failed to publish $(basename $dir) to GitHub Packages (may already exist)"
+            PKG_NAME=$(node -p "require('./package.json').name")
+            if npm view "${PKG_NAME}@${NPM_VERSION}" version --registry https://npm.pkg.github.com > /dev/null 2>&1; then
+              echo "${PKG_NAME}@${NPM_VERSION} already exists; skipping"
+            else
+              npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}"
+            fi
             cd "$GITHUB_WORKSPACE"
           done
 
