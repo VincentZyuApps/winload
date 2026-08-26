@@ -84,25 +84,45 @@ fi
 BASE_URL="https://gitee.com/${OWNER}/${REPO}/releases/download/${VERSION}"
 TMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TMP_DIR"' EXIT
+CHECKSUM_FILE="winload-checksums-${VERSION}.txt"
+
+echo "📥 正在下载 ${CHECKSUM_FILE}..."
+curl -fSL -o "${TMP_DIR}/${CHECKSUM_FILE}" "${BASE_URL}/${CHECKSUM_FILE}"
+
+download_and_verify() {
+  local asset="$1"
+  local target="${TMP_DIR}/${asset}"
+  local checksum
+
+  echo "📥 正在下载 ${asset}..."
+  curl -fSL -o "$target" "${BASE_URL}/${asset}"
+  checksum=$(awk -v asset="$asset" '$2 == asset { print $1; exit }' "${TMP_DIR}/${CHECKSUM_FILE}")
+  if [ -z "$checksum" ]; then
+    echo "❌ 未找到 ${asset} 的 SHA-256 校验值。"
+    exit 1
+  fi
+  if ! printf '%s  %s\n' "$checksum" "$target" | sha256sum --check --status; then
+    echo "❌ ${asset} 的 SHA-256 校验失败。"
+    exit 1
+  fi
+  echo "✅ SHA-256 校验通过: ${asset}"
+}
 
 if [ "$PKG_MGR" = "termux" ]; then
   ANDROID_ASSET="winload-android-${ARCH_NAME}-${VERSION}"
-  echo "📥 正在从 Gitee 下载 ${ANDROID_ASSET}..."
-  curl -fSL -o "${TMP_DIR}/winload" "${BASE_URL}/${ANDROID_ASSET}"
+  download_and_verify "$ANDROID_ASSET"
   echo "📦 安装到 ${PREFIX}/bin/ ..."
-  install -Dm755 "${TMP_DIR}/winload" "${PREFIX}/bin/winload"
+  install -Dm755 "${TMP_DIR}/${ANDROID_ASSET}" "${PREFIX}/bin/winload"
 elif [ "$PKG_MGR" = "apt" ]; then
   PLATFORM="linux-${ARCH_NAME}"
   PKG_FILE="winload-${PLATFORM}-${VERSION}.deb"
-  echo "📥 正在从 Gitee 下载 ${PKG_FILE}..."
-  curl -fSL -o "${TMP_DIR}/${PKG_FILE}" "${BASE_URL}/${PKG_FILE}"
+  download_and_verify "$PKG_FILE"
   echo "📦 通过 apt 安装中..."
   sudo dpkg -i "${TMP_DIR}/${PKG_FILE}" || sudo apt-get install -f -y
 elif [ "$PKG_MGR" = "dnf" ]; then
   PLATFORM="linux-${ARCH_NAME}"
   PKG_FILE="winload-${PLATFORM}-${VERSION}.rpm"
-  echo "📥 正在从 Gitee 下载 ${PKG_FILE}..."
-  curl -fSL -o "${TMP_DIR}/${PKG_FILE}" "${BASE_URL}/${PKG_FILE}"
+  download_and_verify "$PKG_FILE"
   echo "📦 通过 dnf 安装中..."
   sudo dnf install -y "${TMP_DIR}/${PKG_FILE}"
 fi

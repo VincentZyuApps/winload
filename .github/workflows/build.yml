@@ -613,6 +613,15 @@ jobs:
             exit 1
           fi
 
+      - name: Generate release checksums
+        shell: bash
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          CHECKSUM_FILE="winload-checksums-${VERSION}.txt"
+          sha256sum winload-*-${VERSION}* > "$CHECKSUM_FILE"
+          echo "Generated $CHECKSUM_FILE:"
+          cat "$CHECKSUM_FILE"
+
       - name: Delete existing release & tag (force fresh release)
         env:
           GH_TOKEN: ${{ github.token }}
