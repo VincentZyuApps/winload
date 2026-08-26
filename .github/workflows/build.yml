@@ -525,6 +525,7 @@ jobs:
           path: rust/renamed/*.rpm
 
       - name: Prepare artifact
+        if: matrix.target != 'i686-unknown-linux-musl' || !env.I686_MUSL_SKIP
         shell: bash
         run: |
           VERSION="${{ needs.check.outputs.version }}"
@@ -548,6 +549,7 @@ jobs:
           echo "asset_name=$ASSET_WITH_VERSION" >> "$GITHUB_ENV"
 
       - name: Upload build artifact
+        if: matrix.target != 'i686-unknown-linux-musl' || !env.I686_MUSL_SKIP
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.asset_name }}
@@ -576,6 +578,36 @@ jobs:
         run: |
           echo "Downloaded artifacts:"
           ls -lh
+
+      - name: Verify required release artifacts
+        shell: bash
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          REQUIRED_ASSETS=(
+            "winload-windows-x86_64-msvc-npcap-${VERSION}.exe"
+            "winload-windows-x86_64-msvc-no-npcap-${VERSION}.exe"
+            "winload-windows-aarch64-msvc-npcap-${VERSION}.exe"
+            "winload-windows-aarch64-msvc-no-npcap-${VERSION}.exe"
+            "winload-linux-x86_64-${VERSION}"
+            "winload-linux-i686-${VERSION}"
+            "winload-linux-aarch64-${VERSION}"
+            "winload-macos-x86_64-${VERSION}"
+            "winload-macos-aarch64-${VERSION}"
+            "winload-android-aarch64-${VERSION}"
+            "winload-android-x86_64-${VERSION}"
+          )
+
+          MISSING=0
+          for asset in "${REQUIRED_ASSETS[@]}"; do
+            if [ ! -f "$asset" ]; then
+              echo "::error::Missing required release artifact: $asset"
+              MISSING=1
+            fi
+          done
+
+          if [ "$MISSING" -ne 0 ]; then
+            exit 1
+          fi
 
       - name: Delete existing release & tag (force fresh release)
         env:
