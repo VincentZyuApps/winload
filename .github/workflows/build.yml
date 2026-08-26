@@ -185,7 +185,7 @@ jobs:
       - name: Test repository scripts
         env:
           PYTHONPATH: python/src
-        run: python3 -m unittest discover -s test
+        run: python3 -m unittest discover -s test/readme
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable

@@ -34,6 +34,7 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
     }
 
     let mut result = HashMap::new();
+    let mut completed = false;
     unsafe {
         let fd = libc::socket(libc::AF_NETLINK, libc::SOCK_RAW, 0);
         if fd < 0 {
@@ -82,7 +83,6 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
         }
 
         let mut buf = vec![0u8; 32768];
-        let mut completed = false;
         'outer: loop {
             let mut peer = SockaddrNl {
                 family: 0,
