@@ -20,15 +20,8 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
     const NLMSG_DONE: u16 = 3;
     const IFLA_IFNAME: u16 = 3;
     const IFLA_STATS64: u16 = 23;
-
-    #[repr(C)]
-    struct Nlmsghdr {
-        len: u32,
-        typ: u16,
-        flags: u16,
-        seq: u32,
-        pid: u32,
-    }
+    const NLMSG_HDR_LEN: usize = 16;
+    const IFINFOMSG_LEN: usize = 16;
     #[repr(C, packed)]
     struct Sockaddrne {
         family: u16,
@@ -44,12 +37,11 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
             return result;
         }
 
-        let mut req = [0u8; 32];
-        let hdr = &mut *(req.as_mut_ptr() as *mut Nlmsghdr);
-        hdr.len = 32;
-        hdr.typ = RTM_GETLINK;
-        hdr.flags = NLM_F_REQUEST | NLM_F_DUMP;
-        hdr.seq = 1;
+        let mut req = [0u8; NLMSG_HDR_LEN + IFINFOMSG_LEN];
+        req[0..4].copy_from_slice(&(req.len() as u32).to_ne_bytes());
+        req[4..6].copy_from_slice(&RTM_GETLINK.to_ne_bytes());
+        req[6..8].copy_from_slice(&(NLM_F_REQUEST | NLM_F_DUMP).to_ne_bytes());
+        req[8..12].copy_from_slice(&1_u32.to_ne_bytes());
         let sa = Sockaddrne {
             family: libc::AF_NETLINK as u16,
             pad: 0,
@@ -60,7 +52,7 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
         let sent = libc::sendto(
             fd,
             req.as_ptr() as *const libc::c_void,
-            32,
+            req.len(),
             0,
             &sa as *const _ as *const libc::sockaddr,
             std::mem::size_of::<Sockaddrne>() as libc::socklen_t,
@@ -78,16 +70,16 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
             }
             let n = n as usize;
             let mut off = 0usize;
-            while off + 16 <= n {
-                let hdr = &*(buf.as_ptr().add(off) as *const Nlmsghdr);
-                let msg_len = hdr.len as usize;
-                if msg_len < 16 || off + msg_len > n {
+            while off + NLMSG_HDR_LEN <= n {
+                let msg_len = u32::from_ne_bytes(buf[off..off + 4].try_into().unwrap()) as usize;
+                let msg_type = u16::from_ne_bytes(buf[off + 4..off + 6].try_into().unwrap());
+                if msg_len < NLMSG_HDR_LEN || off + msg_len > n {
                     break;
                 }
-                match hdr.typ {
+                match msg_type {
                     NLMSG_DONE => break 'outer,
                     RTM_NEWLINK => {
-                        let mut rta = off + 32;
+                        let mut rta = off + NLMSG_HDR_LEN + IFINFOMSG_LEN;
                         let end = off + msg_len;
                         let mut iface: Option<String> = None;
                         let mut rx = 0u64;
@@ -106,7 +98,7 @@ pub(crate) fn netlink_collect(elapsed: f64) -> HashMap<String, Snapshot> {
                                     iface = Some(String::from_utf8_lossy(&s[..nul]).into_owned());
                                 }
                                 IFLA_STATS64 => {
-                                    let d = &buf[rta + 4..];
+                                    let d = &buf[rta + 4..rta + rlen];
                                     if d.len() >= 32 {
                                         rx = u64::from_ne_bytes(d[16..24].try_into().unwrap());
                                         tx = u64::from_ne_bytes(d[24..32].try_into().unwrap());
