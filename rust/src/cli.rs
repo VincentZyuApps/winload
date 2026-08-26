@@ -193,6 +193,14 @@ impl Args {
         if self.average == 0 {
             return Err("--average must be greater than 0".into());
         }
+        if crate::config::requested_sample_capacity(self.interval, self.average)
+            > crate::config::MAX_SAMPLE_CAPACITY
+        {
+            return Err(format!(
+                "--interval and --average retain more than {} samples per interface",
+                crate::config::MAX_SAMPLE_CAPACITY
+            ));
+        }
         if !self.max_half_life.is_finite() || self.max_half_life <= 0.0 {
             return Err("--max-half-life must be greater than 0".into());
         }
@@ -312,6 +320,14 @@ mod tests {
                 .validate()
                 .is_ok()
         );
+    }
+
+    #[test]
+    fn oversized_sample_window_is_rejected() {
+        let error = parsed(&["winload", "--interval", "1", "--average", "61"])
+            .validate()
+            .unwrap_err();
+        assert!(error.contains("retain more than 60000 samples"));
     }
 
     #[test]

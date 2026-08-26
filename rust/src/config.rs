@@ -2,6 +2,17 @@
 
 use ratatui::style::Color;
 
+pub const MIN_SAMPLE_CAPACITY: u64 = 600;
+pub const MAX_SAMPLE_CAPACITY: u64 = 60_000;
+
+pub fn requested_sample_capacity(interval_ms: u64, average_window_sec: u64) -> u64 {
+    1000_u64
+        .saturating_mul(average_window_sec)
+        .checked_div(interval_ms)
+        .unwrap_or(u64::MAX)
+        .max(MIN_SAMPLE_CAPACITY)
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
 pub enum Unit {
     Bit,

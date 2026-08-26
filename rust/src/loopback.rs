@@ -5,7 +5,7 @@
 //!
 //! 此模块仅在 Windows 平台编译。非 Windows 平台下提供空实现。
 
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 
 /// Npcap 下载地址 (仅 Windows)
@@ -33,6 +33,37 @@ impl LoopbackCounters {
 
     pub fn get_sent(&self) -> u64 {
         self.bytes_sent.load(Ordering::Relaxed)
+    }
+}
+
+/// Owns the Npcap capture thread and releases it when the application exits.
+pub struct LoopbackCapture {
+    stop: Arc<AtomicBool>,
+    #[cfg(target_os = "windows")]
+    worker: Option<std::thread::JoinHandle<()>>,
+}
+
+impl LoopbackCapture {
+    #[cfg(target_os = "windows")]
+    fn new(stop: Arc<AtomicBool>, worker: std::thread::JoinHandle<()>) -> Self {
+        Self {
+            stop,
+            worker: Some(worker),
+        }
+    }
+
+    pub fn stop(&self) {
+        self.stop.store(true, Ordering::Relaxed);
+    }
+}
+
+impl Drop for LoopbackCapture {
+    fn drop(&mut self) {
+        self.stop();
+        #[cfg(target_os = "windows")]
+        if let Some(worker) = self.worker.take() {
+            let _ = worker.join();
+        }
     }
 }
 
@@ -80,7 +111,7 @@ pub mod platform {
     /// 返回 Ok(info_msg) 成功时，后台线程会持续累加计数器。
     /// 返回 Err(msg) 如果 Npcap 不可用或打开设备失败。
     #[cfg(feature = "npcap")]
-    pub fn start_npcap(counters: LoopbackCounters) -> Result<String, String> {
+    pub fn start_npcap(counters: LoopbackCounters) -> Result<(String, LoopbackCapture), String> {
         // Pre-flight: verify wpcap.dll is loadable before calling any pcap functions.
         // The binary uses /DELAYLOAD:wpcap.dll, so pcap functions are not resolved
         // until first call. If the DLL is missing, that first call would crash.
@@ -140,21 +171,27 @@ pub mod platform {
         let dev_name = loopback_dev.name.clone();
         let info_msg = format!("[npcap] Found loopback device: {dev_name}");
 
-        // 在后台线程中持续捕获
-        thread::Builder::new()
+        // 在后台线程中持续捕获，并在应用退出时停止并回收线程。
+        let stop = Arc::new(AtomicBool::new(false));
+        let thread_stop = Arc::clone(&stop);
+        let worker = thread::Builder::new()
             .name("npcap-loopback".to_string())
             .spawn(move || {
-                if let Err(e) = npcap_capture_loop(&dev_name, &counters) {
+                if let Err(e) = npcap_capture_loop(&dev_name, &counters, &thread_stop) {
                     eprintln!("[npcap] Capture error: {e}");
                 }
             })
             .map_err(|e| format!("Failed to spawn npcap thread: {e}"))?;
 
-        Ok(info_msg)
+        Ok((info_msg, LoopbackCapture::new(stop, worker)))
     }
 
     #[cfg(feature = "npcap")]
-    fn npcap_capture_loop(device_name: &str, counters: &LoopbackCounters) -> Result<(), String> {
+    fn npcap_capture_loop(
+        device_name: &str,
+        counters: &LoopbackCounters,
+        stop: &AtomicBool,
+    ) -> Result<(), String> {
         let mut cap = pcap::Capture::from_device(device_name)
             .map_err(|e| format!("Cannot open device: {e}"))?
             .promisc(false)
@@ -163,7 +200,7 @@ pub mod platform {
             .open()
             .map_err(|e| format!("Cannot start capture: {e}"))?;
 
-        loop {
+        while !stop.load(Ordering::Relaxed) {
             match cap.next_packet() {
                 Ok(packet) => {
                     // Npcap loopback 使用 DLT_NULL 格式:
@@ -201,7 +238,7 @@ pub mod platform {
     }
 
     #[cfg(not(feature = "npcap"))]
-    pub fn start_npcap(_counters: LoopbackCounters) -> Result<String, String> {
+    pub fn start_npcap(_counters: LoopbackCounters) -> Result<(String, LoopbackCapture), String> {
         Err(format!(
             "winload was compiled without Npcap support (feature 'npcap' disabled).\n\
              Recompile with: cargo build --features npcap\n\n\
@@ -219,7 +256,7 @@ pub mod platform {
 pub mod platform {
     use super::*;
 
-    pub fn start_npcap(_counters: LoopbackCounters) -> Result<String, String> {
+    pub fn start_npcap(_counters: LoopbackCounters) -> Result<(String, LoopbackCapture), String> {
         Err("--npcap is only supported on Windows. \
              On Linux/macOS, loopback traffic is natively available."
             .to_string())

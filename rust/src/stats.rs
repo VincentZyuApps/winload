@@ -5,6 +5,7 @@
 use std::collections::VecDeque;
 
 use crate::collector::Snapshot;
+use crate::config::{requested_sample_capacity, MAX_SAMPLE_CAPACITY};
 
 /// 某一方向（收/发）的统计结果
 #[derive(Clone, Debug)]
@@ -69,7 +70,8 @@ impl StatisticsEngine {
         smart_max_half_life: Option<f64>,
     ) -> Self {
         let second_window = (1000u64 / refresh_interval_ms).max(1) as usize;
-        let max_samples = ((1000u64 / refresh_interval_ms) * average_window_sec).max(600) as usize;
+        let max_samples = requested_sample_capacity(refresh_interval_ms, average_window_sec)
+            .min(MAX_SAMPLE_CAPACITY) as usize;
 
         let decay_factor = match smart_max_half_life {
             Some(half_life) if half_life > 0.0 => {
@@ -227,5 +229,16 @@ pub fn format_bytes(total_bytes: u64) -> String {
         format!("{:.2} kByte", b / 1024.0)
     } else {
         format!("{:.2} Byte", b)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sample_capacity_stays_bounded_for_direct_callers() {
+        let engine = StatisticsEngine::new(1, u64::MAX, None);
+        assert_eq!(engine.max_samples, MAX_SAMPLE_CAPACITY as usize);
     }
 }

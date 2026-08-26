@@ -47,9 +47,10 @@ fn start_loopback(app: &mut App) -> io::Result<()> {
         LoopbackMode::None => unreachable!(),
     };
     match result {
-        Ok(info) => {
+        Ok((info, capture)) => {
             app.loopback_info = Some(info);
             app.loopback_counters = Some(counters);
+            app.loopback_capture = Some(capture);
             Ok(())
         }
         Err(error) => Err(io::Error::other(format!(
