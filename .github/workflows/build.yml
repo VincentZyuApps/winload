@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('push-{0}', github.ref_name) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # ── 判断是否需要构建 / 发布 ──────────────────────────────
   check:
@@ -159,6 +163,36 @@ jobs:
           echo "should_benchmark=$BENCHMARK" >> "$GITHUB_OUTPUT"
           
           echo "📋 Flags: build=$BUILD release=$RELEASE scoop=$PUBLISH_SCOOP homebrew=$PUBLISH_HOMEBREW aur=$PUBLISH_AUR npm=$PUBLISH_NPM pypi=$PUBLISH_PYPI crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
+
+  # ── 基础测试 ───────────────────────────────────────────
+  quality:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install Python package
+        run: python3 -m pip install --disable-pip-version-check -e ./python
+
+      - name: Test Python implementation
+        env:
+          PYTHONPATH: python/src
+        run: python3 -m unittest discover -s python/tests
+
+      - name: Test repository scripts
+        env:
+          PYTHONPATH: python/src
+        run: python3 -m unittest discover -s test/readme
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
+
+      - name: Test Rust implementation
+        working-directory: rust
+        run: cargo test --locked --no-default-features
 
   # ── 同步代码到 Gitee ─────────────────────────────────────
   # 每次 push 都同步，与 check 并行运行
@@ -495,6 +529,7 @@ jobs:
           path: rust/renamed/*.rpm
 
       - name: Prepare artifact
+        if: matrix.target != 'i686-unknown-linux-musl' || !env.I686_MUSL_SKIP
         shell: bash
         run: |
           VERSION="${{ needs.check.outputs.version }}"
@@ -518,6 +553,7 @@ jobs:
           echo "asset_name=$ASSET_WITH_VERSION" >> "$GITHUB_ENV"
 
       - name: Upload build artifact
+        if: matrix.target != 'i686-unknown-linux-musl' || !env.I686_MUSL_SKIP
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.asset_name }}
@@ -546,6 +582,45 @@ jobs:
         run: |
           echo "Downloaded artifacts:"
           ls -lh
+
+      - name: Verify required release artifacts
+        shell: bash
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          REQUIRED_ASSETS=(
+            "winload-windows-x86_64-msvc-npcap-${VERSION}.exe"
+            "winload-windows-x86_64-msvc-no-npcap-${VERSION}.exe"
+            "winload-windows-aarch64-msvc-npcap-${VERSION}.exe"
+            "winload-windows-aarch64-msvc-no-npcap-${VERSION}.exe"
+            "winload-linux-x86_64-${VERSION}"
+            "winload-linux-i686-${VERSION}"
+            "winload-linux-aarch64-${VERSION}"
+            "winload-macos-x86_64-${VERSION}"
+            "winload-macos-aarch64-${VERSION}"
+            "winload-android-aarch64-${VERSION}"
+            "winload-android-x86_64-${VERSION}"
+          )
+
+          MISSING=0
+          for asset in "${REQUIRED_ASSETS[@]}"; do
+            if [ ! -f "$asset" ]; then
+              echo "::error::Missing required release artifact: $asset"
+              MISSING=1
+            fi
+          done
+
+          if [ "$MISSING" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Generate release checksums
+        shell: bash
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          CHECKSUM_FILE="winload-checksums-${VERSION}.txt"
+          sha256sum winload-*-${VERSION}* > "$CHECKSUM_FILE"
+          echo "Generated $CHECKSUM_FILE:"
+          cat "$CHECKSUM_FILE"
 
       - name: Delete existing release & tag (force fresh release)
         env:
@@ -760,13 +835,13 @@ jobs:
           echo "📦 Target version: ${VERSION}"
           echo "📥 Downloading Windows binaries from GitHub release..."
 
-          curl -fSL -o winload-windows-x86_64.exe \
-            "${BASE_URL}/winload-windows-x86_64-msvc-npcap-${VERSION}.exe" \
-            || { echo "❌ Failed to download x64 binary"; exit 1; }
+          download_release_asset() {
+            curl -fSL --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout 30 --max-time 300 -o "$1" "$2"
+          }
 
-          curl -fSL -o winload-windows-aarch64.exe \
-            "${BASE_URL}/winload-windows-aarch64-msvc-npcap-${VERSION}.exe" \
-            || { echo "❌ Failed to download arm64 binary"; exit 1; }
+          download_release_asset winload-windows-x86_64.exe "${BASE_URL}/winload-windows-x86_64-msvc-npcap-${VERSION}.exe"
+          download_release_asset winload-windows-aarch64.exe "${BASE_URL}/winload-windows-aarch64-msvc-npcap-${VERSION}.exe"
 
           echo "✅ Downloaded:"
           ls -lh winload-windows-*.exe
@@ -828,15 +903,47 @@ jobs:
         run: |
           VERSION="${{ needs.check.outputs.version }}"
 
-          git clone https://vincent-zyu:${GITEE_TOKEN}@gitee.com/vincent-zyu/scoop-bucket.git scoop-repo
+          retry_gitee_git() {
+            local operation="$1"
+            shift
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Gitee ${operation}: attempt ${attempt}/${max_attempts}"
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Gitee ${operation} failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Gitee ${operation} failed after ${max_attempts} attempts."
+            return 1
+          }
+
+          clone_gitee_bucket() {
+            rm -rf scoop-repo
+            git clone https://vincent-zyu:${GITEE_TOKEN}@gitee.com/vincent-zyu/scoop-bucket.git scoop-repo
+          }
+
+          retry_gitee_git "Scoop bucket clone" clone_gitee_bucket
           cp winload.json scoop-repo/bucket/winload.json
 
           cd scoop-repo
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add bucket/winload.json
-          git commit -m "ci: 🍨 Update winload to ${VERSION}" || echo "No changes to commit"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: 🍨 Update winload to ${VERSION}"
+            retry_gitee_git "Scoop bucket push" git push
+          fi
 
           echo "✅ Gitee Scoop bucket updated!"
 
@@ -859,6 +966,11 @@ jobs:
           echo "📦 Target version: ${VERSION}"
 
           # 下载所有平台的二进制用于计算 SHA256
+          download_release_asset() {
+            curl -fSL --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout 30 --max-time 300 -o "$1" "$2"
+          }
+
           PLATFORMS=(
             "winload-linux-x86_64:${BASE_URL}/winload-linux-x86_64-${VERSION}"
             "winload-linux-aarch64:${BASE_URL}/winload-linux-aarch64-${VERSION}"
@@ -870,7 +982,7 @@ jobs:
             NAME="${entry%%:*}"
             URL="${entry##*:}"
             echo "📥 Downloading $NAME..."
-            curl -fSL -o "$NAME" "$URL" || echo "⚠️ Failed to download $NAME (may not exist)"
+            download_release_asset "$NAME" "$URL"
           done
 
           echo "✅ Downloaded:"
@@ -884,11 +996,18 @@ jobs:
           BASE_URL="https://github.com/${REPO}/releases/download/${VERSION}"
 
           mkdir -p Formula
+          for asset in winload-linux-x86_64 winload-linux-aarch64 winload-macos-x86_64 winload-macos-aarch64; do
+            if [ ! -s "$asset" ]; then
+              echo "::error::Missing or empty release asset: $asset"
+              exit 1
+            fi
+          done
+
           # 计算各平台 SHA256
-          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 2>/dev/null | awk '{print $1}' || echo "")
+          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 | awk '{print $1}')
+          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 | awk '{print $1}')
+          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 | awk '{print $1}')
+          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 | awk '{print $1}')
 
           cat > Formula/winload.rb << HEREDOC
           class Winload < Formula
@@ -976,7 +1095,8 @@ jobs:
             NAME="${entry%%:*}"
             URL="${entry##*:}"
             echo "📥 Downloading $NAME from Gitee..."
-            curl -fSL -o "$NAME" "$URL" || echo "⚠️ Failed to download $NAME (may not exist)"
+            curl -fSL --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout 30 --max-time 300 -o "$NAME" "$URL"
           done
 
           echo "✅ Downloaded:"
@@ -989,11 +1109,18 @@ jobs:
           GITEE_BASE_URL="https://gitee.com/vincent-zyu/winload/releases/download/${VERSION}"
 
           mkdir -p Formula
+          for asset in winload-linux-x86_64 winload-linux-aarch64 winload-macos-x86_64 winload-macos-aarch64; do
+            if [ ! -s "$asset" ]; then
+              echo "::error::Missing or empty release asset: $asset"
+              exit 1
+            fi
+          done
+
           # 计算各平台 SHA256
-          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 2>/dev/null | awk '{print $1}' || echo "")
+          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 | awk '{print $1}')
+          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 | awk '{print $1}')
+          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 | awk '{print $1}')
+          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 | awk '{print $1}')
 
           cat > Formula/winload.rb << HEREDOC
           class Winload < Formula
@@ -1039,15 +1166,47 @@ jobs:
         run: |
           VERSION="${{ needs.check.outputs.version }}"
 
-          git clone https://vincent-zyu:${GITEE_TOKEN}@gitee.com/vincent-zyu/homebrew-tap.git brew-repo
+          retry_gitee_git() {
+            local operation="$1"
+            shift
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Gitee ${operation}: attempt ${attempt}/${max_attempts}"
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Gitee ${operation} failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Gitee ${operation} failed after ${max_attempts} attempts."
+            return 1
+          }
+
+          clone_gitee_tap() {
+            rm -rf brew-repo
+            git clone https://vincent-zyu:${GITEE_TOKEN}@gitee.com/vincent-zyu/homebrew-tap.git brew-repo
+          }
+
+          retry_gitee_git "Homebrew tap clone" clone_gitee_tap
           cp Formula/winload.rb brew-repo/Formula/winload.rb
 
           cd brew-repo
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/winload.rb
-          git commit -m "ci: 🍺 Update winload to ${VERSION}" || echo "No changes to commit"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: 🍺 Update winload to ${VERSION}"
+            retry_gitee_git "Homebrew tap push" git push
+          fi
 
           echo "✅ Gitee Homebrew tap updated!"
 
@@ -1228,12 +1387,17 @@ jobs:
           mkdir -p artifacts
           echo "📥 Downloading binaries for npm publish..."
 
-          curl -fSL -o artifacts/winload-windows-x86_64.exe   "${BASE_URL}/winload-windows-x86_64-msvc-npcap-${VERSION}.exe"
-          curl -fSL -o artifacts/winload-windows-aarch64.exe  "${BASE_URL}/winload-windows-aarch64-msvc-npcap-${VERSION}.exe"
-          curl -fSL -o artifacts/winload-linux-x86_64         "${BASE_URL}/winload-linux-x86_64-${VERSION}"
-          curl -fSL -o artifacts/winload-linux-aarch64        "${BASE_URL}/winload-linux-aarch64-${VERSION}"
-          curl -fSL -o artifacts/winload-macos-x86_64         "${BASE_URL}/winload-macos-x86_64-${VERSION}"
-          curl -fSL -o artifacts/winload-macos-aarch64        "${BASE_URL}/winload-macos-aarch64-${VERSION}"
+          download_release_asset() {
+            curl -fSL --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout 30 --max-time 300 -o "$1" "$2"
+          }
+
+          download_release_asset artifacts/winload-windows-x86_64.exe  "${BASE_URL}/winload-windows-x86_64-msvc-npcap-${VERSION}.exe"
+          download_release_asset artifacts/winload-windows-aarch64.exe "${BASE_URL}/winload-windows-aarch64-msvc-npcap-${VERSION}.exe"
+          download_release_asset artifacts/winload-linux-x86_64        "${BASE_URL}/winload-linux-x86_64-${VERSION}"
+          download_release_asset artifacts/winload-linux-aarch64       "${BASE_URL}/winload-linux-aarch64-${VERSION}"
+          download_release_asset artifacts/winload-macos-x86_64        "${BASE_URL}/winload-macos-x86_64-${VERSION}"
+          download_release_asset artifacts/winload-macos-aarch64       "${BASE_URL}/winload-macos-aarch64-${VERSION}"
 
           echo "✅ Downloaded:"
           ls -lh artifacts/
@@ -1249,6 +1413,37 @@ jobs:
             NPM_TAG="alpha"
           fi
           echo "📦 npm version: ${NPM_VERSION} (tag: ${NPM_TAG})"
+
+          publish_with_retry() {
+            local package_name="$1"
+            local registry="$2"
+            shift 2
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
+              if npm publish "$@"; then
+                return 0
+              fi
+
+              # A connection may drop after npm accepts the immutable version.
+              if npm view "${package_name}@${NPM_VERSION}" version --registry "$registry" > /dev/null 2>&1; then
+                echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
+                return 0
+              fi
+
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Publish failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Failed to publish ${package_name} after ${max_attempts} attempts."
+            return 1
+          }
 
           PLATFORMS=(
             "@vincentzyuapps/winload-win32-x64|win32|x64|artifacts/winload-windows-x86_64.exe|winload.exe"
@@ -1287,7 +1482,11 @@ jobs:
           PKGJSON
 
             cd "${PKG_DIR}"
-            npm publish --provenance --access public --tag "${NPM_TAG}" 2>&1 || echo "⚠️ Failed to publish ${PKG_NAME} (may already exist)"
+            if npm view "${PKG_NAME}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
+              echo "${PKG_NAME}@${NPM_VERSION} already exists; skipping"
+            else
+              publish_with_retry "$PKG_NAME" "https://registry.npmjs.org" --provenance --access public --tag "${NPM_TAG}"
+            fi
             cd "$GITHUB_WORKSPACE"
           done
 
@@ -1318,7 +1517,32 @@ jobs:
 
           echo "📦 Publishing @vincentzyuapps/winload@${NPM_VERSION} (tag: ${NPM_TAG})..."
           cat package.json
-          npm publish --provenance --access public --tag "${NPM_TAG}"
+          publish_with_retry() {
+            local package_name="$1"
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
+              if npm publish --provenance --access public --tag "${NPM_TAG}"; then
+                return 0
+              fi
+              if npm view "${package_name}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
+                echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
+                return 0
+              fi
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Publish failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Failed to publish ${package_name} after ${max_attempts} attempts."
+            return 1
+          }
+          publish_with_retry "@vincentzyuapps/winload"
 
           echo "✅ Scoped package published!"
 
@@ -1335,7 +1559,7 @@ jobs:
   publish-npm-unscope:
     name: Publish to npm (unscoped)
     needs: [check, release, publish-npm-scope]
-    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && needs.publish-npm-scope.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       id-token: write
       contents: read
@@ -1366,7 +1590,32 @@ jobs:
             require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2) + '\n');
           "
           echo "📦 Publishing winload-rust-bin@${NPM_VERSION} (tag: ${NPM_TAG})..."
-          npm publish --provenance --access public --tag "${NPM_TAG}"
+          publish_with_retry() {
+            local package_name="winload-rust-bin"
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
+              if npm publish --provenance --access public --tag "${NPM_TAG}"; then
+                return 0
+              fi
+              if npm view "${package_name}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
+                echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
+                return 0
+              fi
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Publish failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Failed to publish ${package_name} after ${max_attempts} attempts."
+            return 1
+          }
+          publish_with_retry
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -1374,7 +1623,7 @@ jobs:
   publish-npm-github-packages:
     name: Publish to GitHub Packages for npm
     needs: [check, release, publish-npm-scope]
-    if: always() && needs.check.outputs.should_publish_npm == 'true' && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    if: always() && needs.check.outputs.should_publish_npm == 'true' && needs.publish-npm-scope.result == 'success' && (needs.release.result == 'success' || needs.release.result == 'skipped')
     permissions:
       contents: read
       packages: write
@@ -1399,12 +1648,43 @@ jobs:
             NPM_TAG="alpha"
           fi
 
+          publish_with_retry() {
+            local package_name="$1"
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
+              if npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}"; then
+                return 0
+              fi
+              if npm view "${package_name}@${NPM_VERSION}" version --registry https://npm.pkg.github.com > /dev/null 2>&1; then
+                echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
+                return 0
+              fi
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Publish failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Failed to publish ${package_name} after ${max_attempts} attempts."
+            return 1
+          }
+
           for dir in npm-platforms/@vincentzyuapps/*/; do
             [ -d "$dir" ] || continue
             echo "📦 Publishing $(basename $dir) to GitHub Packages..."
             cd "$dir"
             echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-            npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}" 2>&1 || echo "⚠️ Failed to publish $(basename $dir) to GitHub Packages (may already exist)"
+            PKG_NAME=$(node -p "require('./package.json').name")
+            if npm view "${PKG_NAME}@${NPM_VERSION}" version --registry https://npm.pkg.github.com > /dev/null 2>&1; then
+              echo "${PKG_NAME}@${NPM_VERSION} already exists; skipping"
+            else
+              publish_with_retry "$PKG_NAME"
+            fi
             cd "$GITHUB_WORKSPACE"
           done
 
@@ -1422,7 +1702,32 @@ jobs:
           cd npm/winload-rust-bin
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
           echo "📦 Publishing @vincentzyuapps/winload@${NPM_VERSION} to GitHub Packages (tag: ${NPM_TAG})..."
-          npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}"
+          publish_with_retry() {
+            local package_name="@vincentzyuapps/winload"
+            local max_attempts=4
+            local delay=5
+            local attempt
+
+            for attempt in $(seq 1 "$max_attempts"); do
+              echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
+              if npm publish --registry https://npm.pkg.github.com --tag "${NPM_TAG}"; then
+                return 0
+              fi
+              if npm view "${package_name}@${NPM_VERSION}" version --registry https://npm.pkg.github.com > /dev/null 2>&1; then
+                echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
+                return 0
+              fi
+              if [ "$attempt" -lt "$max_attempts" ]; then
+                echo "::warning::Publish failed; retrying in ${delay}s."
+                sleep "$delay"
+                delay=$((delay * 2))
+              fi
+            done
+
+            echo "::error::Failed to publish ${package_name} after ${max_attempts} attempts."
+            return 1
+          }
+          publish_with_retry
 
           echo "✅ GitHub Packages published!"
 
@@ -1532,7 +1837,21 @@ jobs:
           TAG="${{ steps.release_info.outputs.tag }}"
           mkdir -p assets
           cd assets
-          gh release download "$TAG" --pattern "*"
+          max_attempts=4
+          delay=5
+          for attempt in $(seq 1 "$max_attempts"); do
+            echo "🔁 Downloading release assets: attempt ${attempt}/${max_attempts}"
+            if gh release download "$TAG" --pattern "*" --clobber; then
+              break
+            fi
+            if [ "$attempt" -eq "$max_attempts" ]; then
+              echo "::error::Failed to download release assets after ${max_attempts} attempts."
+              exit 1
+            fi
+            echo "::warning::Download failed; retrying in ${delay}s."
+            sleep "$delay"
+            delay=$((delay * 2))
+          done
           echo "📥 Downloaded files:"
           ls -la
 
@@ -1550,20 +1869,21 @@ jobs:
           # JSON 安全转义 release body（处理换行、引号、反斜杠等）
           JSON_BODY=$(jq -R -s '.' < release_body.md)
           
-          CURL="curl -s -k --retry 3 --retry-delay 5 --retry-all-errors"
+          CURL=(curl -sS --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused --connect-timeout 30 --max-time 120)
+          CURL_FAIL=(curl -fsS --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused --connect-timeout 30 --max-time 120)
           
           # 1. 确保 tag 存在于 Gitee
-          if $CURL --fail "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/tags/${TAG}?access_token=${GITEE_TOKEN}" > /dev/null 2>&1; then
+          if "${CURL_FAIL[@]}" "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/tags/${TAG}?access_token=${GITEE_TOKEN}" > /dev/null 2>&1; then
             echo "🏷️ Tag $TAG already exists on Gitee"
           else
             echo "🏷️ Creating tag $TAG on Gitee..."
-            $CURL -X POST --header 'Content-Type: application/json;charset=UTF-8' \
+            "${CURL_FAIL[@]}" -X POST --header 'Content-Type: application/json;charset=UTF-8' \
               "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/tags" \
               -d "{\"access_token\":\"${GITEE_TOKEN}\",\"tag_name\":\"${TAG}\",\"refs\":\"main\",\"tag_message\":\"Release ${TAG}\"}"
           fi
           
           # 2. 检查是否已有对应 tag 的 Release
-          EXISTING=$($CURL "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/tags/${TAG}?access_token=${GITEE_TOKEN}")
+          EXISTING=$("${CURL[@]}" "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/tags/${TAG}?access_token=${GITEE_TOKEN}")
           RELEASE_ID=$(echo "$EXISTING" | jq -r '.id')
           
           if [ -n "$RELEASE_ID" ] && [ "$RELEASE_ID" != "null" ]; then
@@ -1588,7 +1908,7 @@ jobs:
                 prerelease: $prerelease
               }')
             
-            CREATE_RESPONSE=$($CURL -X POST --header 'Content-Type: application/json;charset=UTF-8' \
+            CREATE_RESPONSE=$("${CURL_FAIL[@]}" -X POST --header 'Content-Type: application/json;charset=UTF-8' \
               "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases" \
               -d "$RELEASE_PAYLOAD")
             
@@ -1640,15 +1960,17 @@ jobs:
                 echo "$(ts)   🔄 Attempt $ATTEMPT/3 — starting curl (max-time=1200s, connect-timeout=30s)"
                 
                 START_TIME=$(date +%s)
-                HTTP_CODE_FILE=$(mktemp)
-                RESPONSE=$(curl -s -k --retry 3 --retry-delay 10 --retry-all-errors \
+                if RESPONSE=$(curl -fsS --retry 3 --retry-delay 10 --retry-all-errors --retry-connrefused \
                   --max-time 1200 --connect-timeout 30 \
                   -w "\n%{http_code}" \
                   -X POST --header "Content-Type: multipart/form-data" \
                   -F "access_token=${GITEE_TOKEN}" \
                   -F "file=@${FILE}" \
-                  "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/${RELEASE_ID}/attach_files")
-                CURL_EXIT=$?
+                  "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/releases/${RELEASE_ID}/attach_files"); then
+                  CURL_EXIT=0
+                else
+                  CURL_EXIT=$?
+                fi
                 END_TIME=$(date +%s)
                 ELAPSED=$((END_TIME - START_TIME))
                 
@@ -1695,3 +2017,7 @@ jobs:
           echo "$(ts) ════════════════════════════════════════"
           
           echo "📊 Upload complete: $SUCCESS succeeded, $FAIL failed"
+          if [ "$FAIL" -ne 0 ]; then
+            echo "::error::Gitee release asset upload failed for $FAIL file(s)."
+            exit 1
+          fi

@@ -37,6 +37,12 @@ class CliTests(unittest.TestCase):
                 parse_args(["--interval", "0"])
         self.assertEqual(caught.exception.code, 2)
 
+    def test_rejects_an_oversized_sample_window(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as caught:
+                parse_args(["--interval", "1", "--average", "61"])
+        self.assertEqual(caught.exception.code, 2)
+
     def test_fixed_requires_value(self):
         with contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit):

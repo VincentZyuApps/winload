@@ -364,16 +364,16 @@ python/
 │       ├── __init__.py // 2 lines | 📦 Marks the Python package and exposes package-level metadata.
 │       ├── __main__.py // 6 lines | ▶️ Runs the Python CLI entry point when invoked with python -m winload.
 │       ├── app.py // 135 lines | Owns mutable application state, traffic updates, and device navigation.
-│       ├── cli.py // 205 lines | Builds, localizes, parses, and validates the Python command-line interface.
+│       ├── cli.py // 219 lines | Builds, localizes, parses, and validates the Python command-line interface.
 │       ├── collector.py // 121 lines | 📡 Collects network interface counters with psutil or the optional Netlink backend.
-│       ├── config.py // 65 lines | Defines immutable, strongly typed runtime configuration for the Python application.
+│       ├── config.py // 73 lines | Defines immutable, strongly typed runtime configuration for the Python application.
 │       ├── diagnostics.py // 162 lines | Reports version, build, system, and network-interface diagnostic information.
-│       ├── emoji.py // 41 lines | ✨ Decorates CLI-facing labels with optional emoji icons.
+│       ├── emoji.py // 48 lines | ✨ Decorates CLI-facing labels with optional emoji icons.
 │       ├── graph.py // 108 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
 │       ├── main.py // 46 lines | Wires the Python CLI to diagnostics or the interactive terminal runtime.
 │       ├── netlink.py // 120 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
 │       ├── runtime.py // 62 lines | Manages the curses lifecycle, input mapping, refresh cadence, and UI rendering loop.
-│       └── stats.py // 206 lines | 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
+│       └── stats.py // 208 lines | 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
 └── _build_info.py // 73 lines | 🧾 Resolves source or packaged Git metadata for Python version output.
 
 rust/
@@ -387,18 +387,18 @@ rust/
 │   │   ├── debug.rs // 105 lines | Draws the F3 runtime diagnostics overlay.
 │   │   ├── mod.rs // 261 lines | Coordinates the ratatui layout, header, help bar, panels, and debug overlay.
 │   │   └── panels.rs // 488 lines | Draws traffic histories in classic, line, scatter, and bar styles with optional axes.
-│   ├── app.rs // 190 lines | Owns mutable application state, traffic collection, and device navigation.
-│   ├── cli.rs // 375 lines | Parses localized command-line arguments and produces a validated RunConfig.
+│   ├── app.rs // 192 lines | Owns mutable application state, traffic collection, and device navigation.
+│   ├── cli.rs // 417 lines | Parses localized command-line arguments and produces a validated RunConfig.
 │   ├── collector.rs // 238 lines | 📡 Collects network interface counters and prepares traffic snapshots for the TUI.
-│   ├── config.rs // 183 lines | Defines validated, strongly typed runtime configuration shared by the Rust modules.
+│   ├── config.rs // 194 lines | Defines validated, strongly typed runtime configuration shared by the Rust modules.
 │   ├── diagnostics.rs // 45 lines | Prints build, platform, and network-interface diagnostics outside the TUI.
-│   ├── emoji.rs // 40 lines | ✨ Decorates CLI-facing labels with optional emoji icons.
+│   ├── emoji.rs // 50 lines | ✨ Decorates CLI-facing labels with optional emoji icons.
 │   ├── graph.rs // 279 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
-│   ├── loopback.rs // 227 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
+│   ├── loopback.rs // 265 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
 │   ├── main.rs // 42 lines | Boots the Rust application and dispatches CLI actions to focused modules.
 │   ├── netlink.rs // 175 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
-│   ├── runtime.rs // 99 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
-│   └── stats.rs // 231 lines | 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
+│   ├── runtime.rs // 100 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
+│   └── stats.rs // 244 lines | 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
 └── _build_info.rs // 51 lines | 🧾 Injects Git metadata and configures platform-specific linker behavior.
 ```
 <!-- winload-source-tree:end -->

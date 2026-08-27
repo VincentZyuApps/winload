@@ -38,6 +38,14 @@ class MaxMode(StringEnum):
 
 RgbColor = Tuple[int, int, int]
 
+MIN_SAMPLE_CAPACITY = 600
+MAX_SAMPLE_CAPACITY = 60_000
+
+
+def requested_sample_capacity(interval_ms: int, average_window_sec: int) -> int:
+    """Return the number of snapshots required by a requested average window."""
+    return max(1000 * average_window_sec // interval_ms, MIN_SAMPLE_CAPACITY)
+
 
 @dataclass(frozen=True)
 class RunConfig:

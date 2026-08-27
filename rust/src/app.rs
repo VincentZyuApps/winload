@@ -3,7 +3,7 @@
 use crate::collector::{Collector, DeviceInfo};
 use crate::config::{BarStyle, GraphStyle, MaxMode, RunConfig, TitleAlign, Unit, XAxis, YAxis};
 use crate::i18n::t;
-use crate::loopback::{LoopbackCounters, LoopbackMode};
+use crate::loopback::{LoopbackCapture, LoopbackCounters, LoopbackMode};
 use crate::stats::StatisticsEngine;
 
 pub struct DeviceView {
@@ -38,6 +38,7 @@ pub struct App {
     pub loopback_mode: LoopbackMode,
     pub loopback_info: Option<String>,
     pub loopback_counters: Option<LoopbackCounters>,
+    pub loopback_capture: Option<LoopbackCapture>,
     collector: Collector,
 }
 
@@ -96,6 +97,7 @@ impl App {
             loopback_mode,
             loopback_info: None,
             loopback_counters: None,
+            loopback_capture: None,
             collector,
         }
     }

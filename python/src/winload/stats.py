@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from .collector import Snapshot
+from .config import MAX_SAMPLE_CAPACITY, requested_sample_capacity
 
 
 @dataclass
@@ -37,8 +38,9 @@ class StatisticsEngine:
         self._avg_window_sec = average_window_sec
 
         # 滑动窗口
-        max_samples = max(
-            int(1000 / refresh_interval_ms * average_window_sec), 600
+        max_samples = min(
+            requested_sample_capacity(refresh_interval_ms, average_window_sec),
+            MAX_SAMPLE_CAPACITY,
         )
         self._samples: deque[Snapshot] = deque(maxlen=max_samples)
 

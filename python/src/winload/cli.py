@@ -5,7 +5,16 @@ import argparse
 import sys
 from typing import Optional, Sequence
 
-from .config import BarStyle, MaxMode, RgbColor, RunConfig, TitleAlign, Unit
+from .config import (
+    MAX_SAMPLE_CAPACITY,
+    BarStyle,
+    MaxMode,
+    RgbColor,
+    RunConfig,
+    TitleAlign,
+    Unit,
+    requested_sample_capacity,
+)
 from .diagnostics import format_build_info, get_help_system_info, get_system_info, get_version
 from .emoji import decorate
 from .i18n import set_lang, t
@@ -173,6 +182,11 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> RunConfig:
         parser.error("--interval must be greater than 0")
     if args.average <= 0:
         parser.error("--average must be greater than 0")
+    if requested_sample_capacity(args.interval, args.average) > MAX_SAMPLE_CAPACITY:
+        parser.error(
+            "--interval and --average retain more than "
+            f"{MAX_SAMPLE_CAPACITY} samples per interface"
+        )
     if args.max_half_life <= 0:
         parser.error("--max-half-life must be greater than 0")
     has_half_life = any(
