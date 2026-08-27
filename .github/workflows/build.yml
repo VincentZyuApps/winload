@@ -966,6 +966,11 @@ jobs:
           echo "📦 Target version: ${VERSION}"
 
           # 下载所有平台的二进制用于计算 SHA256
+          download_release_asset() {
+            curl -fSL --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout 30 --max-time 300 -o "$1" "$2"
+          }
+
           PLATFORMS=(
             "winload-linux-x86_64:${BASE_URL}/winload-linux-x86_64-${VERSION}"
             "winload-linux-aarch64:${BASE_URL}/winload-linux-aarch64-${VERSION}"
@@ -977,7 +982,7 @@ jobs:
             NAME="${entry%%:*}"
             URL="${entry##*:}"
             echo "📥 Downloading $NAME..."
-            curl -fSL -o "$NAME" "$URL" || echo "⚠️ Failed to download $NAME (may not exist)"
+            download_release_asset "$NAME" "$URL"
           done
 
           echo "✅ Downloaded:"
@@ -991,11 +996,18 @@ jobs:
           BASE_URL="https://github.com/${REPO}/releases/download/${VERSION}"
 
           mkdir -p Formula
+          for asset in winload-linux-x86_64 winload-linux-aarch64 winload-macos-x86_64 winload-macos-aarch64; do
+            if [ ! -s "$asset" ]; then
+              echo "::error::Missing or empty release asset: $asset"
+              exit 1
+            fi
+          done
+
           # 计算各平台 SHA256
-          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 2>/dev/null | awk '{print $1}' || echo "")
+          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 | awk '{print $1}')
+          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 | awk '{print $1}')
+          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 | awk '{print $1}')
+          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 | awk '{print $1}')
 
           cat > Formula/winload.rb << HEREDOC
           class Winload < Formula
