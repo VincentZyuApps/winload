@@ -10,21 +10,21 @@ CI/CD 流水线完全由 **commit 信息中的关键词** 驱动。推送到 `ma
 
 ## 🔑 关键词
 
-| Commit 信息中的关键词 | 构建（8 平台） | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | 基准测试 (Benchmark) |
-|----------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish-from-release` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Commit 信息中的关键词 | 构建（8 平台） | 测试 | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | 基准测试 (Benchmark) |
+|----------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `build-action` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-release` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `publish-from-release` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 
 > **说明:** `publish-from-release` 从已有的 GitHub Release 发布到 Scoop、Homebrew、AUR 和 npm，不会重新构建；`aur-publish` 则只补发 AUR。`build-publish` 会执行构建、Release、Scoop、Homebrew、AUR 和 npm 的完整流水线。
 
-> **说明:** Pull Request 始终会触发构建（不会发布或推送包管理器）。PR 中 commit message 的关键词会被**忽略**——工作流设置 `should_build=true`，而 `should_release` 和六个发布输出（`should_publish_scoop`、`should_publish_homebrew`、`should_publish_aur`、`should_publish_npm`、`should_publish_pypi`、`should_publish_crates`）均为 `false`。
+> **说明:** Pull Request 会读取最新 head commit。只有 `build-action`、`build-release` 与 `build-publish` 会触发构建和测试；PR 永远不会创建 Release、发布包或运行基准测试。
 
 > **发布前检查：** 修改 Rust 包版本或依赖后，请从包含 `winload` 仓库的目录运行以下命令，以更新并验证 `Cargo.lock`。
 
@@ -53,13 +53,13 @@ git diff HEAD -- rust/Cargo.lock
 # 单个关键词
 # ============================================================
 
-# 仅构建，验证所有平台的编译
+# 构建并测试，验证所有平台的编译
 git commit --allow-empty -m "ci: test cross-compile (build-action)"
 
 # 仅运行基准测试
 git commit --allow-empty -m "test: verify performance (run-benchmark)"
 
-# 构建 + 创建 GitHub Release（不发布到包管理器）
+# 构建 + 测试 + 创建 GitHub Release（不发布到包管理器）
 git commit -m "release: v0.2.0 (build-release)"
 
 # 从已有的最新 GitHub Release 发布到 Scoop/Homebrew/AUR/npm（不重新构建）
@@ -74,7 +74,7 @@ git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
 # 仅发布到 PyPI（不构建，不发布 Release）
 git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
 
-# 完整流水线：构建 + Release + 发布到 Scoop/Homebrew/AUR/npm
+# 完整流水线：构建 + 测试 + Release + 发布到 Scoop/Homebrew/AUR/npm
 git commit -m "release: v0.2.0 (build-publish)"
 
 # ============================================================
@@ -131,8 +131,9 @@ git commit -m "feat: add dark mode support"
 ## 📦 流水线阶段 (Rust)
 
 ```
-check ──→ build ──→ release ──→ publish
-  │         │         │           │
+check ──┬─→ build ──┐
+  │     ├─→ quality ├─→ release ──→ publish
+  │     │           │             │
   │         │         │           ├─ Scoop: 从 Release 下载 Win 二进制
   │         │         │           │  生成 winload.json → 推送到 scoop-bucket
   │         │         │           │
@@ -154,7 +155,7 @@ check ──→ build ──→ release ──→ publish
   │         │            生成 release notes
   │         │            创建 GitHub Release
   │         │
-  │         └─ 编译 8 个平台目标
+  │     └─ 编译 8 个平台目标
   │            上传构建产物
   │
   ├─→ sync-gitee-code（与 check 并行，每次 push 触发）
@@ -189,6 +190,10 @@ flowchart TB
     subgraph build["build"]
         B1[编译 8 个平台]
         B2[上传构建产物]
+    end
+
+    subgraph quality["quality"]
+        T1[运行 Python、README 与 Rust 测试]
     end
     
     subgraph release["release"]
@@ -244,13 +249,15 @@ flowchart TB
 
     C1 --> C2
     C1 -."每次 push".-> SC1
-    C2 --> B1
+    C2 --"build-* 关键词"--> B1
+    C2 --"build-* 关键词"--> T1
     C2 --"run-benchmark"--> BM1
     C2 --> PY1
     BM1 --> BM2
     PY1 --> PY2
     B1 --> B2
     B2 --> R1
+    T1 --> R1
     C2 --"crates-publish"--> CR1
     R1 --> R2 --> R3 --> R4
     R4 --> S1

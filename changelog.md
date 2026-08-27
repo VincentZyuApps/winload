@@ -17,7 +17,8 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
-- [v0.2.0-beta.1](#v020-beta1---unreleased-) 🧪
+- [v0.2.3-beta.4](#v023-beta4---2026-08-27-) 🧪
+- [v0.2.0-beta.1](#v020-beta1---2026-08-11-) 🧪
 - [v0.2.0-alpha.5](#v020-alpha5---2026-08-10-) 🧪
 - [v0.2.0-alpha.4](#v020-alpha4---2026-08-10-) 🐧
 - [v0.2.0-alpha.3](#v020-alpha3---2026-08-10-) 🧩
@@ -41,7 +42,22 @@ The project ships two implementations:
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
 
-## [v0.2.0-beta.1] - Unreleased 🧪
+## [v0.2.3-beta.4] - 2026-08-27 🧪
+
+### Release Focus 🎯
+
+- 🔖 Synchronizes the Python package, Rust crate, Cargo lockfile, and version tests at `0.2.3-beta.4`.
+- 🧪 Runs Python, README-generator, and Rust tests only for build-oriented CI keywords.
+- 🧱 Requires both the test job and the multi-platform build matrix to succeed before creating a GitHub Release.
+- ⌨️ Gives the Rust edition the Python `C`, PageUp, and PageDown shortcuts while preserving Rust-only graph controls and Npcap loopback capture.
+
+### CI and Documentation 🛠️
+
+- 🔀 Makes pull requests inspect their latest head commit; only build-oriented keywords build and test, while all PR publishing and benchmarks remain disabled.
+- 📚 Documents the test gate and updated CI topology consistently across the English, Simplified Chinese, and Traditional Chinese workflow guides.
+- 🧭 Adds a concise agent guide for symmetric dual-implementation maintenance and the Rust user-experience superset rule.
+
+## [v0.2.0-beta.1] - 2026-08-11 🧪
 
 ### Release Focus 🎯
 

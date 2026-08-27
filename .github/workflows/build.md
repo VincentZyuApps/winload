@@ -10,21 +10,21 @@ The CI/CD pipeline is driven entirely by **commit message keywords**. Push to `m
 
 ## 🔑 Keywords
 
-| Keyword in commit message | Build (8 platforms) | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | Benchmark |
-|---------------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build-action` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-release` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish-from-release` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Keyword in commit message | Build (8 platforms) | Tests | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | Benchmark |
+|---------------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `build-action` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-release` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `publish-from-release` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 
 > **Note:** `publish-from-release` publishes to Scoop, Homebrew, AUR, and npm from an existing GitHub Release without rebuilding, while `aur-publish` only republishes AUR. `build-publish` runs the full build, Release, Scoop, Homebrew, AUR, and npm pipeline.
 
-> **Note:** Pull Requests always trigger a build (no release or publish). Commit message keywords are **ignored** for PRs — the workflow sets `should_build=true`, while `should_release` and all six publishing outputs (`should_publish_scoop`, `should_publish_homebrew`, `should_publish_aur`, `should_publish_npm`, `should_publish_pypi`, and `should_publish_crates`) are `false`.
+> **Note:** Pull Requests read their latest head commit. Only `build-action`, `build-release`, and `build-publish` trigger the build and Tests; PRs never release, publish, or run benchmarks.
 
 > **Release preparation:** After changing the Rust package version or dependencies, run the following commands from the directory containing the `winload` repository to update and verify `Cargo.lock`.
 
@@ -53,13 +53,13 @@ git diff HEAD -- rust/Cargo.lock
 # Single keyword
 # ============================================================
 
-# Just build, verify compilation across all platforms
+# Build and test, verify compilation across all platforms
 git commit --allow-empty -m "ci: test cross-compile (build-action)"
 
 # Run benchmark only
 git commit --allow-empty -m "test: verify performance (run-benchmark)"
 
-# Build + create GitHub Release (no package manager publish)
+# Build + test + create GitHub Release (no package manager publish)
 git commit -m "release: v0.2.0 (build-release)"
 
 # Publish to Scoop/Homebrew/AUR/npm from the latest existing GitHub Release (no rebuild)
@@ -74,7 +74,7 @@ git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
 # Publish to PyPI only (no build, no release)
 git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
 
-# Full pipeline: build + release + publish to Scoop/Homebrew/AUR/npm
+# Full pipeline: build + test + release + publish to Scoop/Homebrew/AUR/npm
 git commit -m "release: v0.2.0 (build-publish)"
 
 # ============================================================
@@ -131,8 +131,9 @@ git commit -m "feat: add dark mode support"
 ## 📦 Pipeline Stages (Rust)
 
 ```
-check ──→ build ──→ release ──→ publish
-  │         │         │           │
+check ──┬─→ build ──┐
+  │     ├─→ quality ├─→ release ──→ publish
+  │     │           │             │
   │         │         │           ├─ Scoop: Download Win binaries
   │         │         │           │  Generate winload.json → Push to scoop-bucket
   │         │         │           │
@@ -154,7 +155,7 @@ check ──→ build ──→ release ──→ publish
   │         │            Generate release notes
   │         │            Create GitHub Release
   │         │
-  │         └─ Compile for 8 platform targets
+  │     └─ Compile for 8 platform targets
   │            Upload build artifacts
   │
   ├─→ sync-gitee-code (parallel with check, every push)
@@ -189,6 +190,10 @@ flowchart TB
     subgraph build["build"]
         B1[Compile 8 platforms]
         B2[Upload artifacts]
+    end
+
+    subgraph quality["quality"]
+        T1[Run Python, README, and Rust tests]
     end
     
     subgraph release["release"]
@@ -244,13 +249,15 @@ flowchart TB
 
     C1 --> C2
     C1 -."every push".-> SC1
-    C2 --> B1
+    C2 --"build-* keywords"--> B1
+    C2 --"build-* keywords"--> T1
     C2 --"run-benchmark"--> BM1
     C2 --> PY1
     BM1 --> BM2
     PY1 --> PY2
     B1 --> B2
     B2 --> R1
+    T1 --> R1
     C2 --"crates-publish"--> CR1
     R1 --> R2 --> R3 --> R4
     R4 --> S1

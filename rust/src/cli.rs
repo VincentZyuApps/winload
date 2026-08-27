@@ -102,9 +102,12 @@ fn keyboard_shortcuts(emoji_enabled: bool) -> String {
         ("Left / Up", "shortcut_previous_device"),
         ("Right / Down", "shortcut_next_device"),
         ("Tab / Enter", "shortcut_next_device"),
+        ("PageUp", "shortcut_previous_device"),
+        ("PageDown", "shortcut_next_device"),
         ("F3", "shortcut_toggle_debug"),
         ("=", "shortcut_toggle_separator"),
         ("c", "shortcut_toggle_color"),
+        ("C", "shortcut_toggle_color"),
         ("q / Q / Ctrl+C", "shortcut_quit"),
         ("Esc", "shortcut_quit"),
         ("g / G", "shortcut_cycle_graph_style"),
@@ -421,5 +424,11 @@ mod tests {
                 "missing {expected:?} in:\n{emoji}"
             );
         }
+        for expected in ["PageUp", "PageDown"] {
+            assert!(plain.contains(expected), "missing {expected:?} in:\n{plain}");
+        }
+        assert!(plain
+            .lines()
+            .any(|line| line.trim_start().starts_with("C ") && line.ends_with("Toggle colors")));
     }
 }

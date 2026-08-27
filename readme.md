@@ -215,6 +215,13 @@ winload --npcap      # Capture 127.0.0.1 loopback traffic (Windows, requires Npc
 winload --netlink    # Manually enable RTNETLINK (Linux/Android, off by default)
 ```
 
+### Rust Edition Extras
+
+The Rust edition includes every user-facing Python control, including `C`, `PageUp`, and `PageDown`, plus:
+
+- `Esc` to quit, four graph styles, optional X/Y axes, and the runtime `g`/`x`/`y` graph controls.
+- Windows `--npcap` loopback capture when Npcap is installed.
+
 ### Options
 
 | Flag | Description | Default |
@@ -261,18 +268,18 @@ winload --netlink    # Manually enable RTNETLINK (Linux/Android, off by default)
 | `←` / `↑` | Switch to the previous network device |
 | `→` / `↓` | Switch to the next network device |
 | `Tab` / `Enter` | Switch to the next network device |
-| `PageUp` / `PageDown` | **[Python Only]** Switch to the previous/next network device |
+| `PageUp` / `PageDown` | Switch to the previous/next network device |
 | `F3` | Toggle debug info overlay (Minecraft-style) |
 | `=` | Toggle separator line visibility |
 | `c` | Toggle color on/off |
-| `C` | **[Python Only]** Toggle color on/off |
+| `C` | Toggle color on/off |
 | `g` / `G` | **[Rust Only]** Cycle `classic` → `line` → `scatter` → `bar` |
 | `x` / `X` | **[Rust Only]** Toggle the time axis; use `5s` when no interval was configured |
 | `y` / `Y` | **[Rust Only]** Cycle Y-axis mode: `none` → `percent` → `unit` |
 | `q` / `Q` or `Ctrl+C` | Quit |
 | `Esc` | **[Rust Only]** Quit |
 
-> **Implementation notes:** `PageUp`, `PageDown`, and uppercase `C` are Python-only; `Esc` and the `g`/`x`/`y` graph controls are Rust-only. `classic` remains the default Rust graph style, and runtime graph changes affect only the current session. All four Rust graph styles share the same X/Y grid and scaling viewport. `--unicode` affects only `classic`; the Ratatui styles use their native markers.
+> **Implementation notes:** Rust adds `Esc` and the `g`/`x`/`y` graph controls. `classic` remains the default Rust graph style, and runtime graph changes affect only the current session. All four Rust graph styles share the same X/Y grid and scaling viewport. `--unicode` affects only `classic`; the Ratatui styles use their native markers.
 
 ## 🪟 Windows Loopback (127.0.0.1)
 
@@ -388,7 +395,7 @@ rust/
 │   │   ├── mod.rs // 261 lines | Coordinates the ratatui layout, header, help bar, panels, and debug overlay.
 │   │   └── panels.rs // 488 lines | Draws traffic histories in classic, line, scatter, and bar styles with optional axes.
 │   ├── app.rs // 192 lines | Owns mutable application state, traffic collection, and device navigation.
-│   ├── cli.rs // 417 lines | Parses localized command-line arguments and produces a validated RunConfig.
+│   ├── cli.rs // 434 lines | Parses localized command-line arguments and produces a validated RunConfig.
 │   ├── collector.rs // 238 lines | 📡 Collects network interface counters and prepares traffic snapshots for the TUI.
 │   ├── config.rs // 194 lines | Defines validated, strongly typed runtime configuration shared by the Rust modules.
 │   ├── diagnostics.rs // 45 lines | Prints build, platform, and network-interface diagnostics outside the TUI.
@@ -396,8 +403,8 @@ rust/
 │   ├── graph.rs // 279 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
 │   ├── loopback.rs // 265 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
 │   ├── main.rs // 42 lines | Boots the Rust application and dispatches CLI actions to focused modules.
-│   ├── netlink.rs // 175 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
-│   ├── runtime.rs // 100 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
+│   ├── netlink.rs // 231 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
+│   ├── runtime.rs // 141 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
 │   └── stats.rs // 244 lines | 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
 └── _build_info.rs // 51 lines | 🧾 Injects Git metadata and configures platform-specific linker behavior.
 ```

@@ -11,8 +11,8 @@ from winload.diagnostics import get_version
 
 class EntrypointTests(unittest.TestCase):
     def test_installed_prerelease_version_uses_project_spelling(self):
-        with patch("winload.diagnostics.get_pkg_version", return_value="0.2.0b1"):
-            self.assertEqual(get_version(), "0.2.0-beta.1")
+        with patch("winload.diagnostics.get_pkg_version", return_value="0.2.3b4"):
+            self.assertEqual(get_version(), "0.2.3-beta.4")
 
     def test_python_module_version(self):
         python_root = Path(__file__).resolve().parents[1]
@@ -27,7 +27,7 @@ class EntrypointTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("winload 0.2.0-beta.1 (Python edition)", result.stdout)
+        self.assertIn("winload 0.2.3-beta.4 (Python edition)", result.stdout)
 
 
 if __name__ == "__main__":

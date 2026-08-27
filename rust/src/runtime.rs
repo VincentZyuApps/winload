@@ -67,7 +67,7 @@ fn handle_key(app: &mut App, code: KeyCode, modifiers: KeyModifiers) -> bool {
             app.hide_separator = !app.hide_separator;
             false
         }
-        KeyCode::Char('c') => {
+        KeyCode::Char('c') | KeyCode::Char('C') => {
             app.no_color = !app.no_color;
             false
         }
@@ -87,14 +87,55 @@ fn handle_key(app: &mut App, code: KeyCode, modifiers: KeyModifiers) -> bool {
             app.show_debug = !app.show_debug;
             false
         }
-        KeyCode::Right | KeyCode::Down | KeyCode::Tab | KeyCode::Enter => {
+        KeyCode::Right | KeyCode::Down | KeyCode::Tab | KeyCode::Enter | KeyCode::PageDown => {
             app.next_device();
             false
         }
-        KeyCode::Left | KeyCode::Up => {
+        KeyCode::Left | KeyCode::Up | KeyCode::PageUp => {
             app.prev_device();
             false
         }
         _ => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    use crate::app::DeviceView;
+    use crate::cli::Args;
+    use crate::collector::DeviceInfo;
+    use crate::stats::StatisticsEngine;
+
+    fn app_for_shortcut_tests() -> App {
+        let config = Args::try_parse_from(["winload"]).unwrap().into_config();
+        let mut app = App::new(config);
+        app.views = ["first", "second"]
+            .into_iter()
+            .map(|name| DeviceView {
+                info: DeviceInfo {
+                    name: name.into(),
+                    addrs: Vec::new(),
+                },
+                engine: StatisticsEngine::new(500, 300, Some(10.0)),
+            })
+            .collect();
+        app.current_idx = 0;
+        app
+    }
+
+    #[test]
+    fn python_compatible_shortcuts_work_in_rust() {
+        let mut app = app_for_shortcut_tests();
+
+        assert!(!handle_key(&mut app, KeyCode::Char('C'), KeyModifiers::SHIFT));
+        assert!(app.no_color);
+
+        assert!(!handle_key(&mut app, KeyCode::PageDown, KeyModifiers::NONE));
+        assert_eq!(app.current_idx, 1);
+        assert!(!handle_key(&mut app, KeyCode::PageUp, KeyModifiers::NONE));
+        assert_eq!(app.current_idx, 0);
     }
 }

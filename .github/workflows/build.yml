@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_build: ${{ steps.flags.outputs.should_build }}
+      should_test: ${{ steps.flags.outputs.should_test }}
       should_release: ${{ steps.flags.outputs.should_release }}
       should_publish_scoop: ${{ steps.flags.outputs.should_publish_scoop }}
       should_publish_homebrew: ${{ steps.flags.outputs.should_publish_homebrew }}
@@ -29,6 +30,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # Check the latest source commit for PR keyword gating, not GitHub's synthetic merge commit.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Check README source trees (read-only)
         shell: bash
@@ -67,32 +71,17 @@ jobs:
       
       - name: Parse commit message
         id: flags
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
-          MSG="$COMMIT_MSG"
+          MSG="$(git log -1 --format=%B)"
           
           # 从 Cargo.toml 提取版本号
           VERSION="v$(grep '^version' rust/Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "📦 Version: $VERSION"
           
-          # PR 始终构建
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "should_build=true"    >> "$GITHUB_OUTPUT"
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish_scoop=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish_homebrew=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish_aur=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish_npm=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish_pypi=false" >> "$GITHUB_OUTPUT"
-            echo "should_publish_crates=false" >> "$GITHUB_OUTPUT"
-            echo "should_benchmark=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          
           # 初始化标志
           BUILD=false
+          TEST=false
           RELEASE=false
           PUBLISH_SCOOP=false
           PUBLISH_HOMEBREW=false
@@ -123,6 +112,7 @@ jobs:
           elif has_trigger "build-action"; then
             BUILD=true
           fi
+          TEST=$BUILD
           
           # "publish-from-release" = 从已有 Release 发布到包管理器 (不构建)
           if has_trigger "publish-from-release"; then
@@ -151,8 +141,21 @@ jobs:
           if has_trigger "run-benchmark"; then
             BENCHMARK=true
           fi
+
+          # PR only validates the source commit. It may build and test, but never publishes or writes results.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RELEASE=false
+            PUBLISH_SCOOP=false
+            PUBLISH_HOMEBREW=false
+            PUBLISH_AUR=false
+            PUBLISH_NPM=false
+            PUBLISH_PYPI=false
+            PUBLISH_CRATES=false
+            BENCHMARK=false
+          fi
           
           echo "should_build=$BUILD"     >> "$GITHUB_OUTPUT"
+          echo "should_test=$TEST"       >> "$GITHUB_OUTPUT"
           echo "should_release=$RELEASE" >> "$GITHUB_OUTPUT"
           echo "should_publish_scoop=$PUBLISH_SCOOP" >> "$GITHUB_OUTPUT"
           echo "should_publish_homebrew=$PUBLISH_HOMEBREW" >> "$GITHUB_OUTPUT"
@@ -162,11 +165,13 @@ jobs:
           echo "should_publish_crates=$PUBLISH_CRATES" >> "$GITHUB_OUTPUT"
           echo "should_benchmark=$BENCHMARK" >> "$GITHUB_OUTPUT"
           
-          echo "📋 Flags: build=$BUILD release=$RELEASE scoop=$PUBLISH_SCOOP homebrew=$PUBLISH_HOMEBREW aur=$PUBLISH_AUR npm=$PUBLISH_NPM pypi=$PUBLISH_PYPI crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
+          echo "📋 Flags: build=$BUILD test=$TEST release=$RELEASE scoop=$PUBLISH_SCOOP homebrew=$PUBLISH_HOMEBREW aur=$PUBLISH_AUR npm=$PUBLISH_NPM pypi=$PUBLISH_PYPI crates=$PUBLISH_CRATES benchmark=$BENCHMARK"
 
   # ── 基础测试 ───────────────────────────────────────────
   quality:
     name: Run Tests
+    needs: check
+    if: needs.check.outputs.should_test == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -562,8 +567,8 @@ jobs:
   # ── 发布到 GitHub Releases ─────────────────────────────
   release:
     name: Publish Release
-    needs: [check, build]
-    if: needs.check.outputs.should_release == 'true'
+    needs: [check, quality, build]
+    if: needs.check.outputs.should_release == 'true' && needs.quality.result == 'success' && needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write

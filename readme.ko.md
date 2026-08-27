@@ -215,6 +215,13 @@ winload --npcap      # 127.0.0.1 루프백 트래픽 캡처 (Windows, Npcap 필�
 winload --netlink    # RTNETLINK 수동 활성화（Linux/Android, 기본 꺼짐）
 ```
 
+### Rust 버전 추가 기능
+
+Rust 버전은 `C`, `PageUp`, `PageDown`을 포함한 Python 버전의 모든 사용자 조작을 지원하며, 다음을 추가로 제공합니다.
+
+- `Esc` 종료, 네 가지 그래프 스타일, 선택적 X/Y축, 실행 중 `g`/`x`/`y` 그래프 제어.
+- Npcap 설치 후 Windows에서 사용할 수 있는 `--npcap` 루프백 캡처.
+
 ### 옵션 상세
 
 | 플래그 | 설명 | 기본값 |
@@ -261,18 +268,18 @@ winload --netlink    # RTNETLINK 수동 활성화（Linux/Android, 기본 꺼짐
 | `←` / `↑` | 이전 네트워크 장치로 전환 |
 | `→` / `↓` | 다음 네트워크 장치로 전환 |
 | `Tab` / `Enter` | 다음 네트워크 장치로 전환 |
-| `PageUp` / `PageDown` | **[Python 전용]** 이전/다음 네트워크 장치로 전환 |
+| `PageUp` / `PageDown` | 이전/다음 네트워크 장치로 전환 |
 | `F3` | 디버그 정보 오버레이 전환 (Minecraft 스타일) |
 | `=` | 구분선 표시 여부 전환 |
 | `c` | 색상 모드 켜기/끄기 전환 |
-| `C` | **[Python 전용]** 색상 모드 켜기/끄기 전환 |
+| `C` | 색상 모드 켜기/끄기 전환 |
 | `g` / `G` | **[Rust 전용]** `classic` → `line` → `scatter` → `bar` 순환 |
 | `x` / `X` | **[Rust 전용]** 시간축 전환. 간격을 지정하지 않았으면 `5s` 사용 |
 | `y` / `Y` | **[Rust 전용]** Y축을 `none` → `percent` → `unit` 순으로 전환 |
 | `q` / `Q` 또는 `Ctrl+C` | 프로그램 종료 |
 | `Esc` | **[Rust 전용]** 프로그램 종료 |
 
-> **구현 참고:** `PageUp`, `PageDown`, 대문자 `C`는 Python 전용이며, `Esc`와 `g`/`x`/`y` 그래프 제어는 Rust 전용입니다. Rust의 기본 그래프 형식은 계속 `classic`이며 실행 중 변경은 현재 세션에만 적용됩니다. 네 가지 Rust 그래프 형식은 동일한 X/Y 격자와 스케일링 영역을 공유합니다. `--unicode`는 `classic`에만 적용되고 Ratatui 형식은 각각의 기본 마커를 사용합니다.
+> **구현 참고:** Rust는 `Esc`와 `g`/`x`/`y` 그래프 제어를 추가로 제공합니다. Rust의 기본 그래프 형식은 계속 `classic`이며 실행 중 변경은 현재 세션에만 적용됩니다. 네 가지 Rust 그래프 형식은 동일한 X/Y 격자와 스케일링 영역을 공유합니다. `--unicode`는 `classic`에만 적용되고 Ratatui 형식은 각각의 기본 마커를 사용합니다.
 
 ## 🪟 Windows 루프백 (127.0.0.1) 안내
 
@@ -388,7 +395,7 @@ rust/
 │   │   ├── mod.rs // 261 lines | Coordinates the ratatui layout, header, help bar, panels, and debug overlay.
 │   │   └── panels.rs // 488 lines | Draws traffic histories in classic, line, scatter, and bar styles with optional axes.
 │   ├── app.rs // 192 lines | Owns mutable application state, traffic collection, and device navigation.
-│   ├── cli.rs // 417 lines | Parses localized command-line arguments and produces a validated RunConfig.
+│   ├── cli.rs // 434 lines | Parses localized command-line arguments and produces a validated RunConfig.
 │   ├── collector.rs // 238 lines | 📡 Collects network interface counters and prepares traffic snapshots for the TUI.
 │   ├── config.rs // 194 lines | Defines validated, strongly typed runtime configuration shared by the Rust modules.
 │   ├── diagnostics.rs // 45 lines | Prints build, platform, and network-interface diagnostics outside the TUI.
@@ -396,8 +403,8 @@ rust/
 │   ├── graph.rs // 279 lines | 📊 Renders incoming and outgoing traffic graphs for terminal display.
 │   ├── loopback.rs // 265 lines | 🪟 Captures and counts Windows loopback traffic through Npcap when enabled.
 │   ├── main.rs // 42 lines | Boots the Rust application and dispatches CLI actions to focused modules.
-│   ├── netlink.rs // 175 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
-│   ├── runtime.rs // 100 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
+│   ├── netlink.rs // 231 lines | 🔗 Reads Linux and Android network counters directly through RTNETLINK.
+│   ├── runtime.rs // 141 lines | Runs the terminal lifecycle, refresh loop, and semantic keyboard controls.
 │   └── stats.rs // 244 lines | 📈 Calculates rolling traffic rates, totals, and adaptive graph scale values.
 └── _build_info.rs // 51 lines | 🧾 Injects Git metadata and configures platform-specific linker behavior.
 ```
