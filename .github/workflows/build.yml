@@ -1109,11 +1109,18 @@ jobs:
           GITEE_BASE_URL="https://gitee.com/vincent-zyu/winload/releases/download/${VERSION}"
 
           mkdir -p Formula
+          for asset in winload-linux-x86_64 winload-linux-aarch64 winload-macos-x86_64 winload-macos-aarch64; do
+            if [ ! -s "$asset" ]; then
+              echo "::error::Missing or empty release asset: $asset"
+              exit 1
+            fi
+          done
+
           # 计算各平台 SHA256
-          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 2>/dev/null | awk '{print $1}' || echo "")
-          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 2>/dev/null | awk '{print $1}' || echo "")
+          SHA_LINUX_X64=$(sha256sum winload-linux-x86_64 | awk '{print $1}')
+          SHA_LINUX_ARM64=$(sha256sum winload-linux-aarch64 | awk '{print $1}')
+          SHA_MACOS_X64=$(sha256sum winload-macos-x86_64 | awk '{print $1}')
+          SHA_MACOS_ARM64=$(sha256sum winload-macos-aarch64 | awk '{print $1}')
 
           cat > Formula/winload.rb << HEREDOC
           class Winload < Formula
