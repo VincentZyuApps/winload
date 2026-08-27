@@ -73,11 +73,11 @@ WINLOAD_VERSION=__VERSION__ bash -c "$(curl -fsSL https://raw.githubusercontent.
 
 **🇨🇳 一键安装脚本在码云的镜像 One-liner install for Linux On Gitee mirror (中国大陆地区更快捏，faster in China):**
 ```bash
-curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh | bash
+curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh | bash
 # or install this specific version:
-WINLOAD_VERSION=__VERSION__ bash -c "$(curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/install_scripts/install_gitee.sh)"
+WINLOAD_VERSION=__VERSION__ bash -c "$(curl -fsSL https://gitee.com/vincent-zyu/winload/raw/main/docs/scripts/install/install_gitee.sh)"
 ```
-> 📄 [View Gitee install script](https://gitee.com/vincent-zyu/winload/blob/main/docs/install_scripts/install_gitee.sh)
+> 📄 [View Gitee install script](https://gitee.com/vincent-zyu/winload/blob/main/docs/scripts/install/install_gitee.sh)
 
 > ⚠️ These two `.sh` install scripts only support systems with **apt or dnf** on **x86_64 / aarch64**. For other platforms, use **npm** or **Cargo**.
 >
