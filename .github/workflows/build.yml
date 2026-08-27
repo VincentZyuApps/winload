@@ -1850,8 +1850,8 @@ jobs:
           # JSON 安全转义 release body（处理换行、引号、反斜杠等）
           JSON_BODY=$(jq -R -s '.' < release_body.md)
           
-          CURL=(curl -sS -k --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused --connect-timeout 30 --max-time 120)
-          CURL_FAIL=(curl -fsS -k --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused --connect-timeout 30 --max-time 120)
+          CURL=(curl -sS --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused --connect-timeout 30 --max-time 120)
+          CURL_FAIL=(curl -fsS --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused --connect-timeout 30 --max-time 120)
           
           # 1. 确保 tag 存在于 Gitee
           if "${CURL_FAIL[@]}" "https://gitee.com/api/v5/repos/${GITEE_OWNER}/${GITEE_REPO}/tags/${TAG}?access_token=${GITEE_TOKEN}" > /dev/null 2>&1; then
@@ -1941,7 +1941,7 @@ jobs:
                 echo "$(ts)   🔄 Attempt $ATTEMPT/3 — starting curl (max-time=1200s, connect-timeout=30s)"
                 
                 START_TIME=$(date +%s)
-                if RESPONSE=$(curl -fsS -k --retry 3 --retry-delay 10 --retry-all-errors --retry-connrefused \
+                if RESPONSE=$(curl -fsS --retry 3 --retry-delay 10 --retry-all-errors --retry-connrefused \
                   --max-time 1200 --connect-timeout 30 \
                   -w "\n%{http_code}" \
                   -X POST --header "Content-Type: multipart/form-data" \
