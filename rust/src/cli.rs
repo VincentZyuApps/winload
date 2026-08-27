@@ -259,6 +259,11 @@ impl Args {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    // The display language is process-global, so tests that change it must not overlap.
+    static LANGUAGE_LOCK: Mutex<()> = Mutex::new(());
+
     #[test]
     fn new_graph_arguments_parse() {
         let args = Args::try_parse_from([
@@ -332,6 +337,7 @@ mod tests {
 
     #[test]
     fn long_help_localizes_shortcuts_between_options_and_system_info() {
+        let _language_lock = LANGUAGE_LOCK.lock().unwrap();
         for (lang, title, previous, graph, system) in [
             (
                 Lang::EnUs,
@@ -391,6 +397,8 @@ mod tests {
 
     #[test]
     fn long_help_decorates_keyboard_shortcuts_with_emoji() {
+        let _language_lock = LANGUAGE_LOCK.lock().unwrap();
+        set_lang(Lang::EnUs);
         let plain = translated_command(false).render_long_help().to_string();
         let emoji = translated_command(true).render_long_help().to_string();
 
