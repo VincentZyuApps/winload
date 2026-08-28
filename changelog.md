@@ -17,6 +17,7 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
+- [v0.2.3-beta.5](#v023-beta5---2026-08-28-) 🧪
 - [v0.2.3-beta.4](#v023-beta4---2026-08-27-) 🧪
 - [v0.2.0-beta.1](#v020-beta1---2026-08-11-) 🧪
 - [v0.2.0-alpha.5](#v020-alpha5---2026-08-10-) 🧪
@@ -41,6 +42,18 @@ The project ships two implementations:
 - [v0.1.1-beta.1](#v011-beta1---2026-02-10-) 🛠️
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
+
+## [v0.2.3-beta.5] - 2026-08-28 🧪
+
+### Release Focus 🎯
+
+- 🔖 Advances the Python package, Rust crate, Cargo lockfile, and version assertions from `0.2.3-beta.4` to `0.2.3-beta.5`.
+- 📱 Corrects Termux detection so only `TERMUX_VERSION` or the canonical Termux `PREFIX` selects the Android installation path.
+
+### Distribution and CI 🛠️
+
+- 🍺 Preserves complete GitHub and Gitee Homebrew release URLs while generating Formula checksums.
+- 🔐 Verifies the npmjs publishing identity before release downloads and reports npm authentication or package-permission failures without retrying them.
 
 ## [v0.2.3-beta.4] - 2026-08-27 🧪
 

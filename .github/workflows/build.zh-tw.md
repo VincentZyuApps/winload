@@ -313,7 +313,7 @@ flowchart TB
 
 ### 前置條件
 
-需在儲存庫的 **Settings → Secrets → Actions** 中設定 `NPM_TOKEN` 金鑰，值為 npm Automation Token。
+需在儲存庫的 **Settings → Secrets → Actions** 中設定 `NPM_TOKEN` 金鑰，值為細粒度 npm 權杖，對 `@vincentzyuapps/winload`、六個專屬平台套件和 `winload-rust-bin` 均有 `Read and write` 權限。
 
 > **注意：** GitHub Packages 發佈使用 `GITHUB_TOKEN`，由 GitHub Actions 自動提供，無需額外設定金鑰。
 
@@ -386,7 +386,7 @@ flowchart TB
 |------|----------|------|
 | `SCOOP_BUCKET_TOKEN` | GitHub PAT（需 `repo` 權限） | 推送至 Scoop bucket |
 | `AUR_SSH_KEY` | AUR 使用者 SSH 私密金鑰 | 推送至 AUR |
-| `NPM_TOKEN` | npm Automation Token | 發佈至 npm |
+| `NPM_TOKEN` | 細粒度 npm 權杖（8 個 npmjs 套件均為 `Read and write`） | 發佈至 npm |
 | `PYPI_TOKEN` | PyPI API Token（Scope: "Entire account"） | 推送至 PyPI |
 | `CARGO_REGISTRY_TOKEN` | crates.io API Token | 發佈至 crates.io |
 | `GITEE_PRIVATE_KEY` | Gitee SSH 私密金鑰 | 鏡像程式碼至 Gitee |

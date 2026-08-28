@@ -313,7 +313,7 @@ Both `build-publish` and `publish-from-release` trigger publishing to npm as [`@
 
 ### Prerequisite
 
-A repository secret `NPM_TOKEN` must be set in **Settings → Secrets → Actions**, containing an npm Automation token.
+A repository secret `NPM_TOKEN` must be set in **Settings → Secrets → Actions**, containing a granular npm token with `Read and write` access to `@vincentzyuapps/winload`, its six platform packages, and `winload-rust-bin`.
 
 > **Note:** GitHub Packages publishing uses `GITHUB_TOKEN` which is automatically provided by GitHub Actions — no additional secret is needed.
 
@@ -386,7 +386,7 @@ The version is automatically extracted from `rust/Cargo.toml` (Rust) or `python/
 |--------|--------------|---------|
 | `SCOOP_BUCKET_TOKEN` | GitHub PAT with `repo` scope | Push to Scoop bucket |
 | `AUR_SSH_KEY` | AUR user SSH private key | Push to AUR |
-| `NPM_TOKEN` | npm Automation token | Publish to npm |
+| `NPM_TOKEN` | Granular npm token (`Read and write` for 8 npmjs packages) | Publish to npm |
 | `PYPI_TOKEN` | PyPI API token (Scope: "Entire account") | Push to PyPI |
 | `CARGO_REGISTRY_TOKEN` | crates.io API token | Publish to crates.io |
 | `GITEE_PRIVATE_KEY` | SSH private key for Gitee | Mirror code to Gitee |

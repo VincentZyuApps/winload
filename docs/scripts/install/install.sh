@@ -9,7 +9,7 @@ API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 
 # ── Detect Termux ──────────────────────────────────────────
 IS_TERMUX=false
-if [ -n "${PREFIX:-}" ] && [ -d "${PREFIX}/bin" ]; then
+if [ "${TERMUX_VERSION+x}" = x ] || [ "${PREFIX:-}" = "/data/data/com.termux/files/usr" ]; then
   IS_TERMUX=true
 fi
 
@@ -32,7 +32,7 @@ case "$ARCH" in
 esac
 
 # ── Detect package manager ───────────────────────────────
-if $IS_TERMUX; then
+if [ "$IS_TERMUX" = true ]; then
   PKG_MGR="termux"
 elif command -v apt-get >/dev/null 2>&1; then
   PKG_MGR="apt"
@@ -57,7 +57,11 @@ if command -v pacman >/dev/null 2>&1; then
   echo ""
 fi
 
-echo "🔍 Detected: arch=$ARCH pkg_mgr=$PKG_MGR${IS_TERMUX:+ termux=true}"
+if [ "$IS_TERMUX" = true ]; then
+  echo "🔍 Detected: arch=$ARCH pkg_mgr=$PKG_MGR termux=true"
+else
+  echo "🔍 Detected: arch=$ARCH pkg_mgr=$PKG_MGR"
+fi
 
 # ── Fetch release version ─────────────────────────────────
 if [ -n "${WINLOAD_VERSION:-}" ]; then

@@ -190,7 +190,10 @@ jobs:
       - name: Test repository scripts
         env:
           PYTHONPATH: python/src
-        run: python3 -m unittest discover -s test/readme
+        run: |
+          bash -n docs/scripts/install/install.sh
+          bash -n docs/scripts/install/install_gitee.sh
+          python3 -m unittest discover -s test/readme
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30 # stable
@@ -977,15 +980,18 @@ jobs:
           }
 
           PLATFORMS=(
-            "winload-linux-x86_64:${BASE_URL}/winload-linux-x86_64-${VERSION}"
-            "winload-linux-aarch64:${BASE_URL}/winload-linux-aarch64-${VERSION}"
-            "winload-macos-x86_64:${BASE_URL}/winload-macos-x86_64-${VERSION}"
-            "winload-macos-aarch64:${BASE_URL}/winload-macos-aarch64-${VERSION}"
+            "winload-linux-x86_64|${BASE_URL}/winload-linux-x86_64-${VERSION}"
+            "winload-linux-aarch64|${BASE_URL}/winload-linux-aarch64-${VERSION}"
+            "winload-macos-x86_64|${BASE_URL}/winload-macos-x86_64-${VERSION}"
+            "winload-macos-aarch64|${BASE_URL}/winload-macos-aarch64-${VERSION}"
           )
 
           for entry in "${PLATFORMS[@]}"; do
-            NAME="${entry%%:*}"
-            URL="${entry##*:}"
+            IFS='|' read -r NAME URL <<< "$entry"
+            if [[ "$URL" != https://* ]]; then
+              echo "::error::Invalid release URL for $NAME: $URL"
+              exit 1
+            fi
             echo "📥 Downloading $NAME..."
             download_release_asset "$NAME" "$URL"
           done
@@ -1090,15 +1096,18 @@ jobs:
 
           # 下载所有平台的二进制用于计算 SHA256
           PLATFORMS=(
-            "winload-linux-x86_64:${GITEE_BASE_URL}/winload-linux-x86_64-${VERSION}"
-            "winload-linux-aarch64:${GITEE_BASE_URL}/winload-linux-aarch64-${VERSION}"
-            "winload-macos-x86_64:${GITEE_BASE_URL}/winload-macos-x86_64-${VERSION}"
-            "winload-macos-aarch64:${GITEE_BASE_URL}/winload-macos-aarch64-${VERSION}"
+            "winload-linux-x86_64|${GITEE_BASE_URL}/winload-linux-x86_64-${VERSION}"
+            "winload-linux-aarch64|${GITEE_BASE_URL}/winload-linux-aarch64-${VERSION}"
+            "winload-macos-x86_64|${GITEE_BASE_URL}/winload-macos-x86_64-${VERSION}"
+            "winload-macos-aarch64|${GITEE_BASE_URL}/winload-macos-aarch64-${VERSION}"
           )
 
           for entry in "${PLATFORMS[@]}"; do
-            NAME="${entry%%:*}"
-            URL="${entry##*:}"
+            IFS='|' read -r NAME URL <<< "$entry"
+            if [[ "$URL" != https://* ]]; then
+              echo "::error::Invalid Gitee release URL for $NAME: $URL"
+              exit 1
+            fi
             echo "📥 Downloading $NAME from Gitee..."
             curl -fSL --retry 4 --retry-delay 5 --retry-all-errors --retry-connrefused \
               --connect-timeout 30 --max-time 300 -o "$NAME" "$URL"
@@ -1381,6 +1390,20 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Verify npm publishing credentials
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if ! NPM_USER="$(npm whoami --registry https://registry.npmjs.org)"; then
+            echo "::error::NPM_TOKEN could not authenticate with npmjs. Use a granular token for vincentzyu with Read and write access to all eight winload packages."
+            exit 1
+          fi
+          if [ "$NPM_USER" != "vincentzyu" ]; then
+            echo "::error::NPM_TOKEN authenticated as ${NPM_USER}, expected vincentzyu."
+            exit 1
+          fi
+          echo "✅ npm authentication verified for ${NPM_USER}."
+
       - name: Download binaries from release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1426,11 +1449,18 @@ jobs:
             local max_attempts=4
             local delay=5
             local attempt
+            local publish_output
 
             for attempt in $(seq 1 "$max_attempts"); do
               echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
-              if npm publish "$@"; then
+              if publish_output="$(npm publish "$@" 2>&1)"; then
+                printf '%s\n' "$publish_output"
                 return 0
+              fi
+              printf '%s\n' "$publish_output" >&2
+              if [[ "$publish_output" =~ E(401|403|404) ]]; then
+                echo "::error::${package_name}: npm authentication or permission failure. Ensure NPM_TOKEN is a granular token with Read and write access to this package."
+                return 1
               fi
 
               # A connection may drop after npm accepts the immutable version.
@@ -1527,11 +1557,18 @@ jobs:
             local max_attempts=4
             local delay=5
             local attempt
+            local publish_output
 
             for attempt in $(seq 1 "$max_attempts"); do
               echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
-              if npm publish --provenance --access public --tag "${NPM_TAG}"; then
+              if publish_output="$(npm publish --provenance --access public --tag "${NPM_TAG}" 2>&1)"; then
+                printf '%s\n' "$publish_output"
                 return 0
+              fi
+              printf '%s\n' "$publish_output" >&2
+              if [[ "$publish_output" =~ E(401|403|404) ]]; then
+                echo "::error::${package_name}: npm authentication or permission failure. Ensure NPM_TOKEN is a granular token with Read and write access to this package."
+                return 1
               fi
               if npm view "${package_name}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
                 echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
@@ -1600,11 +1637,18 @@ jobs:
             local max_attempts=4
             local delay=5
             local attempt
+            local publish_output
 
             for attempt in $(seq 1 "$max_attempts"); do
               echo "🔁 Publishing ${package_name}: attempt ${attempt}/${max_attempts}"
-              if npm publish --provenance --access public --tag "${NPM_TAG}"; then
+              if publish_output="$(npm publish --provenance --access public --tag "${NPM_TAG}" 2>&1)"; then
+                printf '%s\n' "$publish_output"
                 return 0
+              fi
+              printf '%s\n' "$publish_output" >&2
+              if [[ "$publish_output" =~ E(401|403|404) ]]; then
+                echo "::error::${package_name}: npm authentication or permission failure. Ensure NPM_TOKEN is a granular token with Read and write access to this package."
+                return 1
               fi
               if npm view "${package_name}@${NPM_VERSION}" version --registry https://registry.npmjs.org > /dev/null 2>&1; then
                 echo "${package_name}@${NPM_VERSION} is available after the failed request; treating it as published."
