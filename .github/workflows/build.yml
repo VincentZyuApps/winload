@@ -91,12 +91,12 @@ jobs:
           PUBLISH_CRATES=false
           BENCHMARK=false
 
-          # 仅匹配独立触发词，避免 build-action-old 等字符串误触发
+          # 仅匹配独立的 [触发词] 标签，避免裸词或相近字符串误触发
           has_trigger() {
-            printf '%s\n' "$MSG" | grep -qiE "(^|[^[:alnum:]_-])$1([^[:alnum:]_-]|$)"
+            printf '%s\n' "$MSG" | grep -qiE "(^|[^[:alnum:]_-])\\[$1\\]([^[:alnum:]_-]|$)"
           }
           
-          # "build-publish" = 构建 + Release + 发布到包管理器 (全套)
+          # "[build-publish]" = 构建 + Release + 发布到包管理器 (全套)
           if has_trigger "build-publish"; then
             BUILD=true
             RELEASE=true
@@ -104,17 +104,17 @@ jobs:
             PUBLISH_HOMEBREW=true
             PUBLISH_AUR=true
             PUBLISH_NPM=true
-          # "build-release" = 构建 + GitHub Release
+          # "[build-release]" = 构建 + GitHub Release
           elif has_trigger "build-release"; then
             BUILD=true
             RELEASE=true
-          # "build-action" = 仅构建
+          # "[build-action]" = 仅构建
           elif has_trigger "build-action"; then
             BUILD=true
           fi
           TEST=$BUILD
           
-          # "publish-from-release" = 从已有 Release 发布到包管理器 (不构建)
+          # "[publish-from-release]" = 从已有 Release 发布到包管理器 (不构建)
           if has_trigger "publish-from-release"; then
             PUBLISH_SCOOP=true
             PUBLISH_HOMEBREW=true
@@ -122,22 +122,22 @@ jobs:
             PUBLISH_NPM=true
           fi
 
-          # "aur-publish" = 从已有 Release 仅发布到 AUR
+          # "[aur-publish]" = 从已有 Release 仅发布到 AUR
           if has_trigger "aur-publish"; then
             PUBLISH_AUR=true
           fi
           
-          # "pypi-publish" = 发布到 PyPI
+          # "[pypi-publish]" = 发布到 PyPI
           if has_trigger "pypi-publish"; then
             PUBLISH_PYPI=true
           fi
           
-          # "crates-publish" = 发布到 crates.io
+          # "[crates-publish]" = 发布到 crates.io
           if has_trigger "crates-publish"; then
             PUBLISH_CRATES=true
           fi
 
-          # "run-benchmark" = 运行基准测试
+          # "[run-benchmark]" = 运行基准测试
           if has_trigger "run-benchmark"; then
             BENCHMARK=true
           fi
@@ -722,8 +722,8 @@ jobs:
 
   # ── 更新 Scoop Bucket (GitHub) ─────────────────────────────
   # 触发方式:
-  #   - "publish-from-release" → 从已有 Release 拉取二进制，仅更新 Scoop
-  #   - "build-publish" → 构建 + Release + 更新 Scoop（全套）
+  #   - "[publish-from-release]" → 从已有 Release 拉取二进制，仅更新 Scoop
+  #   - "[build-publish]" → 构建 + Release + 更新 Scoop（全套）
   publish-scoop-github:
     name: Update Scoop Bucket
     needs: [check, release]
@@ -827,7 +827,7 @@ jobs:
 
   # ── 更新 Scoop Bucket (Gitee) ──────────────────────────────
   # 生成指向 Gitee Releases 的 scoop manifest，推送到 Gitee
-  # build-publish 先等待 Gitee Release 同步完成；publish-from-release 使用已有 Gitee Release，不强制等待同步任务
+  # [build-publish] 先等待 Gitee Release 同步完成；[publish-from-release] 使用已有 Gitee Release，不强制等待同步任务
   publish-scoop-gitee:
     name: 【Gitee码云】Update Scoop Bucket
     needs: [check, release, sync-gitee-release]
@@ -1078,7 +1078,7 @@ jobs:
 
   # ── 更新 Homebrew Tap (Gitee) ─────────────────────────────
   # 生成指向 Gitee Releases 的 homebrew formula，推送到 Gitee homebrew-tap
-  # build-publish 先等待 Gitee Release 同步完成；publish-from-release 使用已有 Gitee Release，不强制等待同步任务
+  # [build-publish] 先等待 Gitee Release 同步完成；[publish-from-release] 使用已有 Gitee Release，不强制等待同步任务
   publish-homebrew-gitee:
     name: 【Gitee码云】Update Homebrew Tap
     needs: [check, release, sync-gitee-release]

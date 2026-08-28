@@ -6,25 +6,26 @@
 
 ## 📋 Overview
 
-The CI/CD pipeline is driven entirely by **commit message keywords**. Push to `main` with the right keyword and GitHub Actions takes care of the rest.
+The CI/CD pipeline is driven entirely by **bracketed commit tags**. Push to `main` with the right tag and GitHub Actions takes care of the rest.
 
 ## 🔑 Keywords
 
 | Keyword in commit message | Build (8 platforms) | Tests | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | Benchmark |
 |---------------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build-action` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-release` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish-from-release` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `[build-action]` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `[build-release]` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `[build-publish]` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `[publish-from-release]` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `[aur-publish]` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `[pypi-publish]` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `[crates-publish]` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `[run-benchmark]` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
+> **Trigger format:** Only complete bracketed tags such as `[build-release]` trigger CI. Bare keywords, parenthesized keywords, and lookalike tags do not trigger it; combine tasks as separate tags, for example `[build-publish] [pypi-publish]`.
 
-> **Note:** `publish-from-release` publishes to Scoop, Homebrew, AUR, and npm from an existing GitHub Release without rebuilding, while `aur-publish` only republishes AUR. `build-publish` runs the full build, Release, Scoop, Homebrew, AUR, and npm pipeline.
+> **Note:** `[publish-from-release]` publishes to Scoop, Homebrew, AUR, and npm from an existing GitHub Release without rebuilding, while `[aur-publish]` only republishes AUR. `[build-publish]` runs the full build, Release, Scoop, Homebrew, AUR, and npm pipeline.
 
-> **Note:** Pull Requests read their latest head commit. Only `build-action`, `build-release`, and `build-publish` trigger the build and Tests; PRs never release, publish, or run benchmarks.
+> **Note:** Pull Requests read their latest head commit. Only `[build-action]`, `[build-release]`, and `[build-publish]` trigger the build and Tests; PRs never release, publish, or run benchmarks.
 
 > **Release preparation:** After changing the Rust package version or dependencies, run the following commands from the directory containing the `winload` repository to update and verify `Cargo.lock`.
 
@@ -50,52 +51,52 @@ git diff HEAD -- rust/Cargo.lock
 
 ```bash
 # ============================================================
-# Single keyword
+# Single tag
 # ============================================================
 
 # Build and test, verify compilation across all platforms
-git commit --allow-empty -m "ci: test cross-compile (build-action)"
+git commit --allow-empty -m "ci: test cross-compile [build-action]"
 
 # Run benchmark only
-git commit --allow-empty -m "test: verify performance (run-benchmark)"
+git commit --allow-empty -m "test: verify performance [run-benchmark]"
 
 # Build + test + create GitHub Release (no package manager publish)
-git commit -m "release: v0.2.0 (build-release)"
+git commit -m "release: v0.2.0 [build-release]"
 
 # Publish to Scoop/Homebrew/AUR/npm from the latest existing GitHub Release (no rebuild)
-git commit --allow-empty -m "ci: publish existing release (publish-from-release)"
+git commit --allow-empty -m "ci: publish existing release [publish-from-release]"
 
 # Publish to AUR only from the latest existing GitHub Release (no rebuild)
-git commit --allow-empty -m "ci: update aur (aur-publish)"
+git commit --allow-empty -m "ci: update aur [aur-publish]"
 
 # Publish to crates.io only (no build, no release)
-git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [crates-publish]"
 
 # Publish to PyPI only (no build, no release)
-git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
+git commit --allow-empty -m "release: v0.2.0 [pypi-publish]"
 
 # Full pipeline: build + test + release + publish to Scoop/Homebrew/AUR/npm
-git commit -m "release: v0.2.0 (build-publish)"
+git commit -m "release: v0.2.0 [build-publish]"
 
 # ============================================================
-# Two keywords
+# Two tags
 # ============================================================
 
 # Build + release + Scoop/Homebrew/AUR/npm + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build-publish, crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [build-publish] [crates-publish]"
 
 # PyPI + crates.io (no build, no release)
-git commit --allow-empty -m "release: v0.2.0 (pypi-publish, crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [pypi-publish] [crates-publish]"
 
 # Build + release + Scoop/Homebrew/AUR/npm + PyPI
-git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish)"
+git commit --allow-empty -m "release: v0.2.0 [build-publish] [pypi-publish]"
 
 # ============================================================
-# Three keywords
+# Three tags
 # ============================================================
 
 # Full pipeline: build + release + Scoop/Homebrew/AUR/npm + PyPI + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish, crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [build-publish] [pypi-publish] [crates-publish]"
 
 # ============================================================
 # Regular commits (no build, no publish)
@@ -161,11 +162,11 @@ check ──┬─→ build ──┐
   ├─→ sync-gitee-code (parallel with check, every push)
   │    Mirror all branches/tags to Gitee via hub-mirror-action
   │
-  ├─→ benchmark (independent, triggered by 'run-benchmark')
+  ├─→ benchmark (independent, triggered by '[run-benchmark]')
   │    Run benchmark/benchmark.sh
   │    Commit & Push docs/benchmark/benchmark.svg
   │
-  ├─→ publish-crates-io (triggered independently from check by 'crates-publish'; no multi-platform build)
+  ├─→ publish-crates-io (triggered independently from check by '[crates-publish]'; no multi-platform build)
   │    cargo publish --locked --allow-dirty
   │
   └─→ publish-pypi (independent, no build needed)
@@ -249,34 +250,34 @@ flowchart TB
 
     C1 --> C2
     C1 -."every push".-> SC1
-    C2 --"build-* keywords"--> B1
-    C2 --"build-* keywords"--> T1
-    C2 --"run-benchmark"--> BM1
+    C2 --"build tags"--> B1
+    C2 --"build tags"--> T1
+    C2 --"[run-benchmark]"--> BM1
     C2 --> PY1
     BM1 --> BM2
     PY1 --> PY2
     B1 --> B2
     B2 --> R1
     T1 --> R1
-    C2 --"crates-publish"--> CR1
+    C2 --"[crates-publish]"--> CR1
     R1 --> R2 --> R3 --> R4
     R4 --> S1
     S1 --> S2 --> S3
-    R4 --"build-publish"--> A1
-    C2 --"aur-publish / publish-from-release: existing GitHub Release"--> A1
+    R4 --"[build-publish]"--> A1
+    C2 --"[aur-publish] / [publish-from-release]: existing GitHub Release"--> A1
     A1 --> A2 --> A3
     R4 --> N1
     N1 --> N2 --> N3 --> N4
     R4 --> SR1
     SR1 --> SR2 --> SR3
-    SR3 --"build-publish"--> G1
-    C2 --"publish-from-release: existing Gitee Release"--> G1
+    SR3 --"[build-publish]"--> G1
+    C2 --"[publish-from-release]: existing Gitee Release"--> G1
     G1 --> G2
 ```
 
 ## 🍨 Scoop Publish (Rust)
 
-Both `build-publish` and `publish-from-release` trigger an update to the [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) repository:
+Both `[build-publish]` and `[publish-from-release]` trigger an update to the [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) repository:
 
 1. Downloads Windows x64 and ARM64 binaries from the latest GitHub Release
 2. Computes SHA256 hashes
@@ -285,7 +286,7 @@ Both `build-publish` and `publish-from-release` trigger an update to the [scoop-
 
 ## 🐧 AUR Publish (Rust)
 
-`build-publish` updates the AUR package [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin) after building and creating a new GitHub Release. Both `publish-from-release` and `aur-publish` can update AUR from an existing GitHub Release without rebuilding; `aur-publish` is the AUR-only trigger.
+`[build-publish]` updates the AUR package [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin) after building and creating a new GitHub Release. Both `[publish-from-release]` and `[aur-publish]` can update AUR from an existing GitHub Release without rebuilding; `[aur-publish]` is the AUR-only trigger.
 
 1. Downloads Linux x64 and ARM64 binaries from the latest GitHub Release
 2. Computes SHA256 hashes
@@ -299,7 +300,7 @@ A repository secret `AUR_SSH_KEY` must be set in **Settings → Secrets → Acti
 
 ## 📦 npm Publish (Rust)
 
-Both `build-publish` and `publish-from-release` trigger publishing to npm as [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload):
+Both `[build-publish]` and `[publish-from-release]` trigger publishing to npm as [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload):
 
 1. Downloads 6 platform binaries (Win/Linux/macOS × x64/ARM64) from the latest GitHub Release
 2. Publishes 6 platform-specific packages with `os`/`cpu` fields (npm auto-selects the matching one)
@@ -319,7 +320,7 @@ A repository secret `NPM_TOKEN` must be set in **Settings → Secrets → Action
 
 ## 🐍 PyPI Publish (Python)
 
-The `pypi-publish` keyword triggers publishing the Python package to PyPI:
+The `[pypi-publish]` keyword triggers publishing the Python package to PyPI:
 
 1. Installs `uv` via [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv)
 2. Builds the package using `uv build` in the `python/` directory
@@ -331,7 +332,7 @@ A repository secret `PYPI_TOKEN` must be set in **Settings → Secrets → Actio
 
 ## 📦 crates.io Publish (Rust)
 
-The `crates-publish` keyword triggers publishing the Rust crate to [crates.io](https://crates.io/crates/winload):
+The `[crates-publish]` keyword triggers publishing the Rust crate to [crates.io](https://crates.io/crates/winload):
 
 1. Installs Rust stable toolchain
 2. Runs `cargo publish --locked --allow-dirty` to publish to crates.io
@@ -341,7 +342,7 @@ The `crates-publish` keyword triggers publishing the Rust crate to [crates.io](h
 
 A repository secret `CARGO_REGISTRY_TOKEN` must be set in **Settings → Secrets → Actions**, containing a crates.io API token.
 
-> **Note:** This job is independently triggered from `check` by `crates-publish`; it does not wait for the multi-platform build or binary Release jobs.
+> **Note:** This job is independently triggered from `check` by `[crates-publish]`; it does not wait for the multi-platform build or binary Release jobs.
 
 ## 🔄 Gitee Sync
 
@@ -360,7 +361,7 @@ Runs **after `release` job succeeds** (parallel with GitHub-side package publish
 2. Creates a corresponding Release on Gitee via API
 3. Uploads all binary assets to Gitee Release
 
-When `build-publish` creates a fresh Release, Gitee Scoop and Gitee Homebrew wait for this mirror job to succeed before pointing manifests/formulae at Gitee assets. `publish-from-release` keeps using the existing Gitee Release directly and does not force this mirror job first.
+When `[build-publish]` creates a fresh Release, Gitee Scoop and Gitee Homebrew wait for this mirror job to succeed before pointing manifests/formulae at Gitee assets. `[publish-from-release]` keeps using the existing Gitee Release directly and does not force this mirror job first.
 
 ### Prerequisites
 

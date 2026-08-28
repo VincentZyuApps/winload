@@ -17,6 +17,7 @@ The project ships two implementations:
 
 ## Version Index 🧭
 
+- [v0.2.3-beta.6](#v023-beta6---2026-08-28-) 🧪
 - [v0.2.3-beta.5](#v023-beta5---2026-08-28-) 🧪
 - [v0.2.3-beta.4](#v023-beta4---2026-08-27-) 🧪
 - [v0.2.0-beta.1](#v020-beta1---2026-08-11-) 🧪
@@ -42,6 +43,18 @@ The project ships two implementations:
 - [v0.1.1-beta.1](#v011-beta1---2026-02-10-) 🛠️
 - [v0.1.0](#v010---2026-02-09-) 🌱
 - [Initial Development](#initial-development---2026-02-08-to-2026-02-09-) 🧪
+
+## [v0.2.3-beta.6] - 2026-08-28 🧪
+
+### Release Focus 🎯
+
+- 🔖 Advances the Python package, Rust crate, Cargo lockfile, and Python version assertions from `0.2.3-beta.5` to `0.2.3-beta.6`.
+- 🏷️ Requires every CI action to use a complete bracketed trigger tag, including combined release actions.
+
+### CI and Documentation 🛠️
+
+- 🔒 Accepts only exact tags such as `[build-release]`; bare keywords, parenthesized keywords, and lookalike tags no longer start CI work.
+- 📚 Synchronizes the English, Simplified Chinese, and Traditional Chinese workflow guides with independent bracketed-tag examples.
 
 ## [v0.2.3-beta.5] - 2026-08-28 🧪
 

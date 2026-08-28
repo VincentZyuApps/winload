@@ -6,25 +6,26 @@
 
 ## 📋 概述
 
-CI/CD 流水线完全由 **commit 信息中的关键词** 驱动。推送到 `main` 分支时，只需在 commit message 中包含对应关键词，GitHub Actions 会自动完成后续工作。
+CI/CD 流水线完全由 **commit 信息中的方括号标签** 驱动。推送到 `main` 分支时，只需在 commit message 中包含对应标签，GitHub Actions 会自动完成后续工作。
 
 ## 🔑 关键词
 
 | Commit 信息中的关键词 | 构建（8 平台） | 测试 | GitHub Release | Scoop | Homebrew | AUR | npm | PyPI | crates.io | 基准测试 (Benchmark) |
 |----------------------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `build-action` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-release` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `build-publish` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `publish-from-release` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| `aur-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `pypi-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| `crates-publish` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `run-benchmark` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| `[build-action]` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `[build-release]` | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `[build-publish]` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `[publish-from-release]` | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| `[aur-publish]` | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `[pypi-publish]` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| `[crates-publish]` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| `[run-benchmark]` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
+> **触发格式：** 只有完整的方括号标签（如 `[build-release]`）才会触发 CI。裸关键词、圆括号关键词和相近标签均不生效；组合任务请分别使用标签，例如 `[build-publish] [pypi-publish]`。
 
-> **说明:** `publish-from-release` 从已有的 GitHub Release 发布到 Scoop、Homebrew、AUR 和 npm，不会重新构建；`aur-publish` 则只补发 AUR。`build-publish` 会执行构建、Release、Scoop、Homebrew、AUR 和 npm 的完整流水线。
+> **说明:** `[publish-from-release]` 从已有的 GitHub Release 发布到 Scoop、Homebrew、AUR 和 npm，不会重新构建；`[aur-publish]` 则只补发 AUR。`[build-publish]` 会执行构建、Release、Scoop、Homebrew、AUR 和 npm 的完整流水线。
 
-> **说明:** Pull Request 会读取最新 head commit。只有 `build-action`、`build-release` 与 `build-publish` 会触发构建和测试；PR 永远不会创建 Release、发布包或运行基准测试。
+> **说明:** Pull Request 会读取最新 head commit。只有 `[build-action]`、`[build-release]` 与 `[build-publish]` 会触发构建和测试；PR 永远不会创建 Release、发布包或运行基准测试。
 
 > **发布前检查：** 修改 Rust 包版本或依赖后，请从包含 `winload` 仓库的目录运行以下命令，以更新并验证 `Cargo.lock`。
 
@@ -50,52 +51,52 @@ git diff HEAD -- rust/Cargo.lock
 
 ```bash
 # ============================================================
-# 单个关键词
+# 单个标签
 # ============================================================
 
 # 构建并测试，验证所有平台的编译
-git commit --allow-empty -m "ci: test cross-compile (build-action)"
+git commit --allow-empty -m "ci: test cross-compile [build-action]"
 
 # 仅运行基准测试
-git commit --allow-empty -m "test: verify performance (run-benchmark)"
+git commit --allow-empty -m "test: verify performance [run-benchmark]"
 
 # 构建 + 测试 + 创建 GitHub Release（不发布到包管理器）
-git commit -m "release: v0.2.0 (build-release)"
+git commit -m "release: v0.2.0 [build-release]"
 
 # 从已有的最新 GitHub Release 发布到 Scoop/Homebrew/AUR/npm（不重新构建）
-git commit --allow-empty -m "ci: publish existing release (publish-from-release)"
+git commit --allow-empty -m "ci: publish existing release [publish-from-release]"
 
 # 仅从已有的最新 GitHub Release 发布到 AUR（不重新构建）
-git commit --allow-empty -m "ci: update aur (aur-publish)"
+git commit --allow-empty -m "ci: update aur [aur-publish]"
 
 # 仅发布到 crates.io（不构建，不发布 Release）
-git commit --allow-empty -m "release: v0.2.0 (crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [crates-publish]"
 
 # 仅发布到 PyPI（不构建，不发布 Release）
-git commit --allow-empty -m "release: v0.2.0 (pypi-publish)"
+git commit --allow-empty -m "release: v0.2.0 [pypi-publish]"
 
 # 完整流水线：构建 + 测试 + Release + 发布到 Scoop/Homebrew/AUR/npm
-git commit -m "release: v0.2.0 (build-publish)"
+git commit -m "release: v0.2.0 [build-publish]"
 
 # ============================================================
-# 两个关键词组合
+# 两个标签组合
 # ============================================================
 
 # 构建 + Release + Scoop/Homebrew/AUR/npm + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build-publish, crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [build-publish] [crates-publish]"
 
 # PyPI + crates.io（不构建，不发布 Release）
-git commit --allow-empty -m "release: v0.2.0 (pypi-publish, crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [pypi-publish] [crates-publish]"
 
 # 构建 + Release + Scoop/Homebrew/AUR/npm + PyPI
-git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish)"
+git commit --allow-empty -m "release: v0.2.0 [build-publish] [pypi-publish]"
 
 # ============================================================
-# 三个关键词组合
+# 三个标签组合
 # ============================================================
 
 # 完整流水线：构建 + Release + Scoop/Homebrew/AUR/npm + PyPI + crates.io
-git commit --allow-empty -m "release: v0.2.0 (build-publish, pypi-publish, crates-publish)"
+git commit --allow-empty -m "release: v0.2.0 [build-publish] [pypi-publish] [crates-publish]"
 
 # ============================================================
 # 常规 commit（不需要构建和发布）
@@ -161,11 +162,11 @@ check ──┬─→ build ──┐
   ├─→ sync-gitee-code（与 check 并行，每次 push 触发）
   │    通过 hub-mirror-action 镜像所有分支/标签到 Gitee
   │
-  ├─→ benchmark（独立运行，'run-benchmark' 触发）
+  ├─→ benchmark（独立运行，'[run-benchmark]' 触发）
   │    运行 benchmark/benchmark.sh
   │    提交并推送 docs/benchmark/benchmark.svg
   │
-  ├─→ publish-crates-io（从 check 独立触发，'crates-publish'；无需多平台构建）
+  ├─→ publish-crates-io（从 check 独立触发，'[crates-publish]'；无需多平台构建）
   │    cargo publish --locked --allow-dirty
   │
   └─→ publish-pypi（独立运行，不需要构建）
@@ -249,34 +250,34 @@ flowchart TB
 
     C1 --> C2
     C1 -."每次 push".-> SC1
-    C2 --"build-* 关键词"--> B1
-    C2 --"build-* 关键词"--> T1
-    C2 --"run-benchmark"--> BM1
+    C2 --"构建类标签"--> B1
+    C2 --"构建类标签"--> T1
+    C2 --"[run-benchmark]"--> BM1
     C2 --> PY1
     BM1 --> BM2
     PY1 --> PY2
     B1 --> B2
     B2 --> R1
     T1 --> R1
-    C2 --"crates-publish"--> CR1
+    C2 --"[crates-publish]"--> CR1
     R1 --> R2 --> R3 --> R4
     R4 --> S1
     S1 --> S2 --> S3
-    R4 --"build-publish"--> A1
-    C2 --"aur-publish / publish-from-release：使用已有 GitHub Release"--> A1
+    R4 --"[build-publish]"--> A1
+    C2 --"[aur-publish] / [publish-from-release]：使用已有 GitHub Release"--> A1
     A1 --> A2 --> A3
     R4 --> N1
     N1 --> N2 --> N3 --> N4
     R4 --> SR1
     SR1 --> SR2 --> SR3
-    SR3 --"build-publish"--> G1
-    C2 --"publish-from-release：使用已有 Gitee Release"--> G1
+    SR3 --"[build-publish]"--> G1
+    C2 --"[publish-from-release]：使用已有 Gitee Release"--> G1
     G1 --> G2
 ```
 
 ## 🍨 Scoop 发布 (Rust)
 
-`build-publish` 和 `publish-from-release` 都会触发 [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) 仓库的更新：
+`[build-publish]` 和 `[publish-from-release]` 都会触发 [scoop-bucket](https://github.com/VincentZyuApps/scoop-bucket) 仓库的更新：
 
 1. 从最新的 GitHub Release 下载 Windows x64 和 ARM64 二进制文件
 2. 计算 SHA256 哈希值
@@ -285,7 +286,7 @@ flowchart TB
 
 ## 🐧 AUR 发布 (Rust)
 
-`build-publish` 会在构建并创建新的 GitHub Release 后更新 AUR 包 [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin)。`publish-from-release` 和 `aur-publish` 都可以从已有的 GitHub Release 更新 AUR 且不会重新构建；`aur-publish` 是仅发布 AUR 的触发词。
+`[build-publish]` 会在构建并创建新的 GitHub Release 后更新 AUR 包 [winload-rust-bin](https://aur.archlinux.org/packages/winload-rust-bin)。`[publish-from-release]` 和 `[aur-publish]` 都可以从已有的 GitHub Release 更新 AUR 且不会重新构建；`[aur-publish]` 是仅发布 AUR 的触发词。
 
 1. 从最新的 GitHub Release 下载 Linux x64 和 ARM64 二进制文件
 2. 计算 SHA256 哈希值
@@ -299,7 +300,7 @@ flowchart TB
 
 ## 📦 npm 发布 (Rust)
 
-`build-publish` 和 `publish-from-release` 都会触发将 Rust 预编译二进制发布到 npm，包名为 [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload)：
+`[build-publish]` 和 `[publish-from-release]` 都会触发将 Rust 预编译二进制发布到 npm，包名为 [`@vincentzyuapps/winload`](https://www.npmjs.com/package/@vincentzyuapps/winload)：
 
 1. 从最新的 GitHub Release 下载 6 个平台的二进制文件（Win/Linux/macOS × x64/ARM64）
 2. 发布 6 个平台专属包，每个包带有 `os`/`cpu` 字段（npm 自动选择匹配的包）
@@ -319,7 +320,7 @@ flowchart TB
 
 ## 🐍 PyPI 发布 (Python)
 
-`pypi-publish` 关键词会触发将 Python 包发布到 PyPI：
+`[pypi-publish]` 关键词会触发将 Python 包发布到 PyPI：
 
 1. 通过 [astral-sh/setup-uv](https://github.com/astral-sh/setup-uv) 安装 `uv`
 2. 在 `python/` 目录下使用 `uv build` 构建包
@@ -331,7 +332,7 @@ flowchart TB
 
 ## 📦 crates.io 发布 (Rust)
 
-`crates-publish` 关键词会触发将 Rust 包发布到 [crates.io](https://crates.io/crates/winload)：
+`[crates-publish]` 关键词会触发将 Rust 包发布到 [crates.io](https://crates.io/crates/winload)：
 
 1. 安装 Rust stable 工具链
 2. 运行 `cargo publish --locked --allow-dirty` 发布到 crates.io
@@ -341,7 +342,7 @@ flowchart TB
 
 需要在仓库的 **Settings → Secrets → Actions** 中设置 `CARGO_REGISTRY_TOKEN` 密钥，值为 crates.io API Token。
 
-> **注意：** 此任务由 `crates-publish` 从 `check` 独立触发，不会等待多平台构建或二进制 Release 任务。
+> **注意：** 此任务由 `[crates-publish]` 从 `check` 独立触发，不会等待多平台构建或二进制 Release 任务。
 
 ## 🔄 Gitee 同步
 
@@ -360,7 +361,7 @@ flowchart TB
 2. 通过 API 在 Gitee 上创建对应的 Release
 3. 上传所有二进制附件到 Gitee Release
 
-当 `build-publish` 创建全新的 Release 时，Gitee Scoop 和 Gitee Homebrew 会等待此镜像任务成功后，再把 manifest/formula 指向 Gitee 附件。`publish-from-release` 会继续直接使用已有的 Gitee Release，不强制先运行此镜像任务。
+当 `[build-publish]` 创建全新的 Release 时，Gitee Scoop 和 Gitee Homebrew 会等待此镜像任务成功后，再把 manifest/formula 指向 Gitee 附件。`[publish-from-release]` 会继续直接使用已有的 Gitee Release，不强制先运行此镜像任务。
 
 ### 前置条件
 
